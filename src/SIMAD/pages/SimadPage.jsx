@@ -1,6 +1,9 @@
 import React from 'react';
+import Slider from 'react-slick';
 import Navbar from '../../Components/Navbar';
 import AOS from 'aos';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 import 'aos/dist/aos.css';
 import '../../App.css';
 
@@ -15,6 +18,17 @@ const SimadPage = () => {
     });
   }, []);
 
+  const sliderSettings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    arrows: true,
+  };
+
   return (
     <div className="bg-gray-300 min-h-screen font-roboto"> {/* Usar Roboto como fuente principal */}
       {/* Navbar */}
@@ -28,6 +42,8 @@ const SimadPage = () => {
         <p className="mt-4 text-lg">Donde la educación secundaria es una aventura.</p>
       </div>
     </section>
+
+   
 
       {/* Sección de Educación Secundaria */}
       <section className="py-16 bg-blue-800 text-white" data-aos="fade-up"> {/* Azul oscuro para fondo de sección */}
@@ -47,35 +63,50 @@ const SimadPage = () => {
         </div>
       </section>
 
-      {/* Sección de Eventos Próximos */}
-      <section className="py-16 bg-gray-100" data-aos="fade-up">
-        <div className="container mx-auto text-center">
-          <h3 className="text-3xl font-semibold mb-6 text-blue-900">Eventos Próximos</h3> {/* Azul para título */}
-          <ul className="space-y-6">
-            <li className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-              <h4 className="text-xl font-bold text-red-600">Semana de la Ciencia</h4> {/* Rojo para título */}
-              <p className="text-gray-600">Fecha: 15 de septiembre de 2024</p>
-              <p className="text-gray-700 mt-2">Participa en nuestra semana de la ciencia donde los estudiantes presentan proyectos innovadores y exploraciones científicas.</p>
-            </li>
-            <li className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-              <h4 className="text-xl font-bold text-red-600">Campeonato Intercolegial</h4> {/* Rojo para título */}
-              <p className="text-gray-600">Fecha: 22 de septiembre de 2024</p>
-              <p className="text-gray-700 mt-2">Únete a nosotros para apoyar a nuestros equipos en el campeonato intercolegial de deportes.</p>
-            </li>
-          </ul>
-        </div>
-      </section>
+      
 
-      {/* Sección de Contacto */}
-      <section className="py-16 bg-blue-900 text-white" data-aos="fade-up"> {/* Azul oscuro para fondo de sección */}
-        <div className="container mx-auto text-center">
-          <h3 className="text-3xl font-semibold mb-6">Contáctanos</h3>
-          <p className="text-lg mb-4">Para más información sobre nuestra educación secundaria, contáctanos:</p>
-          <p>Teléfono: +123 456 789</p>
-          <p>Email: info@liceosantacruz.com</p>
-          <p>Dirección: Calle Falsa 123, Ciudad Ejemplo</p>
-        </div>
-      </section>
+      <section className="py-16 bg-gray-100" data-aos="fade-up"> {/* Fondo gris claro como antes */}
+      <div className="container mx-auto text-center">
+        <h3 className="text-3xl font-semibold mb-6 text-blue-900">Eventos Próximos</h3> {/* Azul para el título */}
+        <Slider {...sliderSettings}>
+          <div className="p-6">
+            <div
+              className="bg-cover bg-center p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
+              style={{
+                backgroundImage: "url('/images/Evento1.png')",
+                minHeight: '300px',
+              }}
+            >
+              <div className="bg-white bg-opacity-80 p-6 rounded-lg"> {/* Fondo blanco con opacidad */}
+                <h4 className="text-xl font-bold text-red-600">Semana de la Ciencia</h4> {/* Rojo para el título */}
+                <p className="text-gray-600">Fecha: 15 de septiembre de 2024</p>
+                <p className="text-gray-700 mt-2">
+                  Participa en nuestra semana de la ciencia donde los estudiantes presentan proyectos innovadores y exploraciones científicas.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="p-6">
+            <div
+              className="bg-cover bg-center p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
+              style={{
+                backgroundImage: "url('/images/Evento2.png')",
+                minHeight: '300px',
+              }}
+            >
+              <div className="bg-white bg-opacity-80 p-6 rounded-lg"> {/* Fondo blanco con opacidad */}
+                <h4 className="text-xl font-bold text-red-600">Campeonato Intercolegial</h4> {/* Rojo para el título */}
+                <p className="text-gray-600">Fecha: 22 de septiembre de 2024</p>
+                <p className="text-gray-700 mt-2">
+                  Únete a nosotros para apoyar a nuestros equipos en el campeonato intercolegial de deportes.
+                </p>
+              </div>
+            </div>
+          </div>
+          {/* Puedes añadir más eventos aquí con diferentes imágenes de fondo */}
+        </Slider>
+      </div>
+    </section>
 
       {/* Footer */}
       <footer className="bg-blue-900 text-white py-4">
