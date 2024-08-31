@@ -1,10 +1,11 @@
 import { Navigate, Route, Routes } from "react-router-dom"
-import SimadPage from "../pages/SimadPage"
-import SobreNosotros from "../components/SobreNosotros"
-import Servicios from "../components/Servicios"
-import Contacto from "../components/Contacto"
+
+import SimadPage from "../PaginaInformativa/SimadPage"
+import SobreNosotros from "../PaginaInformativa/pages/SobreNosotros"
+import Servicios from "../PaginaInformativa/pages/Servicios"
 import RegisterPage from "../../auth/pages/RegisterPage"
 import LoginPage from "../../auth/pages/LoginPage"
+import Contacto from "../PaginaInformativa/pages/Contacto"
 
 export const SimadRoutes = () => {
   return (
