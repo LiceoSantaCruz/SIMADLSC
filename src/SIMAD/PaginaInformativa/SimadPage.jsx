@@ -32,11 +32,12 @@ const SimadPage = () => {
       {/* Hero Section */}
       <HeroSection/>
 
+      {/* Eventos */}
+      <Eventos/>
+      
       {/* Sección de Educación Secundaria */}
       <InfoEducation/>
 
-      {/* Eventos */}
-      <Eventos/>
 
       {/* Footer */}
       <Footer/>

@@ -23,11 +23,7 @@ const Navbar = () => {
               Iniciar Sesión
             </button>
           </Link>
-          <Link to="/register">
-            <button className="bg-gray-300 text-black font-bold py-2 px-4 rounded hover:bg-red-500">
-              Registrarse
-            </button>
-          </Link>
+          
         </div>
       </div>
     </nav>
