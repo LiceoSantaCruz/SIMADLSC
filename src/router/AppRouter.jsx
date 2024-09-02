@@ -1,21 +1,20 @@
-import { Navigate, Route, Routes } from "react-router-dom"
+import {  Route, Routes } from "react-router-dom"
 import { SimadRoutes } from "../SIMAD/routes/SimadRoutes";
-import { AuthRoutes } from "../auth/routes/AuthRoutes";
+import { AdminPage } from "../SIMAD/PaginaAdministrativa/AdminPage";
 
 export const AppRouter = () => {
 
-    const status = 'authenticated'; 
+    const status = 'admin'; 
 
   return (
     <Routes>
 
     {
-      (status === 'authenticated')
-       ? <Route path="/*" element={ <SimadRoutes /> } />
-       : <Route path="/auth/*" element={ <AuthRoutes /> } />
+      (status === 'admin')
+       ? <Route path="/*" element={ <AdminPage/> } />
+       : <Route path="/auth/*" element={ <SimadRoutes /> } />
     }
 
-    <Route path='/*' element={ <Navigate to='/auth/login' />  } />
 
 
 

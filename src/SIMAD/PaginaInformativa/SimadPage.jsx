@@ -6,9 +6,9 @@ import 'aos/dist/aos.css';
 import '../../App.css';
 import Navbar from '../components/Navbar';
 import { Footer } from '../components/Footer';
-import { HeroSection } from '../components/HeroSection';
+import { HeroSection } from './components/HeroSection';
 import { Eventos } from '../components/Eventos';
-import { InfoEducation } from '../components/InfoEducation';
+import { InfoEducation } from './components/InfoEducation';
 
 
 
@@ -32,11 +32,12 @@ const SimadPage = () => {
       {/* Hero Section */}
       <HeroSection/>
 
+      {/* Eventos */}
+      <Eventos/>
+      
       {/* Sección de Educación Secundaria */}
       <InfoEducation/>
 
-      {/* Eventos */}
-      <Eventos/>
 
       {/* Footer */}
       <Footer/>

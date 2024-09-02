@@ -18,7 +18,7 @@ export const Eventos = () => {
         {" "}
         {/* Fondo gris claro como antes */}
         <div className="container mx-auto text-center">
-          <h3 className="text-3xl font-semibold mb-6 text-blue-900">
+          <h3 className="text-3xl font-semibold mb-6 text-red-600">
             Eventos Próximos
           </h3>{" "}
           {/* Azul para el título */}
