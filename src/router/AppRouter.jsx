@@ -12,7 +12,7 @@ export const AppRouter = () => {
     {
       (status === 'admin')
        ? <Route path="/*" element={ <AdminPage/> } />
-       : <Route path="/auth/*" element={ <SimadRoutes /> } />
+       : <Route path="*" element={ <SimadRoutes /> } />
     }
 
 

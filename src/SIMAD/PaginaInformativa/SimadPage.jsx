@@ -9,6 +9,13 @@ import { Footer } from '../components/Footer';
 import { HeroSection } from './components/HeroSection';
 import { Eventos } from '../components/Eventos';
 import { InfoEducation } from './components/InfoEducation';
+import { Matricula } from './components/Matricula'
+import { SobreNosotros } from './components/SobreNosotros';
+import { Servicios } from './components/Servicios';
+import { VideoAboutUs } from './components/VideoAboutUs'
+
+
+
 
 
 
@@ -26,23 +33,34 @@ const SimadPage = () => {
   return (
     <div className="bg-gray-300 min-h-screen font-roboto"> {/* Usar Roboto como fuente principal */}
 
-      {/* Navbar */}
-      <Navbar />
+    {/* Navbar */}
+    <Navbar />
 
-      {/* Hero Section */}
-      <HeroSection/>
+    {/* Hero Section */}
+    <HeroSection/>
 
-      {/* Eventos */}
-      <Eventos/>
-      
-      {/* Sección de Educación Secundaria */}
-      <InfoEducation/>
+    {/* Sección de Educación Secundaria */}
+    <InfoEducation/>
 
+    {/* Video de presentacion */}
+    <VideoAboutUs/>
 
-      {/* Footer */}
-      <Footer/>
+     {/* Video de presentacion */}
+     <SobreNosotros/>
+    
+    {/* Eventos */}
+    <Eventos/>
 
-    </div>
+    {/* Servicios */}
+    <Servicios/>
+
+     {/* Matricula */}
+     <Matricula/>
+
+    {/* Footer */}
+    <Footer/>
+
+  </div>
   );
 };
 
