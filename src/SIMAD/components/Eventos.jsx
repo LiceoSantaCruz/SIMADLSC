@@ -1,81 +1,165 @@
 import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 export const Eventos = () => {
   const sliderSettings = {
     dots: true,
     infinite: true,
-    speed: 500,
-    slidesToShow: 1,
+    speed: 700,
+    slidesToShow: 3,
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 3000,
     arrows: true,
+    centerMode: true,
+    centerPadding: "0",
+    pauseOnHover: true,
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 2,
+        },
+      },
+      {
+        breakpoint: 768,
+        settings: {
+          slidesToShow: 1,
+        },
+      },
+    ],
   };
 
   return (
     <div>
-      <section className="py-16 bg-gray-100" data-aos="fade-up">
-        {" "}
-        {/* Fondo gris claro como antes */}
+      <section className="py-16 bg-gradient-to-b from-gray-100 to-blue-50" data-aos="fade-up">
+        {/* Fondo degradado claro para un toque moderno */}
         <div className="container mx-auto text-center">
-          <h3 className="text-3xl font-semibold mb-6 text-red-600">
-            Eventos Próximos
-          </h3>{" "}
-          {/* Azul para el título */}
-          
+          <h3 className="text-4xl font-bold mb-8 text-blue-900">
+            Eventos Anuales
+          </h3>
           <Slider {...sliderSettings}>
-            <div className="p-6">
-              <div
-                className="bg-cover bg-center p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
-                style={{
-                  backgroundImage: "url('/images/Evento1.png')",
-                  minHeight: "300px",
-                }}
-              >
-                <div className="bg-white bg-opacity-80 p-6 rounded-lg">
-                  {" "}
-                  {/* Fondo blanco con opacidad */}
-                  <h4 className="text-xl font-bold text-red-600">
-                    Semana de la Ciencia
-                  </h4>{" "}
-                  {/* Rojo para el título */}
-                  <p className="text-gray-600">
-                    Fecha: 15 de septiembre de 2024
-                  </p>
-                  <p className="text-gray-700 mt-2">
-                    Participa en nuestra semana de la ciencia donde los
-                    estudiantes presentan proyectos innovadores y exploraciones
-                    científicas.
-                  </p>
+            {/* Card 1 */}
+            <div className="p-4">
+              <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
+                <div
+                  style={{
+                    backgroundImage: "url('/images/Evento1.png')",
+                    height: "180px", 
+                  }}
+                  className="bg-center bg-cover rounded-t-lg relative"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
+                </div>
+                <div className="bg-white p-6 h-56 flex flex-col justify-between rounded-b-lg relative">
+                  <div>
+                    <h4 className="text-xl font-bold text-red-600">
+                      Semana de la Guanacastequidad
+                    </h4>
+                    <p className="text-gray-700 mt-2">
+                      Participa en nuestra semana de la guanacastequidad donde podrás disfrutar de comidas típicas y eventos culturales propios de nuestra provincia.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="p-6">
-              <div
-                className="bg-cover bg-center p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
-                style={{
-                  backgroundImage: "url('/images/Evento2.png')",
-                  minHeight: "300px",
-                }}
-              >
-                <div className="bg-white bg-opacity-80 p-6 rounded-lg">
-                  {" "}
-                  {/* Fondo blanco con opacidad */}
-                  <h4 className="text-xl font-bold text-red-600">
-                    Campeonato Intercolegial
-                  </h4>{" "}
-                  {/* Rojo para el título */}
-                  <p className="text-gray-600">
-                    Fecha: 22 de septiembre de 2024
-                  </p>
-                  <p className="text-gray-700 mt-2">
-                    Únete a nosotros para apoyar a nuestros equipos en el
-                    campeonato intercolegial de deportes.
-                  </p>
+            {/* Card 2 */}
+            <div className="p-4">
+              <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
+                <div
+                  style={{
+                    backgroundImage: "url('/images/Evento2.png')",
+                    height: "180px",
+                  }}
+                  className="bg-center bg-cover rounded-t-lg relative"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
+                </div>
+                <div className="bg-white p-6 h-56 flex flex-col justify-between rounded-b-lg relative">
+                  <div>
+                    <h4 className="text-xl font-bold text-red-600">
+                      Campeonato Intercolegial
+                    </h4>
+                    <p className="text-gray-700 mt-2">
+                      Únete a nosotros para apoyar a nuestros equipos en el campeonato intercolegial de deportes.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-            {/* Puedes añadir más eventos aquí con diferentes imágenes de fondo */}
+            {/* Card 3 */}
+            <div className="p-4">
+              <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
+                <div
+                  style={{
+                    backgroundImage: "url('/images/Evento3.png')",
+                    height: "180px",
+                  }}
+                  className="bg-center bg-cover rounded-t-lg relative"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
+                </div>
+                <div className="bg-white p-6 h-56 flex flex-col justify-between rounded-b-lg relative">
+                  <div>
+                    <h4 className="text-xl font-bold text-red-600">
+                      Feria del Libro
+                    </h4>
+                    <p className="text-gray-700 mt-2">
+                      Descubre nuevos autores y géneros en nuestra feria del libro anual.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Card 4 */}
+            <div className="p-4">
+              <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
+                <div
+                  style={{
+                    backgroundImage: "url('/images/Evento4.png')",
+                    height: "180px",
+                  }}
+                  className="bg-center bg-cover rounded-t-lg relative"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
+                </div>
+                <div className="bg-white p-6 h-56 flex flex-col justify-between rounded-b-lg relative">
+                  <div>
+                    <h4 className="text-xl font-bold text-red-600">
+                      Festival de Música
+                    </h4>
+                    <p className="text-gray-700 mt-2">
+                      Disfruta de una noche de música y talento local en nuestro festival anual.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Card 5 */}
+            <div className="p-4">
+              <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
+                <div
+                  style={{
+                    backgroundImage: "url('/images/Evento5.png')",
+                    height: "180px",
+                  }}
+                  className="bg-center bg-cover rounded-t-lg relative"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
+                </div>
+                <div className="bg-white p-6 h-56 flex flex-col justify-between rounded-b-lg relative">
+                  <div>
+                    <h4 className="text-xl font-bold text-red-600">
+                      Taller de Robótica
+                    </h4>
+                    <p className="text-gray-700 mt-2">
+                      Aprende a construir y programar robots en nuestro taller especial para jóvenes.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </Slider>
         </div>
       </section>
