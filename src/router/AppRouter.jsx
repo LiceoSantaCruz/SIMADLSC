@@ -4,7 +4,7 @@ import { AdminPage } from "../SIMAD/PaginaAdministrativa/AdminPage";
 
 export const AppRouter = () => {
 
-    const status = 'admin'; 
+    const status = 'admi'; 
 
   return (
     <Routes>
