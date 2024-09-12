@@ -4,18 +4,46 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Limpiar mensajes anteriores
+    setError('');
+    setSuccess('');
 
     if (!email || !password) {
       setError('Por favor, completa todos los campos.');
       return;
     }
 
-    setError('');
+    try {
+      const response = await fetch('http://localhost:3000/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    console.log('Inicio de sesión exitoso:', { email, password });
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.message || 'Error en el inicio de sesión');
+        return;
+      }
+
+      const data = await response.json();
+      setSuccess(data.message); // Mostrar el mensaje de éxito
+      setEmail(''); // Limpiar el campo de correo
+      setPassword(''); // Limpiar el campo de contraseña
+    } catch (error) {
+      setError('Error de conexión con el servidor.');
+    }
+  };
+
+  const handleGoBack = () => {
+    window.location.href = '/'; 
   };
 
   return (
@@ -36,11 +64,11 @@ export default function LoginPage() {
                   id="email"
                   name="email"
                   type="email"
-                  required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full rounded-lg border border-gray-300 p-3 shadow-md focus:border-blue-500 focus:ring-blue-500 sm:text-sm transition ease-in-out duration-150"
                   placeholder="Ingresa tu correo electrónico"
+                  required
                 />
               </div>
             </div>
@@ -54,16 +82,20 @@ export default function LoginPage() {
                   id="password"
                   name="password"
                   type="password"
-                  required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full rounded-lg border border-gray-300 p-3 shadow-md focus:border-blue-500 focus:ring-blue-500 sm:text-sm transition ease-in-out duration-150"
                   placeholder="Ingresa tu contraseña"
+                  required
                 />
               </div>
             </div>
 
+            {/* Mostrar mensaje de error */}
             {error && <p className="text-red-500 text-sm">{error}</p>}
+
+            {/* Mostrar mensaje de éxito */}
+            {success && <p className="text-green-500 text-sm">{success}</p>}
 
             <div>
               <button
@@ -75,13 +107,35 @@ export default function LoginPage() {
             </div>
           </form>
 
-          {/* Botón Volver a la Página Principal */}
-          <div className="mt-6 text-center">
-            <a
-              href="/"
-              className="text-blue-700 font-medium hover:underline hover:text-blue-900"
+          <div className="mt-4 flex justify-between items-center">
+            {/* Botón Volver a la izquierda con una flecha */}
+            <button
+              onClick={handleGoBack}
+              className="text-blue-700 font-medium hover:underline flex items-center"
             >
-              Volver a la página principal
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                className="w-5 h-5 mr-1"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+              Volver
+            </button>
+
+            {/* Enlace "¿Olvidaste tu contraseña?" más azul y a la derecha */}
+            <a
+              href="/forgot-password"
+              className="text-blue-600 font-medium hover:underline hover:text-blue-800"
+            >
+              ¿Olvidaste tu contraseña?
             </a>
           </div>
         </div>
