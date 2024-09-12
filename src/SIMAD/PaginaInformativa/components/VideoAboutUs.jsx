@@ -18,7 +18,7 @@ export const VideoAboutUs = () => {
           {/* Video de presentación del Liceo Santa Cruz */}
           <div className="w-full lg:w-1/2 mb-6 lg:mb-0 lg:pr-8" data-aos="fade-right" data-aos-delay="200">
             <video className="w-full rounded-lg shadow-lg" controls>
-              <source src="public\Video\video de presentacion liceo santa cruz.mp4" type="video/mp4" />
+              <source src="Video\video de presentacion liceo santa cruz.mp4" type="video/mp4" />
               Tu navegador no soporta el elemento de video.
             </video>
           </div>

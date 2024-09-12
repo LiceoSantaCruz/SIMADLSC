@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom"
-import SimadPage from "../PaginaInformativa/SimadPage"
-import LoginPage from "../../auth/pages/LoginPage"
+import SimadPage from "../SimadPage"
+import LoginPage from "../../../auth/pages/LoginPage"
 
 
 export const SimadRoutes = () => {

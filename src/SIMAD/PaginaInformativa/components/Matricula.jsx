@@ -21,7 +21,7 @@ export const Matricula = () => {
           {/* Columna Izquierda: Información de Matrícula */}
           <div className="w-full md:w-1/2 p-8" data-aos="fade-right" data-aos-delay="200">
             <h2 id="matricula-title" className="text-3xl font-bold text-blue-900 mb-4">
-              ¿Por qué Matricular con Nosotros?
+              ¿Por qué matricular con nosotros?
             </h2>
             <p className="text-gray-700 mb-4 leading-relaxed">
               En el Liceo Santa Cruz, nos comprometemos a ofrecer una educación de excelencia que prepara a nuestros estudiantes para enfrentar los desafíos del futuro. Nuestros programas académicos están diseñados para desarrollar habilidades críticas y fomentar el crecimiento personal en un entorno seguro y de apoyo.
@@ -44,7 +44,7 @@ export const Matricula = () => {
               className="bg-blue-900 text-white font-bold py-3 px-6 rounded-full hover:bg-blue-700 transition duration-300 shadow-lg"
               aria-label="Iniciar proceso de matrícula"
             >
-              Iniciar Matrícula
+              Iniciar matrícula
             </button>
           </div>
         </div>

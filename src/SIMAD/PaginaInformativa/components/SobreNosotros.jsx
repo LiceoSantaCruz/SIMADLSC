@@ -19,7 +19,7 @@ import { FaBullseye, FaLightbulb } from 'react-icons/fa';
             {/* Tarjeta de Misión */}
             <div data-aos="fade-up" className="p-6 bg-white rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105">
               {/* Reducido p-8 a p-6 para menos relleno */}
-              <div className="text-blue-900 mb-4">
+              <div className="text-[#9F0808] mb-4">
                 <FaBullseye className="w-10 h-10 mx-auto mb-2" />
                 <h4 className="text-2xl font-bold">Misión</h4>
               </div>
@@ -31,7 +31,7 @@ import { FaBullseye, FaLightbulb } from 'react-icons/fa';
             {/* Tarjeta de Visión */}
             <div data-aos="fade-up" className="p-6 bg-white rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105">
               {/* Reducido p-8 a p-6 para menos relleno */}
-              <div className="text-blue-900 mb-4">
+              <div className="text-[#9F0808] mb-4">
                 <FaLightbulb className="w-10 h-10 mx-auto mb-2" />
                 <h4 className="text-2xl font-bold">Visión</h4>
               </div>
