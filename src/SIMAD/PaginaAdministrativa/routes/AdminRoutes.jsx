@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { InfoAdminPage } from '../pages/InfoAdminPage';
 import { AsistenciaEst } from '../pages/Asistencias/AsistenciaEst';
-import { AsistenciaProf } from '../pages/Asistencias/AsistenciaProf';
 import { GestionAsistencia } from '../pages/Asistencias/GestionAsistencia';
 import { JustificacionAusencias } from '../pages/Asistencias/JustificacionAusencias';
 import { ReporteAsistencia } from '../pages/Asistencias/ReporteAsistencia';
@@ -29,7 +28,6 @@ export const AdminRoutes = () => {
 
                         {/* Asistencia Routes */}
                         <Route path="/asistencia-estudiantes" element={<AsistenciaEst />} />
-                        <Route path="/asistencia-profesores" element={<AsistenciaProf />} />
                         <Route path="/gestion-asistencia" element={<GestionAsistencia />} />
                         <Route path="/justificacion-ausencias" element={<JustificacionAusencias />} />
                         <Route path="/reporte-asistencia" element={<ReporteAsistencia />} />
