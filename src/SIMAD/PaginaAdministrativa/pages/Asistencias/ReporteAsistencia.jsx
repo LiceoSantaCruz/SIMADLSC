@@ -1,36 +1,37 @@
 import React, { useState } from 'react';
 
 export const ReporteAsistencia = () => {
-  const [role, setRole] = useState(''); // Guardar si es estudiante o profesor
+  const [studentId, setStudentId] = useState(''); // Guardar el ID del estudiante
+  const [grade, setGrade] = useState(''); // Guardar el grado del estudiante
   const [section, setSection] = useState(''); // Guardar la sección del estudiante
-  const [filters, setFilters] = useState({
-    startDate: '',
-    endDate: '',
-    status: ''
-  });
 
-  // Datos de ejemplo
-  const estudiantesData = [
-    { id: 1, student: 'Juan Pérez', date: '2024-09-12', status: 'Presente', section: 'A' },
-    { id: 2, student: 'Ana García', date: '2024-09-11', status: 'Ausente', section: 'B' }
+  // Datos de ejemplo simulando la base de datos
+  const asistenciaData = [
+    {
+      id_estudiante: 1,
+      id_seccion: '7-1',
+      id_materia: 67,
+      fecha: "2024-09-12T09:30:00.000Z",
+      estado: "presente",
+      detalles_justificacion: "El estudiante llegó a tiempo"
+    },
+    {
+      id_estudiante: 2,
+      id_seccion: '8-1',
+      id_materia: 67,
+      fecha: "2024-09-12T09:30:00.000Z",
+      estado: "ausente",
+      detalles_justificacion: "El estudiante llegó tarde"
+    },
   ];
 
-  const profesoresData = [
-    { id: 3, professor: 'Carlos Mendoza', date: '2024-09-12', status: 'Presente', subject: 'Matemáticas' },
-    { id: 4, professor: 'Laura Sánchez', date: '2024-09-11', status: 'Ausente', subject: 'Historia' }
-  ];
-
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters({
-      ...filters,
-      [name]: value
-    });
+  const handleStudentIdChange = (e) => {
+    setStudentId(e.target.value);
   };
 
-  const handleRoleSelection = (role) => {
-    setRole(role);
-    setSection(''); // Reiniciamos la selección de sección si cambia el rol
+  const handleGradeChange = (e) => {
+    setGrade(e.target.value);
+    setSection(''); // Reiniciar la sección cuando cambia el grado
   };
 
   const handleSectionChange = (e) => {
@@ -39,104 +40,80 @@ export const ReporteAsistencia = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Aquí puedes aplicar la lógica para enviar los filtros
-    console.log('Filtros aplicados:', filters);
-    console.log('Role seleccionado:', role);
-    if (role === 'estudiante') {
-      console.log('Sección:', section);
-    }
+    // Lógica para filtrar los datos
+    const filteredData = asistenciaData.filter(item => {
+      return (
+        (studentId ? item.id_estudiante === parseInt(studentId) : true) &&
+        (grade ? item.id_seccion.startsWith(grade) : true) &&
+        (section ? item.id_seccion === section : true)
+      );
+    });
+
+    console.log("Resultados de la búsqueda:", filteredData);
   };
 
-  // Filtrar los datos según el rol y la sección
-  let filteredData = [];
-  if (role === 'estudiante') {
-    filteredData = estudiantesData.filter((item) => {
-      return section ? item.section === section : true;
-    });
-  } else if (role === 'profesor') {
-    filteredData = profesoresData;
-  }
+  // Función para exportar los datos
+  const handleExport = () => {
+    console.log('Exportando los datos:', asistenciaData); // Aquí puedes integrar una librería para exportar en CSV o PDF
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Encabezado */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Gestión de Reportes de Asistencia</h1>
-        <p className="text-gray-600">Consulta y gestiona los reportes de asistencia según el rol y la sección.</p>
+        <p className="text-gray-600">Consulta y gestiona los reportes de asistencia por ID de estudiante, grado y sección.</p>
       </div>
 
-      {/* Selección de rol */}
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-700">Selecciona el usuario</h2>
-        <div className="flex space-x-4 mt-4">
-          <button
-            onClick={() => handleRoleSelection('estudiante')}
-            className={`px-4 py-2 rounded-md shadow ${role === 'estudiante' ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
-          >
-            Estudiante
-          </button>
-          <button
-            onClick={() => handleRoleSelection('profesor')}
-            className={`px-4 py-2 rounded-md shadow ${role === 'profesor' ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
-          >
-            Profesor
-          </button>
-        </div>
-      </div>
-
-      {/* Filtros adicionales para estudiantes */}
-      {role === 'estudiante' && (
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-gray-700">Selecciona la Sección</h2>
-          <select
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-            value={section}
-            onChange={handleSectionChange}
-          >
-            <option value="">Selecciona una Sección</option>
-            <option value="A">Sección A</option>
-            <option value="B">Sección B</option>
-          </select>
-        </div>
-      )}
-
-      {/* Filtros de búsqueda */}
+      {/* Filtros para buscar por ID de estudiante, grado y sección */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
         <form className="grid grid-cols-1 md:grid-cols-3 gap-4" onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">Fecha Inicio</label>
+            <label htmlFor="studentId" className="block text-sm font-medium text-gray-700">ID Estudiante</label>
             <input
-              type="date"
-              id="startDate"
-              name="startDate"
-              value={filters.startDate}
-              onChange={handleFilterChange}
+              type="number"
+              id="studentId"
+              name="studentId"
+              value={studentId}
+              onChange={handleStudentIdChange}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+              placeholder="Ingresa el ID del estudiante"
             />
           </div>
           <div>
-            <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">Fecha Fin</label>
-            <input
-              type="date"
-              id="endDate"
-              name="endDate"
-              value={filters.endDate}
-              onChange={handleFilterChange}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-            />
-          </div>
-          <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700">Estado de Asistencia</label>
+            <label htmlFor="grade" className="block text-sm font-medium text-gray-700">Grado</label>
             <select
-              id="status"
-              name="status"
-              value={filters.status}
-              onChange={handleFilterChange}
+              id="grade"
+              name="grade"
+              value={grade}
+              onChange={handleGradeChange}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
             >
-              <option value="">Todos</option>
-              <option value="Presente">Presente</option>
-              <option value="Ausente">Ausente</option>
+              <option value="">Selecciona un Grado</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="section" className="block text-sm font-medium text-gray-700">Sección</label>
+            <select
+              id="section"
+              name="section"
+              value={section}
+              onChange={handleSectionChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+            >
+              <option value="">Selecciona una Sección</option>
+              {grade &&
+                [...Array(10).keys()].map((num) => (
+                  <option key={num + 1} value={`${grade}-${num + 1}`}>
+                    {`${grade}-${num + 1}`}
+                  </option>
+                ))
+              }
             </select>
           </div>
           <div className="flex items-end">
@@ -150,54 +127,50 @@ export const ReporteAsistencia = () => {
         </form>
       </div>
 
-      {/* Tabla de reportes */}
+      {/* Resultados filtrados */}
       <div className="bg-white p-4 rounded-lg shadow overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              {role === 'estudiante' ? (
-                <>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estudiante</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sección</th>
-                </>
-              ) : (
-                <>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Profesor</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Materia</th>
-                </>
-              )}
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Estudiante</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sección</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Materia</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Detalles</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredData.map((item) => (
-              <tr key={item.id}>
-                {role === 'estudiante' ? (
-                  <>
-                    <td className="px-6 py-4 whitespace-nowrap">{item.student}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{item.date}</td>
-                    <td className={`px-6 py-4 whitespace-nowrap ${item.status === 'Presente' ? 'text-green-600' : 'text-red-600'}`}>
-                      {item.status}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">{item.section}</td>
-                  </>
-                ) : (
-                  <>
-                    <td className="px-6 py-4 whitespace-nowrap">{item.professor}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{item.date}</td>
-                    <td className={`px-6 py-4 whitespace-nowrap ${item.status === 'Presente' ? 'text-green-600' : 'text-red-600'}`}>
-                      {item.status}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">{item.subject}</td>
-                  </>
-                )}
-              </tr>
-            ))}
+            {asistenciaData
+              .filter(item =>
+                (studentId ? item.id_estudiante === parseInt(studentId) : true) &&
+                (grade ? item.id_seccion.startsWith(grade) : true) &&
+                (section ? item.id_seccion === section : true)
+              )
+              .map(item => (
+                <tr key={item.id_estudiante}>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.id_estudiante}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.id_seccion}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.id_materia}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{new Date(item.fecha).toLocaleDateString()}</td>
+                  <td className={`px-6 py-4 whitespace-nowrap ${item.estado === 'presente' ? 'text-green-600' : 'text-red-600'}`}>
+                    {item.estado}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.detalles_justificacion}</td>
+                </tr>
+              ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Botón para exportar */}
+      <div className="mt-6">
+        <button
+          onClick={handleExport}
+          className="w-full bg-green-500 text-white p-2 rounded-md shadow hover:bg-green-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+        >
+          Exportar Reporte
+        </button>
       </div>
     </div>
   );
