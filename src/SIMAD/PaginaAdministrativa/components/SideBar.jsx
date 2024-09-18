@@ -1,9 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { FaChalkboardTeacher, FaUserGraduate, FaCalendarAlt, FaClipboardList, FaUsers, FaUserCircle, FaSignOutAlt, FaBars } from 'react-icons/fa';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export const SideBar = () => {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token')); // Mantén el estado de autenticación
     const [openSections, setOpenSections] = useState({
         asistencia: false,
         eventos: false,
@@ -12,6 +13,8 @@ export const SideBar = () => {
         usuarios: false,
     });
 
+    const navigate = useNavigate();
+
     const toggleSection = (section) => {
         setOpenSections(prevState => ({
             ...prevState,
@@ -19,13 +22,25 @@ export const SideBar = () => {
         }));
     };
 
-    const navigate = useNavigate();
-
     const handleLogout = () => {
-        // Lógica de logout (por ejemplo, eliminar token de autenticación)
-        console.log("User logged out");
-        navigate('/'); // Redirigir a la página de login
+        // Elimina el token y el rol de localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('rol');
+
+        // Actualiza el estado de autenticación
+        setIsAuthenticated(false);
+        console.log('Token y rol eliminados');
+
+        // Redirige utilizando useNavigate
+        window.location.href = '/paginainformativa' 
     };
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            navigate('/paginainformativa'); // Redirige si el usuario no está autenticado
+        }
+    }, [isAuthenticated, navigate]);
+
     const toggleSidebar = () => {
         setSidebarOpen(!isSidebarOpen);
     };
@@ -139,4 +154,3 @@ export const SideBar = () => {
     </>
     );
 };
-

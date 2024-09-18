@@ -15,7 +15,7 @@ const Navbar = () => {
 
         {/* Botón de inicio de sesión, alineado a la derecha */}
         <div className="ml-auto">
-          <Link to="/login">
+          <Link to="/paginainformativa/login">
             <button className="flex items-center bg-yellow-500 text-black font-bold py-2 px-4 rounded-full hover:bg-yellow-400 transition duration-300">
               <FaSignInAlt className="mr-2" /> Iniciar Sesión
             </button>
