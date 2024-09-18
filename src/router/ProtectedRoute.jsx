@@ -7,7 +7,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
 
   if (!token) {
     // Si no hay token, redirigir a la página de login
-    return <Navigate to="/login" />;
+    return <Navigate to="/paginainformativa" />;
   }
 
   try {
@@ -22,6 +22,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
     // Si el rol es válido, renderizar el contenido de la ruta protegida
     return <Outlet />;
   } catch (error) {
+    console.error(error);
     // Si el token es inválido o hay algún error, redirigir a la página de login
     return <Navigate to="/login" />;
   }

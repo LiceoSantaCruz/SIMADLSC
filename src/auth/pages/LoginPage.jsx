@@ -19,6 +19,7 @@ export default function LoginPage() {
     }
 
     try {
+      // Realizar la petición al servidor para el login
       const response = await fetch('http://localhost:3000/auth/login', {
         method: 'POST',
         headers: {
@@ -27,23 +28,35 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
+      // Si la respuesta no es exitosa, mostrar el error
       if (!response.ok) {
+        
         const errorData = await response.json();
         setError(errorData.message || 'Error en el inicio de sesión');
         return;
       }
 
+      // Si la respuesta es exitosa, recibir los datos (token y rol)
       const data = await response.json();
-      setSuccess(data.message); // Mostrar el mensaje de éxito
-      setEmail(''); // Limpiar el campo de correo
-      setPassword(''); // Limpiar el campo de contraseña
+      console.log('Respuesta del backend:', data); // Verificar toda la respuesta
+
+      // Guardar el token y el rol en localStorage
+      localStorage.setItem('token', data.token);  // Aquí guardas el token
+      localStorage.setItem('rol', data.rol);    // Aquí guardas el rol del usuario (admin, user, etc.)
+      console.log(data.rol)
+      // Mostrar mensaje de éxito
+      setSuccess('Inicio de sesión exitoso');
+
+      // Redirigir al usuario a la página principal
+      window.location.href = '/';  // Redirigir a la página principal o una específica según el rol
     } catch (error) {
+      console.error(error);
       setError('Error de conexión con el servidor.');
     }
   };
 
   const handleGoBack = () => {
-    window.location.href = '/'; 
+    window.location.href = '/paginainformativa'; 
   };
 
   return (
@@ -132,7 +145,7 @@ export default function LoginPage() {
 
             {/* Enlace "¿Olvidaste tu contraseña?" más azul y a la derecha */}
             <a
-              href="/forgot-password"
+              href="/paginainformativa/login/forgot-password"
               className="text-blue-600 font-medium hover:underline hover:text-blue-800"
             >
               ¿Olvidaste tu contraseña?
