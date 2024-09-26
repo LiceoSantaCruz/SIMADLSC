@@ -102,6 +102,7 @@ export const SideBar = () => {
                         <Link to="/horario-estudiantes" className="block py-1 hover:text-gray-400">Horario Estudiantes</Link>
                         <Link to="/horario-profesores" className="block py-1 hover:text-gray-400">Horario Profesores</Link>
                         <Link to="/gestion-horario" className="block py-1 hover:text-gray-400">Gestión Horario</Link>
+
                     </div>
                 )}
             </div>

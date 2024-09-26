@@ -7,8 +7,8 @@ import { ReporteAsistencia } from '../pages/Asistencias/ReporteAsistencia';
 import { Eventos } from '../../components/Eventos';
 import { GestionEventos } from '../pages/Eventos/GestionEventos';
 import { GestionHorario } from '../pages/Horarios/GestionHorario';
-import { HorarioEstu } from '../pages/Horarios/HorarioEstu';
-import { HorarioProf } from '../pages/Horarios/HorarioProf';
+import { HorarioEstu } from '../pages/Horarios/Vistas/HorarioEstu';
+import { HorarioProf } from '../pages/Horarios/Vistas/HorarioProf';
 import { FormularioMatricula } from '../pages/Matricula/FormularioMatricula';
 import { GestionMatricula } from '../pages/Matricula/GestionMatricula';
 import { MatriculaOrdinaria } from '../pages/Matricula/MatriculaOrdinaria';
@@ -16,6 +16,7 @@ import { MatriculaExtraordinaria } from '../pages/Matricula/MatriculaExtraordina
 import GestionUsuarios from '../pages/Usuarios/GestionUsuarios';
 import { MiPerfil } from '../pages/Perfil/MiPerfil';
 import CrearUsuario from '../pages/Usuarios/CrearUsuario';
+import { FaZ } from 'react-icons/fa6';
 
 
 
