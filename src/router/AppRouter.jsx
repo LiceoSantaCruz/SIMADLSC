@@ -8,7 +8,7 @@ export const AppRouter = () => {
   const [role, setRole] = useState(localStorage.getItem('role'));
 
   useEffect(() => {
-    // Actualiza el rol cuando se elimine del localStorage (logout)
+    // Actualiza el rol cuando se elimine o cambie en localStorage (logout)
     const handleStorageChange = () => {
       setRole(localStorage.getItem('role')); // Actualizar el estado del rol
     };
@@ -24,13 +24,27 @@ export const AppRouter = () => {
   return (
     <Routes>
       {/* Si el rol es 'admin', redirigir a la página de administrador */}
-      {role === 'admin' ? (
+      {role === 'admin' && (
         <Route path="/*" element={<AdminPage />} />
-      ) : (
-        <Route path="/paginainformativa/*" element={<SimadRoutes />} />
       )}
 
-      {/* Si el rol no está definido, redirigir a la página informativa */}
+      {/* Si el rol es 'professor', redirigir a la página de profesor */}
+      {role === 'Profesor' && (
+        <Route path="/*" element={<AdminPage />} />
+      )}
+
+      {/* Si el rol es 'student', redirigir a la página de estudiante */}
+      {role === 'Estudiante' && (
+        <Route path="/*" element={<AdminPage />} />
+      )}
+
+      {/* Si el rol es 'adminStaff', redirigir a la página de personal administrativo */}
+      {role === 'SuperAdmin' && (
+        <Route path="/*" element={<AdminPage />} />
+      )}
+
+      {/* Si el rol no está definido o no coincide, redirigir a la página informativa */}
+      <Route path="/paginainformativa/*" element={<SimadRoutes />} />
       <Route path="*" element={<Navigate to="/paginainformativa" />} />
     </Routes>
   );
