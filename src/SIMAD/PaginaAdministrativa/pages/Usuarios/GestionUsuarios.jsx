@@ -39,8 +39,10 @@ const GestionUsuarios = () => {
   };
 
   useEffect(() => {
+
     fetchUsers();
   }, []);
+
 
   // Función para bloquear o desbloquear usuarios
   const handleBlockUser = async (id, bloqueado_Usuario) => {
