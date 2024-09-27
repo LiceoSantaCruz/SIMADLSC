@@ -14,8 +14,8 @@ import { GestionMatricula } from '../pages/Matricula/GestionMatricula';
 import { MatriculaOrdinaria } from '../pages/Matricula/MatriculaOrdinaria';
 import { MatriculaExtraordinaria } from '../pages/Matricula/MatriculaExtraordinaria';
 import GestionUsuarios from '../pages/Usuarios/GestionUsuarios';
-import { MiPerfil } from '../pages/Perfil/MiPerfil';
 import CrearUsuario from '../pages/Usuarios/CrearUsuario';
+import { MiPerfil } from '../pages/Perfil/MiPerfil';
 
 
 
@@ -52,7 +52,7 @@ export const AdminRoutes = () => {
                         <Route path="/Crear-usuarios" element={<CrearUsuario />} />
 
                         {/* Perfil y Logout */}
-                        <Route path="/mi-perfil" element={<MiPerfil />} />
+                        <Route path="/mi-perfil" element={<MiPerfil/>} />
                     </Routes>
                 </div>
   )
