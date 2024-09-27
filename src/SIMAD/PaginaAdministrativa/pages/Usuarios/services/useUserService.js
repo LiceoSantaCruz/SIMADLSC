@@ -77,14 +77,13 @@ export const deleteUser = async (id, token) => {
 };
 
 export const toggleBlockUser = async (id, bloqueado_Usuario, token) => {
-  const updatedData = { bloqueado_Usuario };
-  const response = await fetch(`${BASE_URL}/${id}`, {
+  const response = await fetch(`http://localhost:3000/users/${id}/block`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(updatedData),
+    body: JSON.stringify({ bloqueado_Usuario }),
   });
 
   if (!response.ok) {

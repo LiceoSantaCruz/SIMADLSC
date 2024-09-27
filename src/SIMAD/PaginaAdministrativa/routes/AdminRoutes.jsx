@@ -15,8 +15,8 @@ import { GestionMatricula } from '../pages/Matricula/GestionMatricula';
 import { MatriculaOrdinaria } from '../pages/Matricula/MatriculaOrdinaria';
 import { MatriculaExtraordinaria } from '../pages/Matricula/MatriculaExtraordinaria';
 import GestionUsuarios from '../pages/Usuarios/GestionUsuarios';
-import { MiPerfil } from '../pages/Perfil/MiPerfil';
 import CrearUsuario from '../pages/Usuarios/CrearUsuario';
+import { MiPerfil } from '../pages/Perfil/MiPerfil';
 
 export const AdminRoutes = () => {
   const [role, setRole] = useState(localStorage.getItem('role'));
@@ -34,6 +34,7 @@ export const AdminRoutes = () => {
 
   return (
     <div className="flex-grow p-6 bg-gray-100 min-h-screen overflow-auto">
+
       <Routes>
         <Route path="/" element={<Navigate to="/info" replace />} />
         <Route path="/info" element={<InfoAdminPage />} />
@@ -90,3 +91,4 @@ export const AdminRoutes = () => {
     </div>
   );
 };
+
