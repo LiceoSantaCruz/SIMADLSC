@@ -24,6 +24,7 @@ export const AppRouter = () => {
   return (
     <Routes>
       {/* Si el rol es 'admin', redirigir a la página de administrador */}
+
       {role === 'admin' && (
         <Route path="/*" element={<AdminPage />} />
       )}
