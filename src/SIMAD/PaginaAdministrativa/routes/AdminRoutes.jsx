@@ -39,7 +39,7 @@ export const AdminRoutes = () => {
         <Route path="/info" element={<InfoAdminPage />} />
 
         {/* Rutas para asistencia, según rol */}
-        {(role === 'admin' || role === 'SuperAdmin' || role === 'Profesor') && (
+        {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
           <>
             <Route path="/asistencia-estudiantes" element={<AsistenciaEst />} />
             <Route path="/gestion-asistencia" element={<GestionAsistencia />} />
@@ -50,12 +50,12 @@ export const AdminRoutes = () => {
 
         {/* Rutas para eventos, accesibles a todos */}
         <Route path="/eventos" element={<Eventos />} />
-        {(role === 'admin' || role === 'SuperAdmin') && (
+        {(role === 'admin' || role === 'superadmin') && (
           <Route path="/gestion-eventos" element={<GestionEventos />} />
         )}
 
         {/* Rutas para horarios, según el rol */}
-        {(role === 'admin' || role === 'SuperAdmin' || role === 'Profesor') && (
+        {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
           <>
             <Route path="/gestion-horario" element={<GestionHorario />} />
             <Route path="/horario-estudiantes" element={<HorarioEstu />} />
@@ -64,7 +64,7 @@ export const AdminRoutes = () => {
         )}
 
         {/* Rutas para matrícula, según el rol */}
-        {(role === 'admin' || role === 'SuperAdmin') && (
+        {(role === 'admin' || role === 'superadmin') && (
           <>
             <Route path="/formulario-matricula" element={<FormularioMatricula />} />
             <Route path="/gestion-matricula" element={<GestionMatricula />} />
@@ -77,7 +77,7 @@ export const AdminRoutes = () => {
         )}
 
         {/* Rutas de usuarios solo para admin */}
-        {role === 'SuperAdmin' && (
+        {role === 'superadmin' && (
           <>
             <Route path="/gestion-usuarios" element={<GestionUsuarios />} />
             <Route path="/crear-usuarios" element={<CrearUsuario />} />

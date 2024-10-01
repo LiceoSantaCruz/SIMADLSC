@@ -29,17 +29,17 @@ export const AppRouter = () => {
       )}
 
       {/* Si el rol es 'professor', redirigir a la página de profesor */}
-      {role === 'Profesor' && (
+      {role === 'profesor' && (
         <Route path="/*" element={<AdminPage />} />
       )}
 
       {/* Si el rol es 'student', redirigir a la página de estudiante */}
-      {role === 'Estudiante' && (
+      {role === 'estudiante' && (
         <Route path="/*" element={<AdminPage />} />
       )}
 
       {/* Si el rol es 'adminStaff', redirigir a la página de personal administrativo */}
-      {role === 'SuperAdmin' && (
+      {role === 'superadmin' && (
         <Route path="/*" element={<AdminPage />} />
       )}
 

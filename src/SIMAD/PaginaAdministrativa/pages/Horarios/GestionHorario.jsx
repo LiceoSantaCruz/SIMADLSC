@@ -7,7 +7,11 @@ export const GestionHorario = () => {
   const [formularioSeleccionado, setFormularioSeleccionado] = useState(null);
 
   const seleccionarFormulario = (tipo) => {
-    setFormularioSeleccionado(tipo);
+    if (formularioSeleccionado === tipo) {
+      setFormularioSeleccionado(null); // Si el mismo formulario está seleccionado, lo cierra
+    } else {
+      setFormularioSeleccionado(tipo); // Si es un formulario diferente, lo abre
+    }
   };
 
   return (
@@ -17,16 +21,20 @@ export const GestionHorario = () => {
       {/* Botones para seleccionar el tipo de formulario */}
       <div className="mb-6">
         <button
-          className="bg-blue-500 text-white px-6 py-2 rounded-lg mr-4"
+          className={`px-6 py-2 rounded-lg mr-4 ${
+            formularioSeleccionado === 'profesor' ? 'bg-blue-700' : 'bg-blue-500'
+          } text-white`}
           onClick={() => seleccionarFormulario('profesor')}
         >
-          Crear horario para profesor
+          {formularioSeleccionado === 'profesor' ? 'Cerrar horario para profesor' : 'Crear horario para profesor'}
         </button>
         <button
-          className="bg-green-500 text-white px-6 py-2 rounded-lg"
+          className={`px-6 py-2 rounded-lg ${
+            formularioSeleccionado === 'estudiante' ? 'bg-green-700' : 'bg-green-500'
+          } text-white`}
           onClick={() => seleccionarFormulario('estudiante')}
         >
-          Crear horario para estudiante
+          {formularioSeleccionado === 'estudiante' ? 'Cerrar horario para estudiante' : 'Crear horario para estudiante'}
         </button>
       </div>
 
@@ -34,8 +42,8 @@ export const GestionHorario = () => {
       {formularioSeleccionado === 'profesor' && <FormularioHorarioProfesor />}
       {formularioSeleccionado === 'estudiante' && <FormularioHorarioEstudiante />}
 
-      {/* Lista de Horarios */}
-      <ListaHorarios />
+      {/* Lista de Horarios solo se muestra si no hay formulario seleccionado */}
+      {!formularioSeleccionado && <ListaHorarios />}
     </div>
   );
 };

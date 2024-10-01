@@ -64,7 +64,7 @@ export const SideBar = () => {
                 </Link>
                 
                 {/* Asistencia: Solo visible para admin, adminStaff, y profesores */}
-                {(role === 'admin' || role === 'SuperAdmin' || role === 'Profesor') && (
+                {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
                     <div>
                         <div onClick={() => toggleSection('asistencia')} className="cursor-pointer flex items-center space-x-2 py-2">
                             <FaUserGraduate />
@@ -91,7 +91,7 @@ export const SideBar = () => {
                     {openSections.eventos && (
                         <div className="ml-6">
                             <Link to="/eventos" className="block py-1 hover:text-gray-400">Eventos</Link>
-                            {(role === 'admin' || role === 'SuperAdmin') && (
+                            {(role === 'admin' || role === 'superadmin') && (
                                 <Link to="/gestion-eventos" className="block py-1 hover:text-gray-400">Gestión Eventos</Link>
                             )}
                         </div>
@@ -99,7 +99,7 @@ export const SideBar = () => {
                 </div>
 
                 {/* Horarios: Visible para admin, adminStaff, y profesores */}
-                {(role === 'admin' || role === 'SuperAdmin' || role === 'Profesor') && (
+                {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
                     <div>
                         <div onClick={() => toggleSection('horarios')} className="cursor-pointer flex items-center space-x-2 py-2">
                             <FaChalkboardTeacher />
@@ -116,7 +116,7 @@ export const SideBar = () => {
                 )}
 
                 {/* Matrícula: Visible para admin, adminStaff, y estudiantes */}
-                {(role === 'admin' || role === 'SuperAdmin' || role === 'Estudiante') && (
+                {(role === 'admin' || role === 'superadmin' || role === 'estudiante') && (
                     <div>
                         <div onClick={() => toggleSection('matricula')} className="cursor-pointer flex items-center space-x-2 py-2">
                             <FaClipboardList />
@@ -125,7 +125,7 @@ export const SideBar = () => {
                         {openSections.matricula && (
                             <div className="ml-6">
                                 <Link to="/formulario-matricula" className="block py-1 hover:text-gray-400">Formulario Matrícula</Link>
-                                {(role === 'admin' || role === 'SuperAdmin') && (
+                                {(role === 'admin' || role === 'superadmin') && (
                                     <>
                                         <Link to="/gestion-matricula" className="block py-1 hover:text-gray-400">Gestión Matrícula</Link>
                                         <Link to="/matricula-ordinaria" className="block py-1 hover:text-gray-400">Matrícula Ordinaria</Link>
@@ -138,7 +138,7 @@ export const SideBar = () => {
                 )}
 
                 {/* Usuarios: Solo visible para admin */}
-                {role === 'SuperAdmin' && (
+                {role === 'superadmin' && (
                     <div>
                         <div onClick={() => toggleSection('usuarios')} className="cursor-pointer flex items-center space-x-2 py-2">
                             <FaUsers />
