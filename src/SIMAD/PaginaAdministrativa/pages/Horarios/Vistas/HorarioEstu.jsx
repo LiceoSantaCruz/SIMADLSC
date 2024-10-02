@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';  // Import for table formatting
 
 const MySwal = withReactContent(Swal);
 
@@ -11,7 +13,7 @@ export const HorarioEstu = () => {
   const [error, setError] = useState(null);                     // Estado para manejar errores
 
   useEffect(() => {
-    // Aquí simulamos la carga de datos quemados para probar el componente
+    // Simulación de datos
     const obtenerDatos = async () => {
       try {
         const data = {
@@ -96,12 +98,47 @@ export const HorarioEstu = () => {
     }
   };
 
+  // Función para exportar el horario como PDF
+  const exportarPdf = () => {
+    const doc = new jsPDF();
+
+    doc.text(`Horario de ${nombreEstudiante} - Sección ${seccion}`, 10, 10);
+
+    const tableColumn = ['Hora', ...dias];
+    const tableRows = [];
+
+    horasUnicas.forEach((hora) => {
+      const fila = [hora];
+      dias.forEach((dia) => {
+        const horario = obtenerHorario(dia, hora);
+        fila.push(horario ? `Asig: ${horario.asignatura}\nAula: ${horario.aula}` : '-');
+      });
+      tableRows.push(fila);
+    });
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+    });
+
+    doc.save(`Horario_${nombreEstudiante}.pdf`);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Mensaje con el nombre del estudiante y la sección */}
       <h1 className="text-3xl font-bold mb-6">
         Hola, {nombreEstudiante || 'Estudiante'}! Bienvenido al horario de la sección {seccion || 'Sección'}.
       </h1>
+
+      {/* Botón para exportar a PDF */}
+      <button
+        className="bg-green-500 text-white px-4 py-2 rounded-lg mb-4 hover:bg-green-600"
+        onClick={exportarPdf}
+      >
+        Exportar Horario como PDF
+      </button>
 
       {/* Tabla de Horarios */}
       <div className="bg-white p-6 rounded-lg shadow-md">

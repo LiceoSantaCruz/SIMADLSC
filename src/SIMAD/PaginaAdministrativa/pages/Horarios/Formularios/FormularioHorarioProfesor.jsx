@@ -4,8 +4,8 @@ const FormularioHorarioProfesor = () => {
   const [grado, setGrado] = useState('');               // Estado para el grado del profesor
   const [seccion, setSeccion] = useState('');           // Estado para la sección seleccionada
   const [materia, setMateria] = useState('');           // Estado para la materia seleccionada
-  const [horaInicio, setHoraInicio] = useState('');     // Estado para la hora de inicio de la clase
-  const [horaFin, setHoraFin] = useState('');           // Estado para la hora de fin de la clase
+  const [dia, setDia] = useState('');                   // Estado para el día seleccionado
+  const [rangoHoras, setRangoHoras] = useState('');     // Estado para el rango de horas (inicio y fin)
   const [aula, setAula] = useState('');                 // Estado para el aula
   const [profesorId, setProfesorId] = useState('');     // Estado para el ID del profesor seleccionado
 
@@ -17,10 +17,6 @@ const FormularioHorarioProfesor = () => {
     // Simulación de petición al backend para obtener profesores, materias, y secciones
     const obtenerDatos = async () => {
       try {
-        // const respuestaProfesores = await fetch('/api/profesores');
-        // const profesoresData = await respuestaProfesores.json();
-        // setProfesores(profesoresData);
-
         // Simulación de datos de profesores
         setProfesores([
           { id: '101', nombre: 'Juan Pérez' },
@@ -57,30 +53,22 @@ const FormularioHorarioProfesor = () => {
   const manejarEnvio = async (e) => {
     e.preventDefault();
 
+    const [horaInicio, horaFin] = rangoHoras.split(' - ');
+
     const datosFormulario = {
       profesorId,       // ID del profesor seleccionado
       grado,
       seccion,
       materia,
+      dia,
       horaInicio,
       horaFin,
       aula
     };
 
     try {
-      // const respuesta = await fetch('/api/horario-profesor', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify(datosFormulario),
-      // });
-
-      // if (respuesta.ok) {
-      //   alert('Horario registrado con éxito');
-      // } else {
-      //   alert('Error al registrar el horario');
-      // }
+      // Simulación del envío de los datos al backend
+      console.log('Datos enviados:', datosFormulario);
     } catch (error) {
       console.error('Error al enviar los datos del formulario:', error);
     }
@@ -157,26 +145,38 @@ const FormularioHorarioProfesor = () => {
           </select>
         </div>
 
-        {/* Hora de Inicio */}
+        {/* Combo Box para Día */}
         <div className="mb-4">
-          <label className="block text-gray-700">Hora de Inicio</label>
-          <input
-            type="time"
+          <label className="block text-gray-700">Día</label>
+          <select
             className="border p-2 rounded-lg w-full"
-            value={horaInicio}
-            onChange={(e) => setHoraInicio(e.target.value)}
-          />
+            value={dia}
+            onChange={(e) => setDia(e.target.value)}
+          >
+            <option value="">Seleccione un día</option>
+            <option value="Lunes">Lunes</option>
+            <option value="Martes">Martes</option>
+            <option value="Miércoles">Miércoles</option>
+            <option value="Jueves">Jueves</option>
+            <option value="Viernes">Viernes</option>
+          </select>
         </div>
 
-        {/* Hora de Fin */}
+        {/* Combo Box para Rango de Horas */}
         <div className="mb-4">
-          <label className="block text-gray-700">Hora de Fin</label>
-          <input
-            type="time"
+          <label className="block text-gray-700">Hora (Inicio - Fin)</label>
+          <select
             className="border p-2 rounded-lg w-full"
-            value={horaFin}
-            onChange={(e) => setHoraFin(e.target.value)}
-          />
+            value={rangoHoras}
+            onChange={(e) => setRangoHoras(e.target.value)}
+          >
+            <option value="">Seleccione un rango de horas</option>
+            <option value="07:00 - 08:00">07:00 - 08:00</option>
+            <option value="08:00 - 09:30">08:00 - 09:30</option>
+            <option value="10:00 - 11:30">10:00 - 11:30</option>
+            <option value="12:00 - 13:30">12:00 - 13:30</option>
+            <option value="14:00 - 15:30">14:00 - 15:30</option>
+          </select>
         </div>
 
         {/* Aula */}
