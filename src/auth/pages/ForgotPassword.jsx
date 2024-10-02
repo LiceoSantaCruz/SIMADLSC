@@ -1,14 +1,57 @@
 // src/auth/pages/ForgotPassword.jsx
 import { useState } from 'react';
 import { useForgotPassword } from '../hooks/useForgotPassword';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 export const ForgotPassword = () => {
   const [email_Usuario, setEmail_Usuario] = useState('');
-  const { handleForgotPassword, error, success } = useForgotPassword();
+  const { handleForgotPassword } = useForgotPassword();
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    handleForgotPassword(email_Usuario);
+
+    if (isSubmitting) {
+      return; // Evita múltiples envíos
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await handleForgotPassword(email_Usuario);
+
+      // Mostrar alerta de éxito y redirigir al inicio
+      Swal.fire({
+        icon: 'success',
+        title: 'Correo enviado',
+        text: 'Se ha enviado un enlace para restablecer tu contraseña.',
+        confirmButtonText: 'Aceptar',
+      }).then(() => {
+        navigate('/'); // Redirigir a la página de inicio
+      });
+    } catch (error) {
+      if (error.status === 404) {
+        // Mostrar SweetAlert específico para el error 404
+        Swal.fire({
+          icon: 'error',
+          title: 'Correo no encontrado',
+          text: 'El correo electrónico ingresado no está registrado.',
+          confirmButtonText: 'Aceptar',
+        });
+      } else {
+        // Manejar otros errores
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message || 'Ocurrió un error al enviar el correo.',
+          confirmButtonText: 'Aceptar',
+        });
+      }
+    } finally {
+      setIsSubmitting(false); // Habilitar el botón nuevamente
+    }
   };
 
   return (
@@ -20,11 +63,11 @@ export const ForgotPassword = () => {
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-800">
+              <label htmlFor="email_Usuario" className="block text-sm font-medium text-gray-800">
                 Correo Electrónico
               </label>
               <input
-                id="email"
+                id="email_Usuario"
                 name="email_Usuario"
                 type="email"
                 value={email_Usuario}
@@ -35,15 +78,15 @@ export const ForgotPassword = () => {
               />
             </div>
 
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-            {success && <p className="text-green-500 text-sm">{success}</p>}
-
             <div>
               <button
                 type="submit"
-                className="w-full justify-center rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150"
+                disabled={isSubmitting}
+                className={`w-full justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150
+                      ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-700 hover:bg-blue-600'}
+                    `}
               >
-                Enviar enlace
+                {isSubmitting ? 'Enviando...' : 'Enviar enlace'}
               </button>
             </div>
           </form>
@@ -51,4 +94,4 @@ export const ForgotPassword = () => {
       </div>
     </div>
   );
-}
+};

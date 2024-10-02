@@ -2,7 +2,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import { SimadRoutes } from "../SIMAD/PaginaInformativa/routes/SimadRoutes";
 import { AdminPage } from "../SIMAD/PaginaAdministrativa/AdminPage";
 import { useState, useEffect } from "react";
-
+import { AuthRoutes } from "../auth/routes/AuthRoutes";
 export const AppRouter = () => {
   // Estado para el rol del usuario
   const [role, setRole] = useState(localStorage.getItem('role'));
@@ -22,7 +22,10 @@ export const AppRouter = () => {
   }, []);
 
   return (
+    
     <Routes>
+     
+
       {/* Si el rol es 'admin', redirigir a la página de administrador */}
 
       {role === 'admin' && (
@@ -47,6 +50,8 @@ export const AppRouter = () => {
       {/* Si el rol no está definido o no coincide, redirigir a la página informativa */}
       <Route path="/paginainformativa/*" element={<SimadRoutes />} />
       <Route path="*" element={<Navigate to="/paginainformativa" />} />
+        {/* Rutas de autenticación */}
+        <Route path="/auth/*" element={<AuthRoutes />} />
     </Routes>
   );
 };

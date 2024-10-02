@@ -82,6 +82,10 @@ export default function LoginPage() {
     window.location.href = "/paginainformativa";
   };
 
+  const ForgotPassword = () => {
+    window.location.href = "/auth/forgot-password";
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-blue-400 to-blue-600 px-4 py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -173,12 +177,12 @@ export default function LoginPage() {
             </button>
 
             {/* Enlace "¿Olvidaste tu contraseña?" más azul y a la derecha */}
-            <a
-              href="/auth/forgot-password"
+            <button 
+            onClick={ForgotPassword}
               className="text-blue-600 font-medium hover:underline hover:text-blue-800"
             >
               ¿Olvidaste tu contraseña?
-            </a>
+            </button>
           </div>
         </div>
       </div>
