@@ -1,27 +1,61 @@
 import { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 export const HorarioEstu = () => {
-  const [nombreEstudiante, setNombreEstudiante] = useState(''); // Estado para el nombre del estudiante
-  const [seccion, setSeccion] = useState('');                   // Estado para la sección
+  const [nombreEstudiante, setNombreEstudiante] = useState('Juan Pérez'); // Estado para el nombre del estudiante
+  const [seccion, setSeccion] = useState('A');                   // Estado para la sección
   const [horarios, setHorarios] = useState([]);                 // Estado para los horarios
   const [error, setError] = useState(null);                     // Estado para manejar errores
 
   useEffect(() => {
-    // Aquí realizamos la petición al backend para obtener los datos del estudiante, su sección y sus horarios
+    // Aquí simulamos la carga de datos quemados para probar el componente
     const obtenerDatos = async () => {
       try {
-        // const respuesta = await fetch('/api/estudiante-datos'); // URL del endpoint del backend
-        // const data = await respuesta.json();
+        const data = {
+          nombreEstudiante: 'Juan Pérez',
+          seccion: 'A',
+          horarios: [
+            {
+              dia: 'Lunes',
+              horaInicio: '08:00',
+              horaFin: '09:30',
+              asignatura: 'Matemáticas',
+              aula: 'Aula 101',
+              profesor: 'Prof. García',
+            },
+            {
+              dia: 'Martes',
+              horaInicio: '08:00',
+              horaFin: '09:30',
+              asignatura: 'Ciencias',
+              aula: 'Aula 202',
+              profesor: 'Prof. Sánchez',
+            },
+            {
+              dia: 'Miércoles',
+              horaInicio: '08:00',
+              horaFin: '09:30',
+              asignatura: 'Historia',
+              aula: 'Aula 103',
+              profesor: 'Prof. López',
+            },
+            {
+              dia: 'Lunes',
+              horaInicio: '10:00',
+              horaFin: '11:30',
+              asignatura: 'Inglés',
+              aula: 'Aula 104',
+              profesor: 'Prof. Martín',
+            },
+          ],
+        };
 
-        // if (respuesta.ok) {
-        //   setNombreEstudiante(data.nombreEstudiante);
-        //   setSeccion(data.seccion);
-        //   setHorarios(data.horarios); // Asumiendo que data.horarios es una lista de los horarios
-        // } else {
-        //   setError('Error al obtener los datos del estudiante.');
-        // }
-
-        // Comentarios para mostrar cómo se manejarán los datos del backend
+        setNombreEstudiante(data.nombreEstudiante);
+        setSeccion(data.seccion);
+        setHorarios(data.horarios);
 
       } catch (error) {
         console.error('Error al obtener los datos del estudiante:', error);
@@ -36,11 +70,37 @@ export const HorarioEstu = () => {
     return <div className="text-red-500">{error}</div>;
   }
 
+  // Agrupamos los horarios por hora
+  const horasUnicas = [...new Set(horarios.map(horario => `${horario.horaInicio} - ${horario.horaFin}`))];
+  const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+
+  const obtenerHorario = (dia, hora) => {
+    return horarios.find(h => h.dia === dia && `${h.horaInicio} - ${h.horaFin}` === hora);
+  };
+
+  const mostrarDetalles = (horario) => {
+    if (horario) {
+      MySwal.fire({
+        title: `Detalles de la clase`,
+        html: `<b>Asignatura:</b> ${horario.asignatura}<br><b>Aula:</b> ${horario.aula}<br><b>Profesor:</b> ${horario.profesor}`,
+        icon: 'info',
+        confirmButtonText: 'Cerrar',
+      });
+    } else {
+      MySwal.fire({
+        title: 'Detalles de la clase',
+        text: 'No hay clase en este horario',
+        icon: 'info',
+        confirmButtonText: 'Cerrar',
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Mensaje con el nombre del estudiante y la sección */}
       <h1 className="text-3xl font-bold mb-6">
-        Hola, {nombreEstudiante || 'Estudiante'}! Bienvenido al horario de {seccion || 'Sección'}.
+        Hola, {nombreEstudiante || 'Estudiante'}! Bienvenido al horario de la sección {seccion || 'Sección'}.
       </h1>
 
       {/* Tabla de Horarios */}
@@ -50,31 +110,28 @@ export const HorarioEstu = () => {
           <table className="min-w-full table-auto bg-gray-50 shadow-sm rounded-lg">
             <thead className="bg-gray-200 text-gray-700">
               <tr>
-                <th className="px-4 py-2 text-left">Día</th>
-                <th className="px-4 py-2 text-left">Hora Inicio</th>
-                <th className="px-4 py-2 text-left">Hora Fin</th>
-                <th className="px-4 py-2 text-left">Asignatura</th>
-                <th className="px-4 py-2 text-left">Aula</th>
-                <th className="px-4 py-2 text-left">Detalles</th> {/* Nueva columna para ver detalles */}
+                <th className="px-4 py-2 text-left">Hora</th>
+                {dias.map((dia, index) => (
+                  <th key={index} className="px-4 py-2 text-left">{dia}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {horarios.map((horario, index) => (
+              {horasUnicas.map((hora, index) => (
                 <tr key={index} className="border-b">
-                  <td className="px-4 py-2">{horario.dia}</td>
-                  <td className="px-4 py-2">{horario.horaInicio}</td>
-                  <td className="px-4 py-2">{horario.horaFin}</td>
-                  <td className="px-4 py-2">{horario.asignatura}</td>
-                  <td className="px-4 py-2">{horario.aula}</td>
-                  <td className="px-4 py-2 text-center">
-                    {/* Botón o ícono para ver los detalles */}
-                    <button
-                      onClick={() => alert(`Asignatura: ${horario.asignatura}\nAula: ${horario.aula}\nProfesor: ${horario.profesor}`)}
-                      className="text-blue-500 underline"
-                    >
-                      📎 Ver Detalles
-                    </button>
-                  </td>
+                  <td className="px-4 py-2">{hora}</td>
+                  {dias.map((dia) => {
+                    const horario = obtenerHorario(dia, hora);
+                    return (
+                      <td
+                        key={dia}
+                        className="px-4 py-2 text-center cursor-pointer hover:bg-blue-100"
+                        onClick={() => mostrarDetalles(horario)}
+                      >
+                        {seccion} {/* Solo muestra la sección */}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>

@@ -1,29 +1,61 @@
 import { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 export const HorarioProf = () => {
   const [nombreProfesor, setNombreProfesor] = useState(''); // Estado para el nombre del profesor
   const [horarios, setHorarios] = useState([]);             // Estado para los horarios del profesor
   const [horasLecciones, setHorasLecciones] = useState([]);  // Estado para las horas de las lecciones
   const [diasSemana, setDiasSemana] = useState([]);          // Estado para los días de la semana
-  const [profesorId, setProfesorId] = useState(null);        // Estado para el ID del profesor (dinámico)
   const [error, setError] = useState(null);                  // Estado para manejar errores
 
   useEffect(() => {
-    // Aquí realizamos la petición al backend para obtener el ID del profesor y sus horarios
+    // Aquí simulamos la carga de datos quemados para probar el componente
     const obtenerDatos = async () => {
       try {
-        // const respuesta = await fetch(`/api/profesor/datos`);
-        // const data = await respuesta.json();
+        // Datos quemados simulando la respuesta del backend
+        const data = {
+          nombreProfesor: 'Carlos Sánchez',
+          horarios: [
+            {
+              dia: 'Lunes',
+              horaInicio: '08:00',
+              horaFin: '09:30',
+              seccion: '7A',
+              aula: 'Aula 101',
+              asignatura: 'Matemáticas',
+            },
+            {
+              dia: 'Martes',
+              horaInicio: '10:00',
+              horaFin: '11:30',
+              seccion: '8B',
+              aula: 'Aula 202',
+              asignatura: 'Ciencias',
+            },
+            {
+              dia: 'Miércoles',
+              horaInicio: '08:00',
+              horaFin: '09:30',
+              seccion: '7A',
+              aula: 'Aula 103',
+              asignatura: 'Historia',
+            },
+          ],
+          horasLecciones: [
+            { inicio: '08:00', fin: '09:30' },
+            { inicio: '10:00', fin: '11:30' },
+            { inicio: '12:00', fin: '13:30' },
+          ],
+          diasSemana: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'],
+        };
 
-        // if (respuesta.ok) {
-        //   setNombreProfesor(data.nombreProfesor);
-        //   setProfesorId(data.profesorId);         // Asumiendo que el backend envía el ID del profesor
-        //   setHorarios(data.horarios);             // Lista de los horarios del profesor
-        //   setHorasLecciones(data.horasLecciones); // Lista de las horas de las lecciones
-        //   setDiasSemana(data.diasSemana);         // Lista de los días de la semana
-        // } else {
-        //   setError('Error al obtener los datos del profesor.');
-        // }
+        setNombreProfesor(data.nombreProfesor);
+        setHorarios(data.horarios);
+        setHorasLecciones(data.horasLecciones);
+        setDiasSemana(data.diasSemana);
 
       } catch (error) {
         setError('Error de conexión con el servidor.');
@@ -40,6 +72,25 @@ export const HorarioProf = () => {
   // Función para obtener los detalles del horario en una celda específica (basado en día y hora)
   const obtenerHorarioPorDiaYHora = (dia, horaInicio) => {
     return horarios.find(horario => horario.dia === dia && horario.horaInicio === horaInicio);
+  };
+
+  // Función para mostrar los detalles usando SweetAlert
+  const mostrarDetalles = (horario) => {
+    if (horario) {
+      MySwal.fire({
+        title: `Detalles de la clase`,
+        html: `<b>Asignatura:</b> ${horario.asignatura}<br><b>Aula:</b> ${horario.aula}<br><b>Sección:</b> ${horario.seccion}`,
+        icon: 'info',
+        confirmButtonText: 'Cerrar',
+      });
+    } else {
+      MySwal.fire({
+        title: 'Detalles de la clase',
+        text: 'No hay clase en este horario',
+        icon: 'info',
+        confirmButtonText: 'Cerrar',
+      });
+    }
   };
 
   return (
@@ -74,13 +125,13 @@ export const HorarioProf = () => {
                       <td key={diaIndex} className="px-4 py-2 text-center">
                         {horario ? (
                           <button
-                            onClick={() => alert(`Sección: ${horario.seccion}\nAula: ${horario.aula}\nAsignatura: ${horario.asignatura}`)}
+                            onClick={() => mostrarDetalles(horario)}
                             className="text-blue-500 underline"
                           >
-                            📎 Ver Detalles
+                            {horario.seccion} {/* Muestra solo la sección */}
                           </button>
                         ) : (
-                          '-'
+                          '-' /* Si no hay clase, muestra un guion */
                         )}
                       </td>
                     );
@@ -96,4 +147,5 @@ export const HorarioProf = () => {
     </div>
   );
 };
+
 export default HorarioProf;

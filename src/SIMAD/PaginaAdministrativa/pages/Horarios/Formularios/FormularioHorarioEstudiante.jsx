@@ -5,8 +5,8 @@ const FormularioHorarioEstudiante = () => {
   const [seccion, setSeccion] = useState('');           // Estado para la sección seleccionada
   const [profesor, setProfesor] = useState('');         // Estado para el nombre del profesor
   const [materia, setMateria] = useState('');           // Estado para la materia seleccionada
-  const [horaInicio, setHoraInicio] = useState('');     // Estado para la hora de inicio de la clase
-  const [horaFin, setHoraFin] = useState('');           // Estado para la hora de fin de la clase
+  const [dia, setDia] = useState('');                   // Estado para el día seleccionado (lunes a viernes)
+  const [rangoHoras, setRangoHoras] = useState('');     // Estado para el rango de horas (inicio-fin)
   const [aula, setAula] = useState('');                 // Estado para el aula
 
   const [secciones, setSecciones] = useState([]);       // Lista de secciones obtenida del backend
@@ -16,10 +16,6 @@ const FormularioHorarioEstudiante = () => {
     // Simulación de petición al backend para obtener materias
     const obtenerMaterias = async () => {
       try {
-        // const respuestaMaterias = await fetch('/api/materias');
-        // const materiasData = await respuestaMaterias.json();
-        // setMaterias(materiasData);
-
         // Simulación de datos de materias
         setMaterias(['Matemáticas', 'Historia', 'Ciencias', 'Inglés']);
       } catch (error) {
@@ -54,25 +50,14 @@ const FormularioHorarioEstudiante = () => {
       seccion,
       profesor,
       materia,
-      horaInicio,
-      horaFin,
+      dia,
+      rangoHoras,
       aula
     };
 
     try {
-      // const respuesta = await fetch('/api/horario-estudiante', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify(datosFormulario),
-      // });
-
-      // if (respuesta.ok) {
-      //   alert('Horario registrado con éxito');
-      // } else {
-      //   alert('Error al registrar el horario');
-      // }
+      // Simulación del envío al backend
+      console.log('Datos enviados:', datosFormulario);
     } catch (error) {
       console.error('Error al enviar los datos del formulario:', error);
     }
@@ -144,26 +129,40 @@ const FormularioHorarioEstudiante = () => {
           />
         </div>
 
-        {/* Hora de Inicio */}
+        {/* Combo Box para Día */}
         <div className="mb-4">
-          <label className="block text-gray-700">Hora de Inicio</label>
-          <input
-            type="time"
+          <label className="block text-gray-700">Día</label>
+          <select
             className="border p-2 rounded-lg w-full"
-            value={horaInicio}
-            onChange={(e) => setHoraInicio(e.target.value)}
-          />
+            value={dia}
+            onChange={(e) => setDia(e.target.value)}
+          >
+            <option value="">Seleccione un día</option>
+            <option value="Lunes">Lunes</option>
+            <option value="Martes">Martes</option>
+            <option value="Miércoles">Miércoles</option>
+            <option value="Jueves">Jueves</option>
+            <option value="Viernes">Viernes</option>
+          </select>
         </div>
 
-        {/* Hora de Fin */}
+        {/* Combo Box para Rango de Horas */}
         <div className="mb-4">
-          <label className="block text-gray-700">Hora de Fin</label>
-          <input
-            type="time"
+          <label className="block text-gray-700">Hora (Inicio - Fin)</label>
+          <select
             className="border p-2 rounded-lg w-full"
-            value={horaFin}
-            onChange={(e) => setHoraFin(e.target.value)}
-          />
+            value={rangoHoras}
+            onChange={(e) => setRangoHoras(e.target.value)}
+          >
+            <option value="">Seleccione un rango de horas</option>
+            <option value="07:00 - 08:00">07:00 - 08:00</option>
+            <option value="08:00 - 09:00">08:00 - 09:00</option>
+            <option value="09:00 - 10:00">09:00 - 10:00</option>
+            <option value="10:00 - 11:00">10:00 - 11:00</option>
+            <option value="11:00 - 12:00">11:00 - 12:00</option>
+            <option value="12:00 - 13:00">12:00 - 13:00</option>
+            <option value="13:00 - 14:00">13:00 - 14:00</option>
+          </select>
         </div>
 
         {/* Aula */}
