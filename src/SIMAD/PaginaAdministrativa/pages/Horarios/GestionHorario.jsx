@@ -1,3 +1,5 @@
+// src/SIMAD/PaginaAdministrativa/pages/Horarios/GestionHorario.jsx
+
 import { useState } from 'react';
 import FormularioHorarioEstudiante from './Formularios/FormularioHorarioEstudiante';
 import FormularioHorarioProfesor from './Formularios/FormularioHorarioProfesor';

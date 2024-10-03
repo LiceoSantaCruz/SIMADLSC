@@ -1,141 +1,196 @@
-import { useState, useEffect } from 'react';
+// src/SIMAD/PaginaAdministrativa/pages/Horarios/Formularios/FormularioHorarioEstudiante.jsx
+
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import axios from 'axios';
+import { HorarioEstudianteSchema } from './validationSchemas';
 
 const FormularioHorarioEstudiante = () => {
-  const [grado, setGrado] = useState('');               // Estado para el grado del estudiante
-  const [seccion, setSeccion] = useState('');           // Estado para la sección seleccionada
-  const [profesor, setProfesor] = useState('');         // Estado para el nombre del profesor
-  const [materia, setMateria] = useState('');           // Estado para la materia seleccionada
-  const [dia, setDia] = useState('');                   // Estado para el día seleccionado (lunes a viernes)
-  const [rangoHoras, setRangoHoras] = useState('');     // Estado para el rango de horas (inicio-fin)
-  const [aula, setAula] = useState('');                 // Estado para el aula
+  // Estados para almacenar datos dinámicos
+  const [grados, setGrados] = useState([]);
+  const [secciones, setSecciones] = useState([]);
+  const [materias, setMaterias] = useState([]);
+  const [profesores, setProfesores] = useState([]);
 
-  const [secciones, setSecciones] = useState([]);       // Lista de secciones obtenida del backend
-  const [materias, setMaterias] = useState([]);         // Lista de materias obtenida del backend
+  // Configurar React Hook Form con Yup
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm({
+    resolver: yupResolver(HorarioEstudianteSchema),
+    defaultValues: {
+      gradoId: '',
+      seccionId: '',
+      materiaId: '',
+      profesorId: '',
+      dia_semana_Horario: '',
+      hora_inicio_Horario: '',
+    },
+  });
+
+  // Observar cambios en 'gradoId' para actualizar secciones
+  const gradoSeleccionado = watch('gradoId');
 
   useEffect(() => {
-    // Simulación de petición al backend para obtener materias
-    const obtenerMaterias = async () => {
+    // Funciones para obtener datos desde el back-end
+    const fetchGrados = async () => {
       try {
-        // Simulación de datos de materias
-        setMaterias(['Matemáticas', 'Historia', 'Ciencias', 'Inglés']);
+        const response = await axios.get('http://localhost:3000/grados');
+        setGrados(response.data);
       } catch (error) {
-        console.error('Error al obtener materias:', error);
+        console.error('Error al obtener grados:', error);
+        alert('Error al obtener grados');
       }
     };
 
-    obtenerMaterias();
+    const fetchMaterias = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/materias');
+        setMaterias(response.data);
+      } catch (error) {
+        console.error('Error al obtener materias:', error);
+        alert('Error al obtener materias');
+      }
+    };
+
+    const fetchProfesores = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/profesores');
+        setProfesores(response.data);
+      } catch (error) {
+        console.error('Error al obtener profesores:', error);
+        alert('Error al obtener profesores');
+      }
+    };
+
+    fetchGrados();
+    fetchMaterias();
+    fetchProfesores();
   }, []);
 
-  // Función que actualiza las secciones según el grado seleccionado
-  const manejarCambioGrado = (gradoSeleccionado) => {
-    setGrado(gradoSeleccionado);
-    
-    // Simulación de secciones basadas en el grado seleccionado
-    if (gradoSeleccionado === '7') {
-      setSecciones(['7-1', '7-2', '7-3']);
-    } else if (gradoSeleccionado === '8') {
-      setSecciones(['8-1', '8-2', '8-3']);
-    } else if (gradoSeleccionado === '9') {
-      setSecciones(['9-1', '9-2']);
-    } else {
-      setSecciones([]);  // Si no se selecciona un grado válido, se vacía la lista de secciones
-    }
-  };
+  useEffect(() => {
+    // Actualizar las secciones según el grado seleccionado
+    const fetchSecciones = async () => {
+      if (gradoSeleccionado) {
+        try {
+          const response = await axios.get(`http://localhost:3000/secciones?id_grado=${gradoSeleccionado}`);
+          setSecciones(response.data);
+        } catch (error) {
+          console.error('Error al obtener secciones:', error);
+          alert('Error al obtener secciones');
+        }
+      } else {
+        setSecciones([]);
+      }
+    };
 
-  const manejarEnvio = async (e) => {
-    e.preventDefault();
+    fetchSecciones();
+  }, [gradoSeleccionado]);
 
-    const datosFormulario = {
-      grado,
-      seccion,
-      profesor,
-      materia,
-      dia,
-      rangoHoras,
-      aula
+  const onSubmit = async (data) => {
+    // Transformar los campos a números
+    const transformedData = {
+      ...data,
+      gradoId: Number(data.gradoId),
+      seccionId: Number(data.seccionId),
+      materiaId: Number(data.materiaId),
+      profesorId: Number(data.profesorId),
     };
 
     try {
-      // Simulación del envío al backend
-      console.log('Datos enviados:', datosFormulario);
+      await axios.post('http://localhost:3000/horarios/estudiante', transformedData);
+      alert('Horario de estudiante creado exitosamente');
+      reset();
     } catch (error) {
-      console.error('Error al enviar los datos del formulario:', error);
+      console.error('Error al crear el horario de estudiante:', error);
+      alert('Error al crear el horario de estudiante');
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <h1 className="text-3xl font-bold mb-6">Formulario de Horario para Estudiante</h1>
-      <form onSubmit={manejarEnvio} className="bg-white p-6 rounded-lg shadow-md">
-
-        {/* Combo Box para Grado */}
+      <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-6 rounded-lg shadow-md">
+        
+        {/* Grado */}
         <div className="mb-4">
           <label className="block text-gray-700">Grado</label>
           <select
-            className="border p-2 rounded-lg w-full"
-            value={grado}
-            onChange={(e) => manejarCambioGrado(e.target.value)}
+            className={`border p-2 rounded-lg w-full ${errors.id_grado ? 'border-red-500' : ''}`}
+            {...register('id_grado')}
           >
             <option value="">Seleccione un grado</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
+            {grados.map((grado) => (
+              <option key={grado.id_grado} value={grado.id_grado}>
+                {grado.nivel}
+              </option>
+            ))}
           </select>
+          {errors.id_grado && <p className="text-red-500">{errors.id_grado.message}</p>}
         </div>
 
-        {/* Combo Box para Sección */}
+        {/* Sección */}
         <div className="mb-4">
           <label className="block text-gray-700">Sección</label>
           <select
-            className="border p-2 rounded-lg w-full"
-            value={seccion}
-            onChange={(e) => setSeccion(e.target.value)}
+            className={`border p-2 rounded-lg w-full ${errors.seccionId ? 'border-red-500' : ''}`}
+            {...register('seccionId')}
+            disabled={!gradoSeleccionado}
           >
             <option value="">Seleccione una sección</option>
-            {secciones.map((seccion, index) => (
-              <option key={index} value={seccion}>
-                {seccion}
+            {secciones.map((seccion) => (
+              <option key={seccion.id_Seccion} value={seccion.id_Seccion}>
+                {seccion.nombre_Seccion}
               </option>
             ))}
           </select>
+          {errors.seccionId && <p className="text-red-500">{errors.seccionId.message}</p>}
         </div>
 
-        {/* Combo Box para Materia */}
+        {/* Materia */}
         <div className="mb-4">
           <label className="block text-gray-700">Materia</label>
           <select
-            className="border p-2 rounded-lg w-full"
-            value={materia}
-            onChange={(e) => setMateria(e.target.value)}
+            className={`border p-2 rounded-lg w-full ${errors.id_Materia ? 'border-red-500' : ''}`}
+            {...register('id_Materia')}
           >
             <option value="">Seleccione una materia</option>
-            {materias.map((materia, index) => (
-              <option key={index} value={materia}>
-                {materia}
+            {materias.map((materia) => (
+              <option key={materia.id_Materia} value={materia.id_Materia}>
+                {materia.nombre_Materia}
               </option>
             ))}
           </select>
+          {errors.id_Materia && <p className="text-red-500">{errors.id_Materia.message}</p>}
         </div>
 
         {/* Profesor */}
         <div className="mb-4">
           <label className="block text-gray-700">Profesor</label>
-          <input
-            type="text"
-            className="border p-2 rounded-lg w-full"
-            value={profesor}
-            onChange={(e) => setProfesor(e.target.value)}
-            placeholder="Nombre del profesor"
-          />
+          <select
+            className={`border p-2 rounded-lg w-full ${errors.profesorId ? 'border-red-500' : ''}`}
+            {...register('profesorId')}
+          >
+            <option value="">Seleccione un profesor</option>
+            {profesores.map((profesor) => (
+              <option key={profesor.id} value={profesor.id}>
+                {`${profesor.nombre_Profesor} ${profesor.apellido1_Profesor} ${profesor.apellido2_Profesor}`}
+              </option>
+            ))}
+          </select>
+          {errors.profesorId && <p className="text-red-500">{errors.profesorId.message}</p>}
         </div>
 
-        {/* Combo Box para Día */}
+        {/* Día de la Semana */}
         <div className="mb-4">
-          <label className="block text-gray-700">Día</label>
+          <label className="block text-gray-700">Día de la Semana</label>
           <select
-            className="border p-2 rounded-lg w-full"
-            value={dia}
-            onChange={(e) => setDia(e.target.value)}
+            className={`border p-2 rounded-lg w-full ${errors.dia_semana_Horario ? 'border-red-500' : ''}`}
+            {...register('dia_semana_Horario')}
           >
             <option value="">Seleccione un día</option>
             <option value="Lunes">Lunes</option>
@@ -143,46 +198,30 @@ const FormularioHorarioEstudiante = () => {
             <option value="Miércoles">Miércoles</option>
             <option value="Jueves">Jueves</option>
             <option value="Viernes">Viernes</option>
+            <option value="Sábado">Sábado</option>
+            <option value="Domingo">Domingo</option>
           </select>
+          {errors.dia_semana_Horario && <p className="text-red-500">{errors.dia_semana_Horario.message}</p>}
         </div>
 
-        {/* Combo Box para Rango de Horas */}
+        {/* Hora de Inicio */}
         <div className="mb-4">
-          <label className="block text-gray-700">Hora (Inicio - Fin)</label>
-          <select
-            className="border p-2 rounded-lg w-full"
-            value={rangoHoras}
-            onChange={(e) => setRangoHoras(e.target.value)}
-          >
-            <option value="">Seleccione un rango de horas</option>
-            <option value="07:00 - 08:00">07:00 - 08:00</option>
-            <option value="08:00 - 09:00">08:00 - 09:00</option>
-            <option value="09:00 - 10:00">09:00 - 10:00</option>
-            <option value="10:00 - 11:00">10:00 - 11:00</option>
-            <option value="11:00 - 12:00">11:00 - 12:00</option>
-            <option value="12:00 - 13:00">12:00 - 13:00</option>
-            <option value="13:00 - 14:00">13:00 - 14:00</option>
-          </select>
-        </div>
-
-        {/* Aula */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Aula</label>
+          <label className="block text-gray-700">Hora de Inicio</label>
           <input
-            type="text"
-            className="border p-2 rounded-lg w-full"
-            value={aula}
-            onChange={(e) => setAula(e.target.value)}
-            placeholder="Ej: A101"
+            type="time"
+            className={`border p-2 rounded-lg w-full ${errors.hora_inicio_Horario ? 'border-red-500' : ''}`}
+            {...register('hora_inicio_Horario')}
           />
+          {errors.hora_inicio_Horario && <p className="text-red-500">{errors.hora_inicio_Horario.message}</p>}
         </div>
 
         {/* Botón de Enviar */}
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+          className={`bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={isSubmitting}
         >
-          Registrar Horario
+          {isSubmitting ? 'Enviando...' : 'Registrar Horario'}
         </button>
       </form>
     </div>

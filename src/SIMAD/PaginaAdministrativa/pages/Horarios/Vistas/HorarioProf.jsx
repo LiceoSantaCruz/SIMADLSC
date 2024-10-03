@@ -59,6 +59,7 @@ export const HorarioProf = () => {
         setDiasSemana(data.diasSemana);
 
       } catch (error) {
+        console.error('Error al obtener los datos:', error);
         setError('Error de conexión con el servidor.');
       }
     };
