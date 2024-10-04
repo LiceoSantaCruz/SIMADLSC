@@ -1,6 +1,6 @@
 // src/SIMAD/PaginaAdministrativa/pages/Horarios/Formularios/FormularioHorarioEstudiante.jsx
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import axios from 'axios';
@@ -12,6 +12,7 @@ const FormularioHorarioEstudiante = () => {
   const [secciones, setSecciones] = useState([]);
   const [materias, setMaterias] = useState([]);
   const [profesores, setProfesores] = useState([]);
+  const [aulas, setAulas] = useState([]); // Nuevo estado para aulas
 
   // Configurar React Hook Form con Yup
   const {
@@ -29,6 +30,8 @@ const FormularioHorarioEstudiante = () => {
       profesorId: '',
       dia_semana_Horario: '',
       hora_inicio_Horario: '',
+      hora_fin_Horario: '',
+      aulaId: '', // Campo aulaId agregado
     },
   });
 
@@ -67,9 +70,20 @@ const FormularioHorarioEstudiante = () => {
       }
     };
 
+    const fetchAulas = async () => { // Función para obtener aulas
+      try {
+        const response = await axios.get('http://localhost:3000/aulas');
+        setAulas(response.data);
+      } catch (error) {
+        console.error('Error al obtener aulas:', error);
+        alert('Error al obtener aulas');
+      }
+    };
+
     fetchGrados();
     fetchMaterias();
     fetchProfesores();
+    fetchAulas(); // Llamar a fetchAulas
   }, []);
 
   useEffect(() => {
@@ -92,6 +106,7 @@ const FormularioHorarioEstudiante = () => {
   }, [gradoSeleccionado]);
 
   const onSubmit = async (data) => {
+    console.log('Datos enviados:', data);
     // Transformar los campos a números
     const transformedData = {
       ...data,
@@ -99,10 +114,13 @@ const FormularioHorarioEstudiante = () => {
       seccionId: Number(data.seccionId),
       materiaId: Number(data.materiaId),
       profesorId: Number(data.profesorId),
+      aulaId: Number(data.aulaId), // Asegurarse de que aulaId es un número
     };
+    
 
     try {
-      await axios.post('http://localhost:3000/horarios/estudiante', transformedData);
+      const response = await axios.post('http://localhost:3000/horarios/estudiante', transformedData);
+      console.log('Respuesta del servidor:', response);
       alert('Horario de estudiante creado exitosamente');
       reset();
     } catch (error) {
@@ -120,8 +138,8 @@ const FormularioHorarioEstudiante = () => {
         <div className="mb-4">
           <label className="block text-gray-700">Grado</label>
           <select
-            className={`border p-2 rounded-lg w-full ${errors.id_grado ? 'border-red-500' : ''}`}
-            {...register('id_grado')}
+            className={`border p-2 rounded-lg w-full ${errors.gradoId ? 'border-red-500' : ''}`}
+            {...register('gradoId')}
           >
             <option value="">Seleccione un grado</option>
             {grados.map((grado) => (
@@ -130,7 +148,7 @@ const FormularioHorarioEstudiante = () => {
               </option>
             ))}
           </select>
-          {errors.id_grado && <p className="text-red-500">{errors.id_grado.message}</p>}
+          {errors.gradoId && <p className="text-red-500">{errors.gradoId.message}</p>}
         </div>
 
         {/* Sección */}
@@ -155,8 +173,8 @@ const FormularioHorarioEstudiante = () => {
         <div className="mb-4">
           <label className="block text-gray-700">Materia</label>
           <select
-            className={`border p-2 rounded-lg w-full ${errors.id_Materia ? 'border-red-500' : ''}`}
-            {...register('id_Materia')}
+            className={`border p-2 rounded-lg w-full ${errors.materiaId ? 'border-red-500' : ''}`}
+            {...register('materiaId')}
           >
             <option value="">Seleccione una materia</option>
             {materias.map((materia) => (
@@ -165,7 +183,7 @@ const FormularioHorarioEstudiante = () => {
               </option>
             ))}
           </select>
-          {errors.id_Materia && <p className="text-red-500">{errors.id_Materia.message}</p>}
+          {errors.materiaId && <p className="text-red-500">{errors.materiaId.message}</p>}
         </div>
 
         {/* Profesor */}
@@ -177,12 +195,29 @@ const FormularioHorarioEstudiante = () => {
           >
             <option value="">Seleccione un profesor</option>
             {profesores.map((profesor) => (
-              <option key={profesor.id} value={profesor.id}>
+              <option key={profesor.id_Profesor} value={profesor.id_Profesor}>
                 {`${profesor.nombre_Profesor} ${profesor.apellido1_Profesor} ${profesor.apellido2_Profesor}`}
               </option>
             ))}
           </select>
           {errors.profesorId && <p className="text-red-500">{errors.profesorId.message}</p>}
+        </div>
+
+        {/* Aula */}
+        <div className="mb-4">
+          <label className="block text-gray-700">Aula</label>
+          <select
+            className={`border p-2 rounded-lg w-full ${errors.aulaId ? 'border-red-500' : ''}`}
+            {...register('aulaId')}
+          >
+            <option value="">Seleccione un aula</option>
+            {aulas.map((aula) => (
+              <option key={aula.id_aula} value={aula.id_aula}>
+                {aula.nombre_Aula} {/* Ajusta según los campos de tu aula */}
+              </option>
+            ))}
+          </select>
+          {errors.aulaId && <p className="text-red-500">{errors.aulaId.message}</p>}
         </div>
 
         {/* Día de la Semana */}
@@ -195,7 +230,7 @@ const FormularioHorarioEstudiante = () => {
             <option value="">Seleccione un día</option>
             <option value="Lunes">Lunes</option>
             <option value="Martes">Martes</option>
-            <option value="Miércoles">Miércoles</option>
+            <option value="Miércoles">Miercoles</option>
             <option value="Jueves">Jueves</option>
             <option value="Viernes">Viernes</option>
             <option value="Sábado">Sábado</option>
@@ -214,6 +249,19 @@ const FormularioHorarioEstudiante = () => {
           />
           {errors.hora_inicio_Horario && <p className="text-red-500">{errors.hora_inicio_Horario.message}</p>}
         </div>
+
+         {/* Hora de fin */}
+         <div className="mb-4"> 
+          <label className="block text-gray-700">Hora de Fin</label>
+          <input
+            type="time"
+            className={`border p-2 rounded-lg w-full ${errors.hora_fin_Horario ? 'border-red-500' : ''}`}
+            {...register('hora_fin_Horario')}
+          />
+          {errors.hora_fin_Horario && <p className="text-red-500">{errors.hora_fin_Horario.message}</p>} 
+        </div>
+
+
 
         {/* Botón de Enviar */}
         <button
