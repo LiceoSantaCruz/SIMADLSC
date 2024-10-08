@@ -1,20 +1,25 @@
 import { useState } from "react";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
 
 export default function LoginPage() {
   const [email_Usuario, setEmail_Usuario] = useState("");
   const [contraseña_Usuario, setContraseña_Usuario] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Limpiar mensajes anteriores
-    setError("");
-    setSuccess("");
+    MySwal.close(); // Cerrar cualquier SweetAlert anterior
 
     if (!email_Usuario || !contraseña_Usuario) {
-      setError("Por favor, completa todos los campos.");
+      MySwal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Por favor, completa todos los campos.",
+      });
       return;
     }
 
@@ -29,16 +34,26 @@ export default function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email_Usuario, contraseña_Usuario }), // Enviar los nuevos campos
+        body: JSON.stringify({ email_Usuario, contraseña_Usuario }),
       });
 
       // Verificar si la respuesta no es 200 (OK)
       if (!response.ok) {
         const errorData = await response.json();
-        setError(
-          errorData.message ||
-            "Error en el inicio de sesión. Credenciales incorrectas."
-        );
+
+        // Comprobar el mensaje de error y ajustar según sea necesario
+        const errorMessage =
+          errorData.message === "Invalid email"
+            ? "Correo electrónico incorrecto."
+            : errorData.message === "Invalid password"
+            ? "Contraseña incorrecta."
+            : "Error en el inicio de sesión. Credenciales incorrectas.";
+
+        MySwal.fire({
+          icon: "error",
+          title: "Error",
+          text: errorMessage,
+        });
         return;
       }
 
@@ -51,7 +66,11 @@ export default function LoginPage() {
 
       // Verificar si existe un rol
       if (!role) {
-        setError("El rol de usuario no está definido.");
+        MySwal.fire({
+          icon: "error",
+          title: "Error",
+          text: "El rol de usuario no está definido.",
+        });
         return;
       }
 
@@ -68,13 +87,21 @@ export default function LoginPage() {
       }
 
       // Mostrar mensaje de éxito
-      setSuccess("Inicio de sesión exitoso");
+      MySwal.fire({
+        icon: "success",
+        title: "Éxito",
+        text: "Inicio de sesión exitoso",
+      });
 
       // Redirigir al usuario a la página principal o una específica según el rol
       window.location.href = "/";
     } catch (error) {
       console.error(error);
-      setError("Error de conexión con el servidor.");
+      MySwal.fire({
+        icon: "error",
+        title: "Error de conexión",
+        text: "Error de conexión con el servidor.",
+      });
     }
   };
 
@@ -112,6 +139,7 @@ export default function LoginPage() {
                   className="block w-full rounded-lg border border-gray-300 p-3 shadow-md focus:border-blue-500 focus:ring-blue-500 sm:text-sm transition ease-in-out duration-150"
                   placeholder="Ingresa tu correo electrónico"
                   required
+                  autoComplete="current-password"
                 />
               </div>
             </div>
@@ -133,15 +161,10 @@ export default function LoginPage() {
                   className="block w-full rounded-lg border border-gray-300 p-3 shadow-md focus:border-blue-500 focus:ring-blue-500 sm:text-sm transition ease-in-out duration-150"
                   placeholder="Ingresa tu contraseña"
                   required
+                  autoComplete="current-password"
                 />
               </div>
             </div>
-
-            {/* Mostrar mensaje de error */}
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-
-            {/* Mostrar mensaje de éxito */}
-            {success && <p className="text-green-500 text-sm">{success}</p>}
 
             <div>
               <button
@@ -154,7 +177,6 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-4 flex justify-between items-center">
-            {/* Botón Volver a la izquierda con una flecha */}
             <button
               onClick={handleGoBack}
               className="text-blue-700 font-medium hover:underline flex items-center"
@@ -176,9 +198,8 @@ export default function LoginPage() {
               Volver
             </button>
 
-            {/* Enlace "¿Olvidaste tu contraseña?" más azul y a la derecha */}
-            <button 
-            onClick={ForgotPassword}
+            <button
+              onClick={ForgotPassword}
               className="text-blue-600 font-medium hover:underline hover:text-blue-800"
             >
               ¿Olvidaste tu contraseña?

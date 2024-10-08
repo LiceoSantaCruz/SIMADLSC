@@ -1,67 +1,38 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';  // Import for table formatting
+import 'jspdf-autotable'; // Import for table formatting
 
 const MySwal = withReactContent(Swal);
 
 export const HorarioEstu = () => {
-  const [nombreEstudiante, setNombreEstudiante] = useState('Juan Pérez'); // Estado para el nombre del estudiante
-  const [seccion, setSeccion] = useState('A');                   // Estado para la sección
-  const [horarios, setHorarios] = useState([]);                 // Estado para los horarios
-  const [error, setError] = useState(null);                     // Estado para manejar errores
+  const [nombreEstudiante, setNombreEstudiante] = useState(''); // Estado para el nombre del estudiante
+  const [seccion, setSeccion] = useState(''); // Estado para la sección
+  const [horarios, setHorarios] = useState([]); // Estado para los horarios
+  const [error, setError] = useState(null); // Estado para manejar errores
+  const [cargando, setCargando] = useState(true); // Estado para manejar la carga
 
   useEffect(() => {
-    // Simulación de datos
     const obtenerDatos = async () => {
       try {
-        const data = {
-          nombreEstudiante: 'Juan Pérez',
-          seccion: 'A',
-          horarios: [
-            {
-              dia: 'Lunes',
-              horaInicio: '08:00',
-              horaFin: '09:30',
-              asignatura: 'Matemáticas',
-              aula: 'Aula 101',
-              profesor: 'Prof. García',
-            },
-            {
-              dia: 'Martes',
-              horaInicio: '08:00',
-              horaFin: '09:30',
-              asignatura: 'Ciencias',
-              aula: 'Aula 202',
-              profesor: 'Prof. Sánchez',
-            },
-            {
-              dia: 'Miércoles',
-              horaInicio: '08:00',
-              horaFin: '09:30',
-              asignatura: 'Historia',
-              aula: 'Aula 103',
-              profesor: 'Prof. López',
-            },
-            {
-              dia: 'Lunes',
-              horaInicio: '10:00',
-              horaFin: '11:30',
-              asignatura: 'Inglés',
-              aula: 'Aula 104',
-              profesor: 'Prof. Martín',
-            },
-          ],
-        };
+        setCargando(true);
+
+        // Realizar una petición al backend para obtener los datos del estudiante
+        const response = await axios.get('http://localhost:3000/estudiantes/horario'); // Ajusta la URL según tu API
+
+        const data = response.data;
 
         setNombreEstudiante(data.nombreEstudiante);
         setSeccion(data.seccion);
         setHorarios(data.horarios);
 
+        setCargando(false);
       } catch (error) {
         console.error('Error al obtener los datos del estudiante:', error);
         setError('Error de conexión con el servidor.');
+        setCargando(false);
       }
     };
 
@@ -70,6 +41,10 @@ export const HorarioEstu = () => {
 
   if (error) {
     return <div className="text-red-500">{error}</div>;
+  }
+
+  if (cargando) {
+    return <div>Cargando datos...</div>;
   }
 
   // Agrupamos los horarios por hora
@@ -165,7 +140,7 @@ export const HorarioEstu = () => {
                         className="px-4 py-2 text-center cursor-pointer hover:bg-blue-100"
                         onClick={() => mostrarDetalles(horario)}
                       >
-                        {seccion} {/* Solo muestra la sección */}
+                        {horario ? seccion : '-'}
                       </td>
                     );
                   })}

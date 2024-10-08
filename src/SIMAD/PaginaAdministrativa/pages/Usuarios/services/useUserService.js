@@ -16,7 +16,9 @@ export const getAllUsers = async (token) => {
   return response.json();
 };
 
+
 export const createUser = async (userData, token) => {
+
   if (!token) {
     throw new Error('No se proporcionó un token de autenticación');
   }
@@ -32,6 +34,7 @@ export const createUser = async (userData, token) => {
 
   if (!response.ok) {
     throw new Error('Error al crear el usuario');
+    
   }
 
   return response.json();
