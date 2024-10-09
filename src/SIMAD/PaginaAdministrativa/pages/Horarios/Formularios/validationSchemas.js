@@ -1,33 +1,40 @@
 // src/SIMAD/PaginaAdministrativa/pages/Horarios/Formularios/validationSchemas.js
 import * as Yup from 'yup';
 
-export const HorarioEstudianteSchema = Yup.object().shape({
-  gradoId: Yup.number()
-    .required('El grado es obligatorio')
-    .positive('El grado debe ser un número positivo')
-    .integer('El grado debe ser un número entero'),
-  seccionId: Yup.number()
-    .required('La sección es obligatoria')
-    .positive('La sección debe ser un número positivo')
-    .integer('La sección debe ser un número entero'),
-  materiaId: Yup.number()
-    .required('La materia es obligatoria')
-    .positive('La materia debe ser un número positivo')
-    .integer('La materia debe ser un número entero'),
-  profesorId: Yup.number()
-    .required('El profesor es obligatorio')
-    .positive('El profesor debe ser un número positivo')
-    .integer('El profesor debe ser un número entero'),
-  dia_semana_Horario: Yup.string()
-    .required('El día de la semana es obligatorio')
-    .oneOf(['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'], 'Día de la semana inválido'),
-  hora_inicio_Horario: Yup.string()
-    .required('La hora de inicio es obligatoria')
-    .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Hora de inicio inválida'),
+// src/SIMAD/PaginaAdministrativa/pages/Horarios/Formularios/validationSchemas.js
+
+import * as yup from 'yup';
+
+export const HorarioEstudianteSchema = yup.object().shape({
+  gradoId: yup.number()
+    .typeError('Grado debe ser un número')
+    .required('El grado es obligatorio'),
+  seccionId: yup.number()
+    .typeError('Sección debe ser un número')
+    .required('La sección es obligatoria'),
+  materiaId: yup.number()
+    .typeError('Materia debe ser un número')
+    .required('La materia es obligatoria'),
+  profesorId: yup.number()
+    .typeError('Profesor debe ser un número')
+    .required('El profesor es obligatorio'),
+  dia_semana_Horario: yup.string()
+    .oneOf(['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'], 'Seleccione un día válido')
+    .required('El día de la semana es obligatorio'),
+  hora_inicio_Horario: yup.string()
+    .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Hora de inicio inválida')
+    .required('La hora de inicio es obligatoria'),
+  hora_fin_Horario: yup.string()
+    .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Hora de fin inválida')
+    .required('La hora de fin es obligatoria'),
+  aulaId: yup.number()
+    .typeError('Aula debe ser un número')
+    .required('El aula es obligatoria'),
 });
 
 
-export const ProfesorSchema = Yup.object().shape({
+
+export const HorarioProfesorSchema = Yup.object().shape({
   profesorId: Yup.number()
     .typeError('El profesor ID debe ser un número')
     .required('El profesor ID es obligatorio'),
