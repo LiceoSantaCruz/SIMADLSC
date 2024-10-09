@@ -1,6 +1,6 @@
 // src/SIMAD/PaginaAdministrativa/pages/Horarios/Formularios/FormularioHorarioEstudiante.jsx
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import axios from 'axios';
@@ -33,7 +33,7 @@ const FormularioHorarioEstudiante = () => {
   });
 
   // Observar cambios en 'gradoId' para actualizar secciones
-  const gradoSeleccionado = watch('gradoId');
+  const gradoSeleccionado = watch('id_grado');
 
   useEffect(() => {
     // Funciones para obtener datos desde el back-end
