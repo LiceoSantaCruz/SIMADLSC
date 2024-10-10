@@ -9,6 +9,7 @@ const ListaHorarios = ({ horarios, onEditHorario, setHorarios, materias, profeso
   const [horarioSeleccionado, setHorarioSeleccionado] = useState(null);
   const [detallesAbiertos, setDetallesAbiertos] = useState({}); // Para manejar detalles por fila
 
+  // Función para eliminar un horario
   const eliminarHorario = async (id) => {
     const confirmacion = await Swal.fire({
       title: '¿Estás seguro?',
@@ -33,6 +34,7 @@ const ListaHorarios = ({ horarios, onEditHorario, setHorarios, materias, profeso
     }
   };
 
+  // Función para abrir el modal de edición
   const abrirModalEditar = async (horarioId) => {
     try {
       const response = await axios.get(`http://localhost:3000/horarios/${horarioId}`);
@@ -44,11 +46,13 @@ const ListaHorarios = ({ horarios, onEditHorario, setHorarios, materias, profeso
     }
   };
 
+  // Función para cerrar el modal
   const cerrarModal = () => {
     setHorarioSeleccionado(null);
     setModalAbierto(false);
   };
 
+  // Función para actualizar el horario en la lista
   const actualizarHorarioEnLista = (horarioEditado) => {
     setHorarios(
       horarios.map((horario) =>
@@ -67,6 +71,7 @@ const ListaHorarios = ({ horarios, onEditHorario, setHorarios, materias, profeso
     }));
   };
 
+  // Si no hay horarios, mostrar un mensaje
   if (!horarios) {
     return <p>No hay horarios disponibles.</p>;
   }
@@ -101,7 +106,7 @@ const ListaHorarios = ({ horarios, onEditHorario, setHorarios, materias, profeso
                     <td className="py-2 px-4 border-b flex justify-center space-x-2">
                       <button
                         className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
-                        onClick={() => onEditHorario(horario)}
+                        onClick={() => abrirModalEditar(horario.id_Horario)}
                       >
                         Editar
                       </button>

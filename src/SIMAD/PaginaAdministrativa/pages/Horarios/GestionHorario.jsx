@@ -1,4 +1,4 @@
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import useFetch from '../../../../Hooks/useFetch';
 import FormularioHorarioEstudiante from '../../../PaginaAdministrativa/pages/Horarios/Formularios/FormularioHorarioEstudiante';
@@ -24,25 +24,25 @@ export const GestionHorario = () => {
     loading: loadingSecciones,
     error: errorSecciones,
   } = useFetch('http://localhost:3000/secciones');
-  
+
   const {
     data: materias,
     loading: loadingMaterias,
     error: errorMaterias,
   } = useFetch('http://localhost:3000/materias');
-  
+
   const {
     data: profesores,
     loading: loadingProfesores,
     error: errorProfesores,
   } = useFetch('http://localhost:3000/profesores');
-  
+
   const {
     data: aulas,
     loading: loadingAulas,
     error: errorAulas,
   } = useFetch('http://localhost:3000/aulas');
-  
+
   const {
     data: horariosData,
     loading: loadingHorarios,
@@ -110,6 +110,7 @@ export const GestionHorario = () => {
     loadingAulas ||
     loadingHorarios ||
     loadingSecciones;
+
   const hasError =
     errorGrados ||
     errorMaterias ||
@@ -142,15 +143,15 @@ export const GestionHorario = () => {
       {!isLoading && !hasError && (
         <>
           {formularioAbierto ? (
-           <FormularioHorarioEstudiante
-           onSubmitSuccess={horarioEdit ? handleUpdateHorario : handleSubmitSuccess}
-           onCancel={() => setFormularioAbierto(false)}
-           initialData={horarioEdit}
-           grados={grados}
-           materias={materias}
-           profesores={profesores}
-           aulas={aulas}
-         />
+            <FormularioHorarioEstudiante
+              onSubmitSuccess={horarioEdit ? handleUpdateHorario : handleSubmitSuccess}
+              onCancel={() => setFormularioAbierto(false)}
+              initialData={horarioEdit}
+              grados={grados}
+              materias={materias}
+              profesores={profesores}
+              aulas={aulas}
+            />
           ) : (
             <ListaHorarios
               horarios={horarios}
