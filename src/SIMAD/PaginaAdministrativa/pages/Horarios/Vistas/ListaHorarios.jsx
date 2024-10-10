@@ -81,10 +81,9 @@ const ListaHorarios = ({ horarios, onEditHorario, setHorarios, materias, profeso
           <table className="min-w-full bg-white shadow-md rounded-lg">
             <thead>
               <tr>
-                <th className="py-2 px-4 border-b">ID</th>
                 <th className="py-2 px-4 border-b">Sección</th>
                 <th className="py-2 px-4 border-b">Materia</th>
-                <th className="py-2 px-4 border-b">Profesor/Estudiante</th>
+                <th className="py-2 px-4 border-b">Profesor</th>
                 <th className="py-2 px-4 border-b">Acciones</th>
               </tr>
             </thead>
@@ -92,7 +91,6 @@ const ListaHorarios = ({ horarios, onEditHorario, setHorarios, materias, profeso
               {horarios.map((horario) => (
                 <React.Fragment key={horario.id_Horario}>
                   <tr className="text-center">
-                    <td className="py-2 px-4 border-b">{horario.id_Horario}</td>
                     <td className="py-2 px-4 border-b">{horario.seccion?.nombre_Seccion || 'N/A'}</td>
                     <td className="py-2 px-4 border-b">{horario.materia?.nombre_Materia || 'N/A'}</td>
                     <td className="py-2 px-4 border-b">

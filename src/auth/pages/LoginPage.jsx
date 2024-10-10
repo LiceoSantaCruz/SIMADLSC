@@ -27,6 +27,10 @@ export default function LoginPage() {
       // Limpiar el token y el role antes de hacer una nueva solicitud
       localStorage.removeItem("token");
       localStorage.removeItem("role");
+      localStorage.removeItem("id_Usuario");
+      localStorage.removeItem("id_Estudiante");
+      localStorage.removeItem("id_Profesor");
+      localStorage.removeItem("userData");
 
       // Realizar la petición al servidor para el login
       const response = await fetch("http://localhost:3000/auth/login", {
@@ -57,13 +61,18 @@ export default function LoginPage() {
         return;
       }
 
-      // Si la respuesta es exitosa, recibir los datos (token y role)
       const data = await response.json();
-      console.log("Respuesta completa del backend:", data); // Verificar la estructura de la respuesta
-
-      // Acceder a 'role' directamente desde 'data'
-      const role = data.role;
-
+      console.log("Respuesta completa del backend:", data); // Esto ya lo tienes
+      
+      // Extraer los datos relevantes de la respuesta
+      const role = data.role; // Asegúrate de que esto sea correcto
+      const token = data.access_token; // Asegúrate de que esto sea correcto
+      const idProfesor = data.payload?.id_Profesor; // Cambia esta línea
+      const idEstudiante = data.payload?.id_Estudiante; // Cambia esta línea
+      const userData = data.user_data; // Verifica si esto es correcto
+      
+      console.log("Datos recibidos:", role, token, idProfesor, idEstudiante, userData);
+      
       // Verificar si existe un rol
       if (!role) {
         MySwal.fire({
@@ -76,12 +85,15 @@ export default function LoginPage() {
 
       // Guardar el token y el role en localStorage
       try {
-        localStorage.setItem("token", data.access_token); // Guardar el token
-        localStorage.setItem("role", role); // Guardar el rol
-        console.log(
-          "Rol guardado en localStorage:",
-          localStorage.getItem("role")
-        );
+        localStorage.setItem("token", token);
+        localStorage.setItem("role", role);
+        if (idProfesor) {
+          localStorage.setItem("id_profesor", idProfesor);
+        }
+        if (idEstudiante) {
+          localStorage.setItem("id_estudiante", idEstudiante);
+        }
+        localStorage.setItem("user_data", JSON.stringify(userData));
       } catch (error) {
         console.error("Error al guardar en localStorage:", error);
       }
@@ -94,7 +106,15 @@ export default function LoginPage() {
       });
 
       // Redirigir al usuario a la página principal o una específica según el rol
-      window.location.href = "/";
+      // Asegúrate de que la redirección sea correcta según tu lógica
+      if (role === "profesor") {
+        window.location.href = "/horarios/profesor"; // Redirigir a la página de horarios del profesor
+      } else if (role === "estudiante") {
+        window.location.href = "/horarios/estudiante"; // Redirigir a la página de horarios del estudiante
+      } else {
+        window.location.href = "/"; // Redirigir a la página principal
+      }
+
     } catch (error) {
       console.error(error);
       MySwal.fire({
