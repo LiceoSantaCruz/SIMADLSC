@@ -9,6 +9,7 @@ const ListaHorarios = ({ horarios, onEditHorario, setHorarios, materias, profeso
   const [horarioSeleccionado, setHorarioSeleccionado] = useState(null);
   const [detallesAbiertos, setDetallesAbiertos] = useState({}); // Para manejar detalles por fila
 
+
   const eliminarHorario = async (id) => {
     const confirmacion = await Swal.fire({
       title: '¿Estás seguro?',
@@ -33,6 +34,7 @@ const ListaHorarios = ({ horarios, onEditHorario, setHorarios, materias, profeso
     }
   };
 
+
   const abrirModalEditar = async (horarioId) => {
     try {
       const response = await axios.get(`http://localhost:3000/horarios/${horarioId}`);
@@ -49,6 +51,7 @@ const ListaHorarios = ({ horarios, onEditHorario, setHorarios, materias, profeso
     setModalAbierto(false);
   };
 
+  // Función para actualizar el horario en la lista
   const actualizarHorarioEnLista = (horarioEditado) => {
     setHorarios(
       horarios.map((horario) =>
@@ -91,18 +94,24 @@ const ListaHorarios = ({ horarios, onEditHorario, setHorarios, materias, profeso
               {horarios.map((horario) => (
                 <React.Fragment key={horario.id_Horario}>
                   <tr className="text-center">
+
                     <td className="py-2 px-4 border-b">{horario.id_Horario}</td>
+
                     <td className="py-2 px-4 border-b">{horario.seccion?.nombre_Seccion || 'N/A'}</td>
                     <td className="py-2 px-4 border-b">{horario.materia?.nombre_Materia || 'N/A'}</td>
                     <td className="py-2 px-4 border-b">
                       {horario.profesor
-                        ?` ${horario.profesor.nombre_Profesor} ${horario.profesor.apellido1_Profesor} ${horario.profesor.apellido2_Profesor}`
+
+                        ? `${horario.profesor.nombre_Profesor} ${horario.profesor.apellido1_Profesor} ${horario.profesor.apellido2_Profesor}`
+
                         : 'N/A'}
                     </td>
                     <td className="py-2 px-4 border-b flex justify-center space-x-2">
                       <button
                         className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
-                        onClick={() => onEditHorario(horario)}
+
+                        onClick={() => abrirModalEditar(horario.id_Horario)}
+
                       >
                         Editar
                       </button>
@@ -190,4 +199,6 @@ ListaHorarios.propTypes = {
   secciones: PropTypes.array.isRequired,
 };
 
+
 export default ListaHorarios;
+

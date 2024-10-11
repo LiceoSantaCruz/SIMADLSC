@@ -33,7 +33,6 @@ const CrearUsuario  = () => {
     try {
       // Llamamos al servicio de crear usuario
       await createUser(newUser, token);
-
       // Si fue exitoso, reseteamos el formulario
       setNewUser({
         nombre_Usuario: '',
@@ -51,7 +50,7 @@ const CrearUsuario  = () => {
       setLoading(false);
     }
   };
-
+  
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
       <div className="max-w-4xl w-full bg-white p-8 rounded-lg shadow-lg">
@@ -122,6 +121,7 @@ const CrearUsuario  = () => {
             placeholder="Correo Electrónico"
             className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
             required
+             autoComplete='off'
           />
           <input
             type="password"
@@ -131,6 +131,7 @@ const CrearUsuario  = () => {
             placeholder="Contraseña"
             className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
             required
+             autoComplete='off'
           />
           <select
             name="rol_Usuario"
@@ -139,10 +140,10 @@ const CrearUsuario  = () => {
             className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
           >
             {/* Mapeamos los IDs de los roles en lugar de los nombres */}
-            <option value={1}>Super-Administrador</option>
-            <option value={2}>Administrador</option>
-            <option value={3}>Estudiante</option>
-            <option value={4}>Super-Admin</option>
+            <option value={1}>superAdmin</option>
+            <option value={2}>admin</option>
+            <option value={3}>profesor</option>
+            <option value={4}>estudiante</option>
           </select>
 
           <div className="md:col-span-2 flex justify-center">
