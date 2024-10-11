@@ -24,13 +24,14 @@ export const SideBar = () => {
     };
 
     const handleLogout = () => {
-        // Elimina todos los elementos de localStorage
-        localStorage.clear();
-    
+        // Elimina el token y el rol de localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+
         // Actualiza el estado de autenticación
         setIsAuthenticated(false);
-        console.log('Todos los datos de localStorage han sido eliminados');
-    
+        console.log('Token y rol eliminados');
+
         // Redirige utilizando useNavigate
         window.location.href = '/paginainformativa'; 
     };

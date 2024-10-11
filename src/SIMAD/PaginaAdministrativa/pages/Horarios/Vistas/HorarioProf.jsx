@@ -16,6 +16,10 @@ export const HorarioProf = () => {
   const [diasSemana, setDiasSemana] = useState([]);
   const [error, setError] = useState(null);
 
+  // Obtener rol e id del profesor desde localStorage
+  const role = localStorage.getItem('role');
+  const idProfesorLocal = localStorage.getItem('id_profesor');
+
   useEffect(() => {
     const obtenerProfesores = async () => {
       try {
@@ -39,16 +43,26 @@ export const HorarioProf = () => {
       }
     };
 
-    obtenerProfesores();
-  }, []);
+    // Solo obtener la lista de profesores si el rol es admin o superadmin
+    if (role === 'admin' || role === 'superadmin') {
+      obtenerProfesores();
+    }
+  }, [role]);
 
   useEffect(() => {
     const obtenerDatosProfesorYHorario = async () => {
-      if (!idProfesorSeleccionado) return; // Si no hay un profesor seleccionado, no hacer nada
-
       try {
+        let profesorId = idProfesorSeleccionado;
+
+        // Si el rol es profesor, automáticamente selecciona su ID
+        if (role === 'profesor') {
+          profesorId = idProfesorLocal;
+        }
+
+        if (!profesorId) return; // Si no hay un profesor seleccionado, no hacer nada
+
         // Obtener datos del profesor seleccionado
-        const profesorResponse = await fetch(`http://localhost:3000/profesores/${idProfesorSeleccionado}`, {
+        const profesorResponse = await fetch(`http://localhost:3000/profesores/${profesorId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -65,7 +79,7 @@ export const HorarioProf = () => {
         setApellidosProfesor(`${profesorData.apellido1_Profesor} ${profesorData.apellido2_Profesor}`);
 
         // Obtener horarios del profesor seleccionado
-        const horariosResponse = await fetch(`http://localhost:3000/horarios/profesor/${idProfesorSeleccionado}`, {
+        const horariosResponse = await fetch(`http://localhost:3000/horarios/profesor/${profesorId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -78,12 +92,15 @@ export const HorarioProf = () => {
         }
 
         const horariosData = await horariosResponse.json();
-        console.log("Datos de horarios:", horariosData); // Verifica los datos aquí
+        console.log('Datos de horarios:', horariosData); // Verifica los datos aquí
 
         if (Array.isArray(horariosData)) {
           setHorarios(horariosData);
-          const uniqueDays = [...new Set(horariosData.map(h => h.dia_semana_Horario))];
-          const uniqueHours = horariosData.map(h => ({ inicio: h.hora_inicio_Horario, fin: h.hora_fin_Horario }));
+          const uniqueDays = [...new Set(horariosData.map((h) => h.dia_semana_Horario))].sort((a, b) => {
+            const diasOrden = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+            return diasOrden.indexOf(a) - diasOrden.indexOf(b);
+          });
+          const uniqueHours = horariosData.map((h) => ({ inicio: convertirHora12(h.hora_inicio_Horario), fin: convertirHora12(h.hora_fin_Horario) }));
 
           setHorasLecciones(uniqueHours);
           setDiasSemana(uniqueDays);
@@ -97,14 +114,22 @@ export const HorarioProf = () => {
     };
 
     obtenerDatosProfesorYHorario();
-  }, [idProfesorSeleccionado]); // Dependiendo del profesor seleccionado
+  }, [idProfesorSeleccionado, role, idProfesorLocal]); // Dependiendo del profesor seleccionado y el rol
+
+  const convertirHora12 = (hora24) => {
+    const [hora, minuto] = hora24.split(':');
+    let horaNum = parseInt(hora, 10);
+    const ampm = horaNum >= 12 ? 'PM' : 'AM';
+    horaNum = horaNum % 12 || 12; // Convertir 0 a 12
+    return `${horaNum}:${minuto} ${ampm}`;
+  };
 
   if (error) {
     return <div className="text-red-500">{error}</div>;
   }
 
   const obtenerHorarioPorDiaYHora = (dia, horaInicio) => {
-    return horarios.find(horario => horario.dia_semana_Horario === dia && horario.hora_inicio_Horario === horaInicio);
+    return horarios.find((horario) => horario.dia_semana_Horario === dia && convertirHora12(horario.hora_inicio_Horario) === horaInicio);
   };
 
   const mostrarDetalles = (horario) => {
@@ -136,7 +161,11 @@ export const HorarioProf = () => {
       const fila = [`${hora.inicio} - ${hora.fin}`];
       diasSemana.forEach((dia) => {
         const horario = obtenerHorarioPorDiaYHora(dia, hora.inicio);
-        fila.push(horario ? `Asig: ${horario.materia?.nombre_Materia || 'N/A'}\nAula: ${horario.aula?.nombre_Aula || 'N/A'}` : '-');
+        fila.push(
+          horario
+            ? `Asig: ${horario.materia?.nombre_Materia || 'N/A'}\nAula: ${horario.aula?.nombre_Aula || 'N/A'}`
+            : '-'
+        );
       });
       tableRows.push(fila);
     });
@@ -152,31 +181,36 @@ export const HorarioProf = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <div className="bg-white p-4 rounded-lg shadow-lg mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Selecciona un Profesor</h1>
-        <select 
-          className="border p-2 rounded-lg w-full mb-4"
-          onChange={(e) => setIdProfesorSeleccionado(e.target.value)}
-          value={idProfesorSeleccionado || ''}
-        >
-          <option value="">Seleccione un profesor</option>
-          {profesores.map(profesor => (
-            <option key={profesor.id_Profesor} value={profesor.id_Profesor}>
-              {`${profesor.nombre_Profesor} ${profesor.apellido1_Profesor} ${profesor.apellido2_Profesor}`}
-            </option>
-          ))}
-        </select>
-      </div>
+      {role === 'admin' || role === 'superadmin' ? (
+        <div className="bg-white p-4 rounded-lg shadow-lg mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">Selecciona un Profesor</h1>
+          <select
+            className="border p-2 rounded-lg w-full mb-4"
+            onChange={(e) => setIdProfesorSeleccionado(e.target.value)}
+            value={idProfesorSeleccionado || ''}
+          >
+            <option value="">Seleccione un profesor</option>
+            {profesores.map((profesor) => (
+              <option key={profesor.id_Profesor} value={profesor.id_Profesor}>
+                {`${profesor.nombre_Profesor} ${profesor.apellido1_Profesor} ${profesor.apellido2_Profesor}`}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
 
       <button
         className="bg-green-500 text-white px-4 py-2 rounded-lg mb-4 hover:bg-green-600"
         onClick={exportarPdf}
+        disabled={!idProfesorSeleccionado && role !== 'profesor'}
       >
         Exportar Horario como PDF
       </button>
 
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-4">Tus Horarios</h2>
+        <h2 className="text-2xl font-bold mb-4">
+          {role === 'profesor' ? `Horario de ${nombreProfesor} ${apellidosProfesor}` : 'Horarios de todos los profesores'}
+        </h2>
         {horasLecciones.length > 0 && diasSemana.length > 0 ? (
           <table className="min-w-full table-auto bg-gray-50 shadow-sm rounded-lg">
             <thead className="bg-gray-200 text-gray-700">
