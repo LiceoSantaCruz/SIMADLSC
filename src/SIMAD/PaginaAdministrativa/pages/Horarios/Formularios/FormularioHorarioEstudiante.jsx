@@ -1,3 +1,4 @@
+// FormularioHorarioEstudiante.jsx
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -20,6 +21,7 @@ const FormularioHorarioEstudiante = ({
     handleSubmit,
     watch,
     setValue,
+    setError, // Para asignar errores específicos
     formState: { errors, isSubmitting },
     reset,
   } = useForm({
@@ -36,6 +38,7 @@ const FormularioHorarioEstudiante = ({
     },
   });
 
+  const [errorGeneral, setErrorGeneral] = useState(''); // Para errores generales
   const gradoSeleccionado = watch('gradoId');
   const [seccionesDisponibles, setSeccionesDisponibles] = useState([]);
 
@@ -47,6 +50,7 @@ const FormularioHorarioEstudiante = ({
           setSeccionesDisponibles(response.data);
         } catch (error) {
           console.error('Error al obtener las secciones:', error);
+          Swal.fire('Error', 'Hubo un problema al obtener las secciones.', 'error');
         }
       } else {
         setSeccionesDisponibles([]);
@@ -71,6 +75,9 @@ const FormularioHorarioEstudiante = ({
 
   const onSubmit = async (data) => {
     try {
+      // Resetear errores generales antes de intentar enviar
+      setErrorGeneral('');
+
       const transformedData = {
         gradoId: Number(data.gradoId),
         seccionId: Number(data.seccionId),
@@ -102,7 +109,36 @@ const FormularioHorarioEstudiante = ({
       if (onSubmitSuccess) onSubmitSuccess(response.data);
     } catch (error) {
       console.error('Error al guardar el horario de estudiante:', error);
-      Swal.fire('Error', 'Hubo un problema al guardar el horario.', 'error');
+
+      if (error.response && error.response.data) {
+        console.log('Respuesta de error del backend:', error.response.data);
+
+        const { errors: backendErrors, message: backendMessage, error: backendError } = error.response.data;
+
+        if (backendErrors && typeof backendErrors === 'object') {
+          // Asignar errores a los campos correspondientes
+          Object.keys(backendErrors).forEach((field) => {
+            setError(field, {
+              type: 'server',
+              message: backendErrors[field],
+            });
+          });
+        }
+
+        // Determinar el mensaje de error
+        const message = backendMessage || backendError || 'Hubo un problema al guardar el horario.';
+
+        if (message) {
+          // Asignar error general
+          setErrorGeneral(message);
+        }
+
+        // Mostrar alerta
+        Swal.fire('Error', 'Hubo un problema al guardar el horario. Revisa los errores en el formulario.', 'error');
+      } else {
+        setErrorGeneral('Hubo un problema inesperado al guardar el horario.');
+        Swal.fire('Error', 'Hubo un problema al guardar el horario.', 'error');
+      }
     }
   };
 
@@ -111,6 +147,7 @@ const FormularioHorarioEstudiante = ({
       <h2 className="text-2xl font-bold mb-4">
         {initialData ? 'Editar Horario de Estudiante' : 'Crear Horario de Estudiante'}
       </h2>
+      {errorGeneral && <p className="text-red-500 mb-4">{errorGeneral}</p>} {/* Mostrar error general */}
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* Grado */}
         <div className="mb-4">
@@ -146,9 +183,6 @@ const FormularioHorarioEstudiante = ({
           </select>
           {errors.seccionId && <p className="text-red-500">{errors.seccionId.message}</p>}
         </div>
-
-        {/* Resto de los campos del formulario */}
-        {/* Materia, Profesor, Aula, Día de la Semana, Hora de Inicio, Hora de Fin */}
 
         {/* Materia */}
         <div className="mb-4">
@@ -247,6 +281,7 @@ const FormularioHorarioEstudiante = ({
             className="bg-gray-500 text-white px-4 py-2 rounded mr-2 hover:bg-gray-600"
             onClick={() => {
               reset();
+              setErrorGeneral(''); // Resetear errores generales
               if (onCancel) onCancel();
             }}
           >
@@ -254,8 +289,9 @@ const FormularioHorarioEstudiante = ({
           </button>
           <button
             type="submit"
-            className={`bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+            className={`bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ${
+              isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Guardando...' : initialData ? 'Guardar Cambios' : 'Registrar Horario'}
