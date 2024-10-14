@@ -17,7 +17,9 @@ import { MatriculaExtraordinaria } from '../pages/Matricula/MatriculaExtraordina
 import GestionUsuarios from '../pages/Usuarios/GestionUsuarios';
 import CrearUsuario from '../pages/Usuarios/CrearUsuario';
 import { MiPerfil } from '../pages/Perfil/MiPerfil';
-
+import CrearEventos from '../pages/Eventos/CrearEventos';
+import UserEventos from '../pages/Eventos/UserEventos';
+import EventosEdit from '../pages/Eventos/EventosEdit';
 export const AdminRoutes = () => {
   const [role, setRole] = useState(localStorage.getItem('role'));
 
@@ -49,11 +51,11 @@ export const AdminRoutes = () => {
           </>
         )}
 
-        {/* Rutas para eventos, accesibles a todos */}
-        <Route path="/eventos" element={<Eventos />} />
-        {(role === 'admin' || role === 'superadmin') && (
-          <Route path="/gestion-eventos" element={<GestionEventos />} />
-        )}
+<Route path="/eventos" element={<Eventos />} />
+                        <Route path="/crear-eventos" element={<CrearEventos />} />
+                        <Route path="/gestion-eventos" element={<GestionEventos />} />
+                        <Route path="/user-eventos" element={<UserEventos />} />
+                        <Route path="/eventos-edit/:id" element={<EventosEdit />} />
 
         {/* Rutas para horarios, según el rol */}
         {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (

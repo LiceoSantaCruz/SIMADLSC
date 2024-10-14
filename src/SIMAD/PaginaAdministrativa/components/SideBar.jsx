@@ -164,7 +164,7 @@ export const SideBar = () => {
                         </Link>
                         <button onClick={handleLogout} className="py-1 hover:text-gray-400 w-full text-left flex items-center space-x-1">
                             <FaSignOutAlt size={14} />
-                            <span>Logout</span>
+                            <span>Cerrar sesión</span>
                         </button>
                     </div>
                 </div>
