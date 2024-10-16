@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createUser } from './services/useUserService';
 
-const CrearUsuario  = () => {
+const CrearUsuario = () => {
   const [newUser, setNewUser] = useState({
     nombre_Usuario: '',
     apellido1_Usuario: '',
     apellido2_Usuario: '',
     email_Usuario: '',
     contraseña_Usuario: '',
-    rol_Usuario: 2,  // Aquí puedes inicializar con el ID de "Administrativo" por defecto
+    rol_Usuario: 2, // Inicializa con el rol predeterminado, por ejemplo, "Administrativo"
   });
 
   const [loading, setLoading] = useState(false); // Estado de carga
@@ -21,18 +21,25 @@ const CrearUsuario  = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewUser({ ...newUser, [name]: value });
+    setNewUser({
+      ...newUser,
+      [name]: name === 'rol_Usuario' ? parseInt(value, 10) : value, // Convertimos rol_Usuario a número
+    });
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+    e.preventDefault(); // Evita que la página se recargue
+    setLoading(true); // Indica que el formulario está en proceso de envío
     setSuccess(false);
-    setError(null); // Reseteamos el error
-
+    setError(null); // Resetea cualquier error anterior
+  
     try {
+      // Muestra en la consola los datos que se enviarán al backend
+      console.log('Datos enviados al backend:', newUser);
+  
       // Llamamos al servicio de crear usuario
       await createUser(newUser, token);
+  
       // Si fue exitoso, reseteamos el formulario
       setNewUser({
         nombre_Usuario: '',
@@ -40,17 +47,17 @@ const CrearUsuario  = () => {
         apellido2_Usuario: '',
         email_Usuario: '',
         contraseña_Usuario: '',
-        rol_Usuario: 2,  // Resetear al rol predeterminado
+        rol_Usuario: 2, // Resetear al rol predeterminado
       });
       setSuccess(true); // Mostramos el mensaje de éxito
     } catch (error) {
       console.error('Error al crear el usuario:', error);
       setError(error.message); // Mostramos el mensaje de error
     } finally {
-      setLoading(false);
+      setLoading(false); // Finaliza el estado de carga
     }
   };
-  
+
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
       <div className="max-w-4xl w-full bg-white p-8 rounded-lg shadow-lg">
@@ -121,7 +128,7 @@ const CrearUsuario  = () => {
             placeholder="Correo Electrónico"
             className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
             required
-             autoComplete='off'
+            autoComplete="off"
           />
           <input
             type="password"
@@ -131,19 +138,20 @@ const CrearUsuario  = () => {
             placeholder="Contraseña"
             className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
             required
-             autoComplete='off'
+            autoComplete="off"
           />
+
           <select
             name="rol_Usuario"
             value={newUser.rol_Usuario}
             onChange={handleInputChange}
             className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
           >
-            {/* Mapeamos los IDs de los roles en lugar de los nombres */}
+            {/* Excluir la opción de "Estudiante" */}
             <option value={1}>superAdmin</option>
             <option value={2}>admin</option>
             <option value={3}>profesor</option>
-            <option value={4}>estudiante</option>
+            {/* No incluimos el rol de estudiante */}
           </select>
 
           <div className="md:col-span-2 flex justify-center">
