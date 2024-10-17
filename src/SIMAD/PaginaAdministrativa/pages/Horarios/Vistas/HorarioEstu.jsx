@@ -20,21 +20,24 @@ export const HorarioEstu = () => {
                 setCargando(true);
                 const estudianteId = localStorage.getItem('id_estudiante'); // Asegúrate de tener el ID del estudiante
                 const response = await axios.get(`http://localhost:3000/estudiantes/${estudianteId}/horario`);
-
+    
                 // Verifica que la respuesta tenga la estructura esperada
                 if (!response.data || !response.data.horarios) {
                     throw new Error('Datos no válidos recibidos del servidor.');
                 }
-
+    
                 const data = response.data;
-
+    
+                // Log de todos los datos recibidos
+                console.log("Datos completos del servidor:", data);
+    
                 // Establecemos el nombre y sección del estudiante
                 setNombreEstudiante(data.nombreEstudiante);
                 setSeccion(data.seccion);
-
+    
                 // Establecemos los horarios
                 setHorarios(data.horarios); // Asegúrate de que este sea un array de horarios
-
+    
                 setCargando(false);
             } catch (error) {
                 console.error('Error al obtener los datos del estudiante:', error);
@@ -42,9 +45,10 @@ export const HorarioEstu = () => {
                 setCargando(false);
             }
         };
-
+    
         obtenerDatos();
     }, []);
+    
 
     if (error) {
         return <div className="text-red-500">{error}</div>;

@@ -23,6 +23,7 @@ export const SideBar = () => {
         }));
     };
 
+
     const handleLogout = () => {
         // Elimina el token y el rol de localStorage
         localStorage.removeItem('token');
@@ -33,7 +34,7 @@ export const SideBar = () => {
         console.log('Token y rol eliminados');
 
         // Redirige utilizando useNavigate
-        window.location.href = '/paginainformativa'; 
+        window.location.href = '/paginainformativa';
     };
 
     useEffect(() => {
@@ -62,7 +63,7 @@ export const SideBar = () => {
                 <Link to="/info" className="text-2xl font-bold mb-4 hover:text-gray-400">
                     SIMADLSC
                 </Link>
-                
+
                 {/* Asistencia: Solo visible para admin, adminStaff, y profesores */}
                 {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
                     <div>
@@ -98,7 +99,8 @@ export const SideBar = () => {
                 </div>
 
                 {/* Horarios: Visible para admin, adminStaff, y profesores */}
-                {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
+                {/* Horarios: Visible para admin, superadmin, profesores, y estudiantes */}
+                {(role === 'admin' || role === 'superadmin' || role === 'profesor' || role === 'estudiante') && (
                     <div>
                         <div onClick={() => toggleSection('horarios')} className="cursor-pointer flex items-center space-x-2 py-2">
                             <FaChalkboardTeacher />
@@ -106,13 +108,25 @@ export const SideBar = () => {
                         </div>
                         {openSections.horarios && (
                             <div className="ml-6">
-                                <Link to="/horario-estudiantes" className="block py-1 hover:text-gray-400">Horario Estudiantes</Link>
-                                <Link to="/horario-profesores" className="block py-1 hover:text-gray-400">Horario Profesores</Link>
-                                <Link to="/gestion-horario" className="block py-1 hover:text-gray-400">Gestión Horario</Link>
+                                {/* Horario Profesores: Visible para profesores, admin y superadmin */}
+                                {(role === 'profesor' || role === 'admin' || role === 'superadmin') && (
+                                    <Link to="/horario-profesores" className="block py-1 hover:text-gray-400">Horario Profesores</Link>
+                                )}
+
+                                {/* Horario Estudiantes: Visible para estudiantes, admin y superadmin */}
+                                {(role === 'estudiante' || role === 'admin' || role === 'superadmin') && (
+                                    <Link to="/horario-estudiantes" className="block py-1 hover:text-gray-400">Horario Estudiantes</Link>
+                                )}
+
+                                {/* Gestión Horario: Solo visible para admin y superadmin */}
+                                {(role === 'admin' || role === 'superadmin') && (
+                                    <Link to="/gestion-horario" className="block py-1 hover:text-gray-400">Gestión Horario</Link>
+                                )}
                             </div>
                         )}
                     </div>
                 )}
+
 
                 {/* Matrícula: Visible para admin, adminStaff, y estudiantes */}
                 {(role === 'admin' || role === 'superadmin' || role === 'estudiante') && (
