@@ -37,7 +37,7 @@ export const Eventos = () => {
         {/* Fondo degradado claro para un toque moderno */}
         <div className="container mx-auto text-center">
           <h3 className="text-4xl font-bold mb-8 text-blue-900">
-            Eventos Anuales
+            Eventos anuales
           </h3>
           <Slider {...sliderSettings}>
             {/* Card 1 */}
@@ -45,7 +45,7 @@ export const Eventos = () => {
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
                 <div
                   style={{
-                    backgroundImage: "url('/images/Evento1.png')",
+                    backgroundImage: "url('/images/IMG_6505.JPG')",
                     height: "180px", 
                   }}
                   className="bg-center bg-cover rounded-t-lg relative"
@@ -55,11 +55,11 @@ export const Eventos = () => {
                 <div className="bg-white p-6 h-56 flex flex-col justify-between rounded-b-lg relative">
                   <div>
                     <h4 className="text-xl font-bold text-red-600">
-                      Semana de la Guanacastequidad
+                      Semana de la guanacastequidad
                     </h4>
                     <p className="text-gray-700 mt-2">
-                      Participa en nuestra semana de la guanacastequidad donde podrás disfrutar de comidas típicas y eventos culturales propios de nuestra provincia.
-                    </p>
+Únete a nosotros en esta tradicional semana para honrar la rica cultura y herencia de Guanacasteca. Disfruta de actividades llenas de historia, música y gastronomía que reflejan el espíritu único de nuestra región.
+¡No te lo pierdas!                     </p>
                   </div>
                 </div>
               </div>
@@ -69,7 +69,7 @@ export const Eventos = () => {
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
                 <div
                   style={{
-                    backgroundImage: "url('/images/Evento2.png')",
+                    backgroundImage: "url('/images/IMG_0675.JPG')",
                     height: "180px",
                   }}
                   className="bg-center bg-cover rounded-t-lg relative"
@@ -79,11 +79,13 @@ export const Eventos = () => {
                 <div className="bg-white p-6 h-56 flex flex-col justify-between rounded-b-lg relative">
                   <div>
                     <h4 className="text-xl font-bold text-red-600">
-                      Campeonato Intercolegial
+                    Gran bingo millonario Liceo Santa Cruz
                     </h4>
                     <p className="text-gray-700 mt-2">
-                      Únete a nosotros para apoyar a nuestros equipos en el campeonato intercolegial de deportes.
-                    </p>
+                    
+¡No te pierdas el Gran bingo millonario anual del Liceo Santa Cruz!
+
+Únete a nosotros para una dia de diversión y grandes premios. Este evento anual une a nuestra comunidad para apoyar a nuestros estudiantes. ¡No faltes a esta querida tradición!                    </p>
                   </div>
                 </div>
               </div>
@@ -93,7 +95,7 @@ export const Eventos = () => {
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
                 <div
                   style={{
-                    backgroundImage: "url('/images/Evento3.png')",
+                    backgroundImage: "url('/images/IMG_8001.JPG')",
                     height: "180px",
                   }}
                   className="bg-center bg-cover rounded-t-lg relative"
@@ -103,11 +105,11 @@ export const Eventos = () => {
                 <div className="bg-white p-6 h-56 flex flex-col justify-between rounded-b-lg relative">
                   <div>
                     <h4 className="text-xl font-bold text-red-600">
-                      Feria del Libro
+                     Festival estudiantil de las artes (FEA)
                     </h4>
                     <p className="text-gray-700 mt-2">
-                      Descubre nuevos autores y géneros en nuestra feria del libro anual.
-                    </p>
+                    Cada año, celebramos el increíble talento de nuestros estudiantes en este evento. Disfruta de una semana repleta de arte, música, danza y muchas otras expresiones creativas.
+¡Únete y sé testigo del talento artístico que florece en nuestros estudiantes!                    </p>
                   </div>
                 </div>
               </div>
@@ -117,7 +119,7 @@ export const Eventos = () => {
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
                 <div
                   style={{
-                    backgroundImage: "url('/images/Evento4.png')",
+                    backgroundImage: "url('/images/IMG_9317.JPG')",
                     height: "180px",
                   }}
                   className="bg-center bg-cover rounded-t-lg relative"
@@ -127,10 +129,10 @@ export const Eventos = () => {
                 <div className="bg-white p-6 h-56 flex flex-col justify-between rounded-b-lg relative">
                   <div>
                     <h4 className="text-xl font-bold text-red-600">
-                      Festival de Música
+                      Torneos deportivos regionales y nacionales
                     </h4>
                     <p className="text-gray-700 mt-2">
-                      Disfruta de una noche de música y talento local en nuestro festival anual.
+                    Cada año, los talentosos estudiantes del Liceo Santa Cruz participan con entusiasmo en diversas disciplinas deportivas como volleyball, baloncesto, fútbol 11 y futsala, entre otras. Estos torneos no solo destacan el espíritu competitivo de nuestros estudiantes, sino también su compañerismo y dedicación.
                     </p>
                   </div>
                 </div>
@@ -141,7 +143,7 @@ export const Eventos = () => {
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
                 <div
                   style={{
-                    backgroundImage: "url('/images/Evento5.png')",
+                    backgroundImage: "url('/images/IMG_1767.JPG')",
                     height: "180px",
                   }}
                   className="bg-center bg-cover rounded-t-lg relative"
@@ -151,10 +153,10 @@ export const Eventos = () => {
                 <div className="bg-white p-6 h-56 flex flex-col justify-between rounded-b-lg relative">
                   <div>
                     <h4 className="text-xl font-bold text-red-600">
-                      Taller de Robótica
+                      Talleres y ferias
                     </h4>
                     <p className="text-gray-700 mt-2">
-                      Aprende a construir y programar robots en nuestro taller especial para jóvenes.
+                    Cada año, nuestros estudiantes se sumergen en diversas actividades como talleres robótica, feria de emprendedurismo, olimpiadas de biología ferias científicas, entre otras. Estos eventos proporcionan oportunidades únicas para el aprendizaje y el desarrollo de habilidades, fomentando la creatividad y el espíritu innovador en nuestros jóvenes.
                     </p>
                   </div>
                 </div>

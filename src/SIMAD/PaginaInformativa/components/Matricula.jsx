@@ -10,7 +10,7 @@ export const Matricula = () => {
   return (
     <section
       className="py-16 bg-cover bg-center"
-      style={{ backgroundImage: "url('Images/LiceoMatricula.jpg')" }} 
+      style={{ backgroundImage: "url('/images/IMG_2947.JPG')" }} 
       aria-labelledby="matricula-title"
     >
       <div className="container mx-auto px-6 md:px-12 lg:px-24">

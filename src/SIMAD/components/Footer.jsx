@@ -1,4 +1,4 @@
-import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa'; 
+import { FaFacebook, FaInstagram } from 'react-icons/fa'; 
 
 export const Footer = () => {
   return (
@@ -36,13 +36,10 @@ export const Footer = () => {
         <div className="text-center md:text-left">
           <h4 className="text-lg font-semibold mb-2">Redes Sociales</h4>
           <div className="flex justify-center md:justify-start space-x-4">
-            <a href="#" className="text-white hover:text-blue-400">
+            <a href="https://www.facebook.com/share/mJmkXV7p48J7Zs89/" className="text-white hover:text-blue-400">
               <FaFacebook size="1.5em" /> 
             </a>
-            <a href="#" className="text-white hover:text-blue-400">
-              <FaTwitter size="1.5em" /> 
-            </a>
-            <a href="#" className="text-white hover:text-blue-400">
+            <a href="https://www.instagram.com/liceosantacruz_oficial?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" className="text-white hover:text-blue-400">
               <FaInstagram size="1.5em" /> 
             </a>
           </div>
