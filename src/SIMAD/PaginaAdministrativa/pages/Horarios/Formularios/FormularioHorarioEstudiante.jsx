@@ -254,7 +254,7 @@ const FormularioHorarioEstudiante = ({
 
         {/* Hora de Inicio */}
         <div className="mb-4">
-          <label className="block text-gray-700">Hora de Inicio (ej: 13:00)</label>
+          <label className="block text-gray-700">Hora de Inicio (ej: 1:00 PM)</label>
           <input
             type="time"
             className={`border p-2 rounded-lg w-full ${errors.hora_inicio_Horario ? 'border-red-500' : ''}`}
@@ -265,7 +265,7 @@ const FormularioHorarioEstudiante = ({
 
         {/* Hora de Fin */}
         <div className="mb-4">
-          <label className="block text-gray-700">Hora de Fin (ej: 14:30)</label>
+          <label className="block text-gray-700">Hora de Fin (ej: 1:30 PM)</label>
           <input
             type="time"
             className={`border p-2 rounded-lg w-full ${errors.hora_fin_Horario ? 'border-red-500' : ''}`}

@@ -34,7 +34,7 @@ export const HorarioEstu = () => {
 
         // Si es estudiante, cargar sus datos y sección
         if (role === 'estudiante' && estudianteId) {
-          const responseEstudiante = await axios.get(`http://localhost:3000/estudiante/${estudianteId}`);
+          const responseEstudiante = await axios.get(`http://localhost:3000/estudiantes/${estudianteId}`);
           const dataEstudiante = responseEstudiante.data;
           setNombreEstudiante(dataEstudiante.nombre_Estudiante);
           setApellidosEstudiante(`${dataEstudiante.apellido1_Estudiante} ${dataEstudiante.apellido2_Estudiante}`);
