@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 import '@sweetalert2/theme-bulma/bulma.css';
 import { FaInfoCircle, FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 
-export const UserEventos = () => {
+const UserEventos = () => {
   const { data: eventos, setData, loading, error } = UseFetchEventos('Aprobado');
 
   const handleEventoClick = (evento) => {

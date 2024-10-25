@@ -5,7 +5,7 @@ import '@sweetalert2/theme-bulma/bulma.css';
 import UseFetchEventos from './Hook/UseFetchEventos';
 import EventosService from './Service/EventosService';
 
-export const EventosEdit = () => {
+const EventosEdit = () => {
   const { id } = useParams(); // Obtenemos el id del evento desde la URL
   const navigate = useNavigate();
   const { 
@@ -46,8 +46,8 @@ export const EventosEdit = () => {
           ubicacion: eventoData.id_ubicacion,
           tipo_evento: eventoData.id_tipo_evento,
         });
-      } catch (error) {
-        console.error('Error al cargar el evento:', error);
+      } catch (error) {    
+        console.log(error)
         Swal.fire({
           icon: 'error',
           title: 'Error',

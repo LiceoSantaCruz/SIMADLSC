@@ -7,8 +7,7 @@ import { AsistenciaEst } from '../pages/Asistencias/AsistenciaEst';
 import { GestionAsistencia } from '../pages/Asistencias/GestionAsistencia';
 import { JustificacionAusencias } from '../pages/Asistencias/JustificacionAusencias';
 import { ReporteAsistencia } from '../pages/Asistencias/ReporteAsistencia';
-import { Eventos } from '../../components/Eventos';
-import { GestionEventos } from '../pages/Eventos/GestionEventos';
+import GestionEventos from '../pages/Eventos/GestionEventos';
 import { GestionHorario } from '../pages/Horarios/GestionHorario';
 import { HorarioEstu } from '../pages/Horarios/Vistas/HorarioEstu';
 import { HorarioProf } from '../pages/Horarios/Vistas/HorarioProf';
@@ -20,6 +19,7 @@ import GestionUsuarios from '../pages/Usuarios/GestionUsuarios';
 import CrearUsuario from '../pages/Usuarios/CrearUsuario';
 import { MiPerfil } from '../pages/Perfil/MiPerfil';
 import CrearEventos from '../pages/Eventos/CrearEventos';
+import Eventos from '../pages/Eventos/Eventos';
 import UserEventos from '../pages/Eventos/UserEventos';
 import EventosEdit from '../pages/Eventos/EventosEdit';
 export const AdminRoutes = () => {
