@@ -36,6 +36,7 @@ export const HorarioEstu = () => {
         if (role === 'estudiante' && estudianteId) {
           const responseEstudiante = await axios.get(`http://localhost:3000/estudiantes/${estudianteId}`);
           const dataEstudiante = responseEstudiante.data;
+          console.log(dataEstudiante);
           setNombreEstudiante(dataEstudiante.nombre_Estudiante);
           setApellidosEstudiante(`${dataEstudiante.apellido1_Estudiante} ${dataEstudiante.apellido2_Estudiante}`);
           setSeccion(dataEstudiante.seccion?.nombre_Seccion || 'Sin Sección');
@@ -138,7 +139,7 @@ export const HorarioEstu = () => {
         <>
           <h1 className="text-3xl font-bold mb-4">Sección: {seccion}</h1>
           <h2 className="text-2xl font-bold mb-6">
-            Hola, {nombreEstudiante} {apellidosEstudiante}! Bienvenido al horario.
+            Hola,{nombreEstudiante}{apellidosEstudiante}! Bienvenido al horario.
           </h2>
         </>
       )}

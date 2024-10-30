@@ -20,8 +20,6 @@ const ordenDias = {
   'Miércoles': 3,
   'Jueves': 4,
   'Viernes': 5,
-  'Sábado': 6,
-  'Domingo': 7,
 };
 
 const ListaHorarios = ({ horarios, onEditHorario, setHorarios, materias, profesores, aulas, secciones }) => {
