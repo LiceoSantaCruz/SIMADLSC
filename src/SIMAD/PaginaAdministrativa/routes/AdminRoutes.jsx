@@ -11,10 +11,10 @@ import GestionEventos from '../pages/Eventos/GestionEventos';
 import { GestionHorario } from '../pages/Horarios/GestionHorario';
 import { HorarioEstu } from '../pages/Horarios/Vistas/HorarioEstu';
 import { HorarioProf } from '../pages/Horarios/Vistas/HorarioProf';
-import { FormularioMatricula } from '../pages/Matricula/FormularioMatricula';
-import { GestionMatricula } from '../pages/Matricula/GestionMatricula';
-import { MatriculaOrdinaria } from '../pages/Matricula/MatriculaOrdinaria';
-import { MatriculaExtraordinaria } from '../pages/Matricula/MatriculaExtraordinaria';
+import { FormularioMatricula } from '../pages/Matricula/components/FormularioMatricula';
+//import { GestionMatricula } from '../pages/Matricula/GestionMatricula';
+//import { MatriculaOrdinaria } from '../pages/Matricula/MatriculaOrdinaria';
+import { MatriculaExtraordinaria } from '../pages/Matricula/Vite/MatriculaExtraordinaria';
 import GestionUsuarios from '../pages/Usuarios/GestionUsuarios';
 import CrearUsuario from '../pages/Usuarios/CrearUsuario';
 import { MiPerfil } from '../pages/Perfil/MiPerfil';
@@ -22,6 +22,9 @@ import CrearEventos from '../pages/Eventos/CrearEventos';
 import Eventos from '../pages/Eventos/Eventos';
 import UserEventos from '../pages/Eventos/UserEventos';
 import EventosEdit from '../pages/Eventos/EventosEdit';
+import GestionMatriculas from '../pages/Matricula/GestionMatricula';
+//import GestionMatriculas from '../pages/Matricula/GestionMatricula';
+ 
 export const AdminRoutes = () => {
   const [role, setRole] = useState(localStorage.getItem('role'));
 
@@ -38,7 +41,6 @@ export const AdminRoutes = () => {
 
   return (
     <div className="flex-grow p-6 bg-gray-100 min-h-screen overflow-auto">
-
       <Routes>
         <Route path="/" element={<Navigate to="/info" replace />} />
          {/* Rutas de inicio personalizadas según el rol */}
@@ -79,9 +81,9 @@ export const AdminRoutes = () => {
         {(role === 'admin' || role === 'superadmin') && (
           <>
             <Route path="/formulario-matricula" element={<FormularioMatricula />} />
-            <Route path="/gestion-matricula" element={<GestionMatricula />} />
-            <Route path="/matricula-ordinaria" element={<MatriculaOrdinaria />} />
-            <Route path="/matricula-extraordinaria" element={<MatriculaExtraordinaria />} />
+            <Route path="/gestion-matricula" element={<GestionMatriculas />} />
+            {/* <Route path="/matricula-ordinaria" element={<MatriculaOrdinaria />} /> */}
+            <Route path="/matricula-extraordinaria" element={<MatriculaExtraordinaria />} /> 
           </>
         )}
         {role === 'Estudiante' && (
