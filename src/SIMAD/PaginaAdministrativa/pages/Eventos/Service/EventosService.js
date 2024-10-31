@@ -57,7 +57,7 @@ const EventosService = {
 
   // Aprobar un evento
   approveEvento: (id) => {
-    return axios.post(`${'http://localhost:3000'}/eventos/${id}/approve`);
+    return axios.patch(`${'http://localhost:3000'}/eventos/${id}/approve`);
   },
 
   deleteEvento: (id) => {
@@ -66,7 +66,7 @@ const EventosService = {
 
   // Rechazar un evento
   rejectEvento: (id) => {
-    return axios.post(`${'http://localhost:3000'}/eventos/${id}/reject`);
+    return axios.patch(`${'http://localhost:3000'}/eventos/${id}/reject`);
   },
 
   // Obtener todas las ubicaciones
