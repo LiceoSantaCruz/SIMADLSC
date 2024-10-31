@@ -48,3 +48,21 @@ export const fetchAsistencias = async ({ cedula, fecha, id_Materia }) => {
   }
   return response.json();
 };
+
+export const obtenerReporteAsistencias = async (cedula, fechaInicio, fechaFin, idPeriodo) => {
+  const params = new URLSearchParams();
+  if (fechaInicio) params.append('fechaInicio', fechaInicio);
+  if (fechaFin) params.append('fechaFin', fechaFin);
+  if (idPeriodo) params.append('id_Periodo', idPeriodo);
+
+  const url = `http://localhost:3000/asistencias/reporte/${cedula}?${params.toString()}`;
+
+  
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Error al obtener los datos');
+    }
+    const data = await response.json();
+    return data;
+  
+};
