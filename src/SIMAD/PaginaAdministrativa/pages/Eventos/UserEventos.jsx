@@ -138,7 +138,7 @@ const UserEventos = () => {
                       Ver Info
                     </button>
                     <Link
-  to={`/eventos-edit/${evento.id_Evento}`} // Enlace a la vista de edición con el ID del evento
+  to={`/eventos-edit/${evento.id_Evento}`}
   className="flex items-center text-yellow-500 hover:text-yellow-700"
   title="Editar Evento"
 >
