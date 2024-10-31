@@ -5,12 +5,13 @@ import useMaterias from "./Hook/useMaterias";
 import useProfesores from "./Hook/useProfesores";
 import useSecciones from "./Hook/useSecciones";
 import useEstudiantesPorSeccion from "./Hook/useEstudiantesPorSeccion";
+import { usePeriodos } from "./Hook/usePeriodos";
 
 export const AsistenciaEst = () => {
-
   const { grados } = useGrados();
   const { materias } = useMaterias();
   const { profesores } = useProfesores();
+  const { periodos } = usePeriodos(); 
 
   const [formData, setFormData] = useState({
     fecha: '',
@@ -18,6 +19,7 @@ export const AsistenciaEst = () => {
     id_grado: '',
     id_Seccion: '',
     id_Profesor: '',
+    id_Periodo: '', 
   });
 
   const { secciones, loading: loadingSecciones } = useSecciones(formData.id_grado);
@@ -30,7 +32,7 @@ export const AsistenciaEst = () => {
     if (e.target.name === 'id_grado') {
       setFormData((prevData) => ({ ...prevData, id_Seccion: '' }));
       setEstudiantes([]);
-    }
+    } 
 
     if (e.target.name === 'id_Seccion') {
       setEstudiantes([]);
@@ -57,6 +59,7 @@ export const AsistenciaEst = () => {
       id_grado: formData.id_grado,
       id_Seccion: formData.id_Seccion,
       id_Profesor: formData.id_Profesor,
+      id_Periodo: formData.id_Periodo, // Agregar el periodo a los datos de asistencia
     }));
 
     await handleCrearAsistencias(asistenciasData);
@@ -70,6 +73,7 @@ export const AsistenciaEst = () => {
       id_grado: '',
       id_Seccion: '',
       id_Profesor: '',
+      id_Periodo: '', 
     });
     setEstudiantes([]);
   };
@@ -161,6 +165,23 @@ export const AsistenciaEst = () => {
               {profesores.map((profesor) => (
                 <option key={profesor.id_Profesor} value={profesor.id_Profesor}>
                   {profesor.nombre_Profesor}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block mb-2">Periodo:</label>
+            <select
+              name="id_Periodo"
+              value={formData.id_Periodo}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border rounded"
+            >
+              <option value="">Seleccionar Periodo</option>
+              {periodos.map((periodo) => (
+                <option key={periodo.id_Periodo} value={periodo.id_Periodo}>
+                  {periodo.nombre_Periodo}
                 </option>
               ))}
             </select>
