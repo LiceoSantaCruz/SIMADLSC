@@ -196,13 +196,13 @@ export const GestionAsistencia = () => {
                 <td className="border px-4 py-2">
                   <button
                     onClick={() => handleEditar(asistencia.asistencia_id)}
-                    className="bg-green-500 text-white px-3 py-1 rounded mr-2"
+                    className="bg-green-700 text-white px-3 py-1 rounded mr-2 hover:bg-green-800"
                   >
                     Editar
                   </button>
                   <button
                     onClick={() => handleEliminar(asistencia.asistencia_id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded"
+                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-300"
                   >
                     Eliminar
                   </button>

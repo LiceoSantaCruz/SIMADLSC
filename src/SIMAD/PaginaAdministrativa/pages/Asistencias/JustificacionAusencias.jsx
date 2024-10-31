@@ -93,7 +93,7 @@ export const JustificacionAusencias = () => {
                 <td className="border px-4 py-2">
                   <button
                     onClick={() => handleJustificar(asistencia.asistencia_id)}
-                    className="bg-green-500 text-white px-2 py-1 rounded"
+                    className="bg-green-700 text-white px-2 py-1 rounded"
                     disabled={asistencia.estado !== 'A'}
                   >
                     Justificar
