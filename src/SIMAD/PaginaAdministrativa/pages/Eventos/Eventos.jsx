@@ -6,7 +6,7 @@ import UseFetchEventos from './Hook/UseFetchEventos';
 import Swal from 'sweetalert2';
 import '@sweetalert2/theme-bulma/bulma.css';
 
- const Eventos = () => {
+const Eventos = () => {
   const { data: eventos, loading, error } = UseFetchEventos('Aprobado'); // Cambiado de 'all' a 'Aprobado'
 
   // Función para manejar el clic en un evento

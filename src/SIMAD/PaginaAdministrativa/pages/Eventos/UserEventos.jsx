@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 import '@sweetalert2/theme-bulma/bulma.css';
 import { FaInfoCircle, FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 
-export const UserEventos = () => {
+const UserEventos = () => {
   const { data: eventos, setData, loading, error } = UseFetchEventos('Aprobado');
 
   const handleEventoClick = (evento) => {
@@ -138,7 +138,7 @@ export const UserEventos = () => {
                       Ver Info
                     </button>
                     <Link
-  to={`/eventos-edit/${evento.id_Evento}`} // Enlace a la vista de edición con el ID del evento
+  to={`/eventos-edit/${evento.id_Evento}`}
   className="flex items-center text-yellow-500 hover:text-yellow-700"
   title="Editar Evento"
 >

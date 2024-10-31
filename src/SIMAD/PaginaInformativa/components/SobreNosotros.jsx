@@ -13,7 +13,7 @@ import { FaBullseye, FaLightbulb } from 'react-icons/fa';
       {/* Sección de Misión y Visión */}
       <section className="py-8 text-gray-800"> 
         <div className="container mx-auto text-center">
-          <h3 className="text-4xl font-bold mb-6 text-blue-900">Nuestra Misión y Visión</h3> 
+          <h3 className="text-4xl font-bold mb-6 text-blue-900">Nuestra misión y visión</h3> 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> 
             
             {/* Tarjeta de Misión */}

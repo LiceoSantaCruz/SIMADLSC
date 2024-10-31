@@ -1,4 +1,4 @@
-import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa'; 
+import { FaFacebook, FaInstagram } from 'react-icons/fa'; 
 
 export const Footer = () => {
   return (
@@ -7,8 +7,8 @@ export const Footer = () => {
         
         {/* Columna 1: Logo y descripción */}
         <div className="text-center md:text-left">
-          <img src="ruta_del_logo.png" alt="Liceo Santa Cruz" className="mx-auto md:mx-0 mb-4" />
-          <p className="text-sm">
+        <img src="images/ruta_del_logo.png" alt="Liceo Santa Cruz" style={{ width: '40px', height: '40px' }} className="mx-auto md:mx-0 mb-4" />
+        <p className="text-sm">
             Liceo Santa Cruz Clímaco A. Pérez. <br />
             Somos una huella de éxito en el tiempo, con el futuro en tus manos.
           </p>
@@ -36,13 +36,10 @@ export const Footer = () => {
         <div className="text-center md:text-left">
           <h4 className="text-lg font-semibold mb-2">Redes Sociales</h4>
           <div className="flex justify-center md:justify-start space-x-4">
-            <a href="#" className="text-white hover:text-blue-400">
+            <a href="https://www.facebook.com/share/mJmkXV7p48J7Zs89/" className="text-white hover:text-blue-400">
               <FaFacebook size="1.5em" /> 
             </a>
-            <a href="#" className="text-white hover:text-blue-400">
-              <FaTwitter size="1.5em" /> 
-            </a>
-            <a href="#" className="text-white hover:text-blue-400">
+            <a href="https://www.instagram.com/liceosantacruz_oficial?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" className="text-white hover:text-blue-400">
               <FaInstagram size="1.5em" /> 
             </a>
           </div>

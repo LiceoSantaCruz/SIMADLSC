@@ -5,7 +5,7 @@ import '@sweetalert2/theme-bulma/bulma.css';
 import UseFetchEventos from './Hook/UseFetchEventos';
 import EventosService from './Service/EventosService';
 
-export const EventosEdit = () => {
+const EventosEdit = () => {
   const { id } = useParams(); // Obtenemos el id del evento desde la URL
   const navigate = useNavigate();
   const { 
@@ -29,31 +29,46 @@ export const EventosEdit = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true); // Estado de carga para los datos del evento
+
+  // Función auxiliar para formatear la fecha a DD-MM-YYYY
+  const formatFecha = (fechaISO) => {
+    if (!fechaISO) return 'Fecha no disponible';
+    const [year, month, day] = fechaISO.split('-');
+    return `${day}-${month}-${year}`;
+  };
 
   // Cargar datos del evento actual
   useEffect(() => {
     const fetchEvento = async () => {
+      setIsLoadingData(true); // Iniciar la carga
       try {
         const response = await EventosService.getEventoById(id);
         const eventoData = response.data;
+
+        // Verificar si fecha_Evento no es null o undefined y formatear
+        const fechaEventoISO = eventoData.fecha_Evento ? eventoData.fecha_Evento.split('T')[0] : '';
+
         setFormData({
-          nombre_Evento: eventoData.nombre_Evento,
-          descripcion_Evento: eventoData.descripcion_Evento,
-          fecha_Evento: eventoData.fecha_Evento.split('T')[0], // Formato de fecha YYYY-MM-DD
-          hora_inicio_Evento: eventoData.hora_inicio_Evento,
-          hora_fin_Evento: eventoData.hora_fin_Evento,
-          id_dirigido_a: eventoData.id_dirigido_a,
-          ubicacion: eventoData.id_ubicacion,
-          tipo_evento: eventoData.id_tipo_evento,
+          nombre_Evento: eventoData.nombre_Evento || '',
+          descripcion_Evento: eventoData.descripcion_Evento || '',
+          fecha_Evento: fechaEventoISO,
+          hora_inicio_Evento: eventoData.hora_inicio_Evento || '',
+          hora_fin_Evento: eventoData.hora_fin_Evento || '',
+          id_dirigido_a: eventoData.id_dirigido_a ? String(eventoData.id_dirigido_a) : '',
+          ubicacion: eventoData.id_ubicacion ? String(eventoData.id_ubicacion) : '',
+          tipo_evento: eventoData.id_tipo_evento ? String(eventoData.id_tipo_evento) : '',
         });
       } catch (error) {
-        console.error('Error al cargar el evento:', error);
+        console.error(error);
         Swal.fire({
           icon: 'error',
           title: 'Error',
           text: 'No se pudo cargar el evento. Inténtalo de nuevo.',
           confirmButtonColor: '#2563EB',
         });
+      } finally {
+        setIsLoadingData(false); // Finalizar la carga
       }
     };
     fetchEvento();
@@ -83,6 +98,17 @@ export const EventosEdit = () => {
     const horaInicio = formData.hora_inicio_Evento;
     const horaFin = formData.hora_fin_Evento;
 
+    // Validar que la fecha y horas estén completas
+    if (!fechaEvento || !horaInicio || !horaFin) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Advertencia',
+        text: 'Por favor, completa la fecha y las horas del evento.',
+        confirmButtonColor: '#2563EB',
+      });
+      return;
+    }
+
     const fechaInicio = new Date(`${fechaEvento}T${horaInicio}`);
     const fechaFinObj = new Date(`${fechaEvento}T${horaFin}`);
 
@@ -101,7 +127,7 @@ export const EventosEdit = () => {
       const payload = {
         nombre_Evento: formData.nombre_Evento,
         descripcion_Evento: formData.descripcion_Evento,
-        fecha_Evento: fechaEvento,
+        fecha_Evento: fechaEvento, // Mantener en formato YYYY-MM-DD
         hora_inicio_Evento: horaInicio,
         hora_fin_Evento: horaFin,
         id_dirigido_a: parseInt(formData.id_dirigido_a, 10),
@@ -129,6 +155,15 @@ export const EventosEdit = () => {
       setIsLoading(false);
     }
   };
+
+  // Mostrar un indicador de carga mientras se obtienen los datos del evento
+  if (isLoadingData) {
+    return (
+      <div className="p-6 bg-gray-100 min-h-screen flex justify-center items-center">
+        <p className="text-gray-700 text-lg">Cargando datos del evento...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen flex justify-center items-center">
@@ -159,6 +194,7 @@ export const EventosEdit = () => {
             value={formData.descripcion_Evento}
             onChange={handleChange}
             className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            rows="4"
           />
         </div>
 
@@ -173,6 +209,12 @@ export const EventosEdit = () => {
             className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             required
           />
+          {/* Mostrar la fecha formateada */}
+          {formData.fecha_Evento && (
+            <p className="mt-2 text-sm text-gray-600">
+              Fecha seleccionada: {formatFecha(formData.fecha_Evento)}
+            </p>
+          )}
         </div>
 
         {/* Campos de Hora de Inicio y Fin */}

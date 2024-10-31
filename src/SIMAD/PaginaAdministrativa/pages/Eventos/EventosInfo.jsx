@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import EventosService from '../services/EventosService';
 import Swal from 'sweetalert2';
 import '@sweetalert2/theme-bulma/bulma.css';
-export const EventoInfo = () => {
+const EventoInfo = () => {
   const { id } = useParams();
   const [evento, setEvento] = useState(null);
   const [loading, setLoading] = useState(true);

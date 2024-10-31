@@ -1,8 +1,10 @@
 
 .bg-hero {
-  background-image: url('/images/backgroundImage1.jpeg'); /* Reemplaza con la ruta de tu imagen */
-  background-size: cover;
-  background-position: center;
+  position: relative; /* Necesario para posicionar la capa gradiente */
+  background-image: url('/images/copia para banner.JPG'); /* Reemplaza con la ruta de tu imagen */
+  background-size: auto 80vh; /* Aumenta la altura de la imagen */
+  background-position: center top; /* Posiciona la imagen desde la parte superior */
+  height: 70vh; /* Ajusta la altura según tus necesidades */
 }
 
 .bg-gradient {

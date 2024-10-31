@@ -1,5 +1,3 @@
-// src/components/CreateEvento.jsx
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -7,7 +5,7 @@ import '@sweetalert2/theme-bulma/bulma.css';
 import UseFetchEventos from './Hook/UseFetchEventos';
 import EventosService from './Service/EventosService';
 
-export const CrearEventos = () => {
+const CrearEventos = () => {
   const { 
     ubicaciones, 
     loadingUbicaciones, 

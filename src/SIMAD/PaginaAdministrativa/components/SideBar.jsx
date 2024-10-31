@@ -98,7 +98,6 @@ export const SideBar = () => {
                     )}
                 </div>
 
-                {/* Horarios: Visible para admin, adminStaff, y profesores */}
                 {/* Horarios: Visible para admin, superadmin, profesores, y estudiantes */}
                 {(role === 'admin' || role === 'superadmin' || role === 'profesor' || role === 'estudiante') && (
                     <div>
