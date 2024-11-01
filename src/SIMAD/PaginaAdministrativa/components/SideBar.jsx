@@ -73,10 +73,10 @@ export const SideBar = () => {
                         </div>
                         {openSections.asistencia && (
                             <div className="ml-6">
-                                <Link to="/asistencia-estudiantes" className="block py-1 hover:text-gray-400">Asistencia Estudiantes</Link>
-                                <Link to="/gestion-asistencia" className="block py-1 hover:text-gray-400">Gestión Asistencia</Link>
-                                <Link to="/justificacion-ausencias" className="block py-1 hover:text-gray-400">Justificación Ausencias</Link>
-                                <Link to="/reporte-asistencia" className="block py-1 hover:text-gray-400">Reporte Asistencia</Link>
+                                <Link to="/asistencia-estudiantes" className="block py-1 hover:text-gray-400">Asistencia estudiantes</Link>
+                                <Link to="/gestion-asistencia" className="block py-1 hover:text-gray-400">Gestión asistencia</Link>
+                                <Link to="/justificacion-ausencias" className="block py-1 hover:text-gray-400">Justificación ausencias</Link>
+                                <Link to="/reporte-asistencia" className="block py-1 hover:text-gray-400">Reporte asistencia</Link>
                             </div>
                         )}
                     </div>
@@ -91,9 +91,19 @@ export const SideBar = () => {
                     {openSections.eventos && (
                         <div className="ml-6">
                             <Link to="/eventos" className="block py-1 hover:text-gray-400">Eventos</Link>
-                            {(role === 'admin' || role === 'superadmin') && (
-                                <Link to="/gestion-eventos" className="block py-1 hover:text-gray-400">Gestión Eventos</Link>
+                            {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
+                              <Link to="/crear-eventos" className="block py-1 hover:text-gray-400">Crear eventos</Link>
+                                
                             )}
+                              {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
+                              <Link to="/user-eventos" className="block py-1 hover:text-gray-400">Estado solicitudes eventos</Link>
+                                
+                            )}
+                            {( role === 'superadmin') && (
+                                <Link to="/gestion-eventos" className="block py-1 hover:text-gray-400">Gestión eventos</Link>
+                                
+                            )}
+                          
                         </div>
                     )}
                 </div>
@@ -109,17 +119,17 @@ export const SideBar = () => {
                             <div className="ml-6">
                                 {/* Horario Profesores: Visible para profesores, admin y superadmin */}
                                 {(role === 'profesor' || role === 'admin' || role === 'superadmin') && (
-                                    <Link to="/horario-profesores" className="block py-1 hover:text-gray-400">Horario Profesores</Link>
+                                    <Link to="/horario-profesores" className="block py-1 hover:text-gray-400">Horario profesores</Link>
                                 )}
 
                                 {/* Horario Estudiantes: Visible para estudiantes, admin y superadmin */}
                                 {(role === 'estudiante' || role === 'admin' || role === 'superadmin') && (
-                                    <Link to="/horario-estudiantes" className="block py-1 hover:text-gray-400">Horario Estudiantes</Link>
+                                    <Link to="/horario-estudiantes" className="block py-1 hover:text-gray-400">Horario estudiantes</Link>
                                 )}
 
                                 {/* Gestión Horario: Solo visible para admin y superadmin */}
                                 {(role === 'admin' || role === 'superadmin') && (
-                                    <Link to="/gestion-horario" className="block py-1 hover:text-gray-400">Gestión Horario</Link>
+                                    <Link to="/gestion-horario" className="block py-1 hover:text-gray-400">Gestión horario</Link>
                                 )}
                             </div>
                         )}
@@ -136,12 +146,12 @@ export const SideBar = () => {
                         </div>
                         {openSections.matricula && (
                             <div className="ml-6">
-                                <Link to="/formulario-matricula" className="block py-1 hover:text-gray-400">Formulario Matrícula</Link>
+                                <Link to="/formulario-matricula" className="block py-1 hover:text-gray-400">Formulario matrícula</Link>
                                 {(role === 'admin' || role === 'superadmin') && (
                                     <>
-                                        <Link to="/gestion-matricula" className="block py-1 hover:text-gray-400">Gestión Matrícula</Link>
-                                        <Link to="/matricula-ordinaria" className="block py-1 hover:text-gray-400">Matrícula Ordinaria</Link>
-                                        <Link to="/matricula-extraordinaria" className="block py-1 hover:text-gray-400">Matrícula Extraordinaria</Link>
+                                        <Link to="/gestion-matricula" className="block py-1 hover:text-gray-400">Gestión matrícula</Link>
+                                        <Link to="/matricula-ordinaria" className="block py-1 hover:text-gray-400">Matrícula ordinaria</Link>
+                                        <Link to="/matricula-extraordinaria" className="block py-1 hover:text-gray-400">Matrícula extraordinaria</Link>
                                     </>
                                 )}
                             </div>
@@ -158,7 +168,7 @@ export const SideBar = () => {
                         </div>
                         {openSections.usuarios && (
                             <div className="ml-6">
-                                <Link to="/gestion-usuarios" className="block py-1 hover:text-gray-400">Gestión Usuarios</Link>
+                                <Link to="/gestion-usuarios" className="block py-1 hover:text-gray-400">Gestión usuarios</Link>
                             </div>
                         )}
                     </div>

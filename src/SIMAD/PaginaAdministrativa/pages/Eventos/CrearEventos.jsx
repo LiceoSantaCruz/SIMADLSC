@@ -1,3 +1,5 @@
+// src/CrearEventos.jsx
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -12,7 +14,13 @@ const CrearEventos = () => {
     errorUbicaciones,
     tiposEventos,
     loadingTiposEventos,
-    errorTiposEventos
+    errorTiposEventos,
+    estadosEventos,
+    loadingEstadosEventos,
+    errorEstadosEventos,
+    dirigidosA, // Añadido
+    loadingDirigidosA, // Añadido
+    errorDirigidosA, // Añadido
   } = UseFetchEventos();
 
   const [formData, setFormData] = useState({
@@ -34,8 +42,46 @@ const CrearEventos = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  // Función para verificar si la fecha es al menos 3 días en el futuro
+  const isAtLeastThreeDaysAhead = (fecha) => {
+    const selectedDate = new Date(fecha);
+    const today = new Date();
+    const minDate = new Date();
+    minDate.setDate(today.getDate() + 3);
+
+    // Comparar solo fechas, sin considerar la hora
+    selectedDate.setHours(0,0,0,0);
+    minDate.setHours(0,0,0,0);
+    today.setHours(0,0,0,0);
+
+    return selectedDate >= minDate;
+  };
+
+  // Función para verificar si la fecha no está en el pasado
+  const isNotPastDate = (fecha) => {
+    const selectedDate = new Date(fecha);
+    const today = new Date();
+
+    // Comparar solo fechas, sin considerar la hora
+    selectedDate.setHours(0,0,0,0);
+    today.setHours(0,0,0,0);
+
+    return selectedDate >= today;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validar que el nombre del evento no esté vacío
+    if (!formData.nombre_Evento.trim()) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Advertencia',
+        text: 'El nombre del evento no puede estar vacío.',
+        confirmButtonColor: '#2563EB',
+      });
+      return;
+    }
 
     // Validar que se hayan seleccionado Ubicación y Tipo de Evento
     if (!formData.ubicacion || !formData.tipo_evento) {
@@ -59,10 +105,99 @@ const CrearEventos = () => {
       return;
     }
 
+    // Validar que la fecha no esté en el pasado
+    if (!isNotPastDate(formData.fecha_Evento)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Advertencia',
+        text: 'La fecha del evento no puede estar en el pasado.',
+        confirmButtonColor: '#2563EB',
+      });
+      return;
+    }
+
+    // Validar que la fecha sea al menos 3 días en el futuro
+    if (!isAtLeastThreeDaysAhead(formData.fecha_Evento)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Advertencia',
+        text: 'El evento debe ser reservado con al menos 3 días de anticipación.',
+        confirmButtonColor: '#2563EB',
+      });
+      return;
+    }
+
+    // Validar que los estados de eventos se hayan cargado correctamente
+    if (loadingEstadosEventos) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Cargando...',
+        text: 'Por favor, espera mientras se cargan los estados del evento.',
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    if (errorEstadosEventos) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al cargar los estados del evento.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    if (loadingDirigidosA) { // Añadido para manejar carga de "Dirigido a"
+      Swal.fire({
+        icon: 'info',
+        title: 'Cargando...',
+        text: 'Por favor, espera mientras se cargan los públicos.',
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    if (errorDirigidosA) { // Añadido para manejar errores de "Dirigido a"
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al cargar los públicos.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    // Validar que se haya seleccionado "Dirigido a"
+    if (!formData.id_dirigido_a) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Advertencia',
+        text: 'Por favor, selecciona a quién está dirigido el evento.',
+        confirmButtonColor: '#2563EB',
+      });
+      return;
+    }
+
+    // Encontrar el ID del estado 'pendiente'
+    const estadoPendiente = estadosEventos.find(
+      (estado) => estado.nombre.toLowerCase() === 'pendiente'
+    );
+
+    if (!estadoPendiente) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se encontró el estado "pendiente".',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
     // Convertir fecha y hora a formatos adecuados
-    const fechaEvento = formData.fecha_Evento; // "2024-10-18"
-    const horaInicio = formData.hora_inicio_Evento; // "11:58:00"
-    const horaFin = formData.hora_fin_Evento; // "12:01:00"
+    const fechaEvento = formData.fecha_Evento; // "YYYY-MM-DD"
+    const horaInicio = formData.hora_inicio_Evento; // "HH:mm:ss"
+    const horaFin = formData.hora_fin_Evento; // "HH:mm:ss"
 
     // Verificar que las horas sean válidas
     const fechaInicio = new Date(`${fechaEvento}T${horaInicio}`);
@@ -89,21 +224,49 @@ const CrearEventos = () => {
       return;
     }
 
+    /*
+    // Validación de solapamiento (opcional)
+    try {
+      const isOverlapping = await EventosService.checkOverlap({
+        fecha_Evento: fechaEvento,
+        hora_inicio_Evento: horaInicio,
+        hora_fin_Evento: horaFin,
+        id_ubicacion: parseInt(formData.ubicacion, 10),
+      });
+
+      if (isOverlapping) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Advertencia',
+          text: 'La ubicación está ocupada en el horario especificado.',
+          confirmButtonColor: '#2563EB',
+        });
+        return;
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al verificar la disponibilidad de la ubicación.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+    */
+
     setIsLoading(true);
     try {
       const payload = {
-        nombre_Evento: formData.nombre_Evento,
-        descripcion_Evento: formData.descripcion_Evento,
+        nombre_Evento: formData.nombre_Evento.trim(),
+        descripcion_Evento: formData.descripcion_Evento.trim(),
         fecha_Evento: fechaEvento, // "YYYY-MM-DD"
         hora_inicio_Evento: horaInicio, // "HH:mm:ss"
         hora_fin_Evento: horaFin, // "HH:mm:ss"
         id_dirigido_a: parseInt(formData.id_dirigido_a, 10),
         id_ubicacion: parseInt(formData.ubicacion, 10),
         id_tipo_evento: parseInt(formData.tipo_evento, 10),
-        id_estado_evento: 1, // Asumiendo que 1 es "Pendiente"
+        id_estado_evento: estadoPendiente.id, // Usando el ID dinámico
       };
-
-      console.log('Enviando payload:', payload); // Para depuración
 
       await EventosService.createEvento(payload);
       Swal.fire({
@@ -117,7 +280,7 @@ const CrearEventos = () => {
           content: 'swal2-content',
           confirmButton: 'swal2-confirm',
         },
-        buttonsStyling: false, // Desactiva los estilos predeterminados de SweetAlert2
+        buttonsStyling: false,
       }).then(() => {
         navigate('/user-eventos'); // Redirige a la vista de solicitudes del usuario
       });
@@ -141,6 +304,9 @@ const CrearEventos = () => {
     }
   };
 
+  // Función para formatear la fecha solo para la visualización (opcional)
+
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen flex justify-center items-center">
       <form
@@ -157,9 +323,7 @@ const CrearEventos = () => {
             name="nombre_Evento"
             value={formData.nombre_Evento}
             onChange={handleChange}
-            className="w-full border
-
- border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             required
           />
         </div>
@@ -185,6 +349,14 @@ const CrearEventos = () => {
             onChange={handleChange}
             className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             required
+            min={(() => {
+              const today = new Date();
+              today.setDate(today.getDate() + 3);
+              const day = String(today.getDate()).padStart(2, '0');
+              const month = String(today.getMonth() + 1).padStart(2, '0'); // Los meses empiezan en 0
+              const year = today.getFullYear();
+              return `${year}-${month}-${day}`;
+            })()}
           />
         </div>
 
@@ -217,18 +389,26 @@ const CrearEventos = () => {
         {/* Campo de Dirigido a */}
         <div className="mb-6">
           <label className="block text-sm font-medium mb-2">Dirigido a</label>
-          <select
-            name="id_dirigido_a"
-            value={formData.id_dirigido_a}
-            onChange={handleChange}
-            className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            required
-          >
-            <option value="">Selecciona un público</option>
-            <option value="1">Estudiantes</option>
-            <option value="2">Público en General</option>
-            {/* Agrega más opciones según tus necesidades */}
-          </select>
+          {loadingDirigidosA ? (
+            <p>Cargando públicos...</p>
+          ) : errorDirigidosA ? (
+            <p className="text-red-500">Error al cargar los públicos: {errorDirigidosA}</p>
+          ) : (
+            <select
+              name="id_dirigido_a"
+              value={formData.id_dirigido_a}
+              onChange={handleChange}
+              className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            >
+              <option value="">Selecciona un público</option>
+              {dirigidosA.map((publico) => (
+                <option key={publico.id} value={publico.id}>
+                  {publico.nombre}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         {/* Campo de Ubicación */}
@@ -237,7 +417,7 @@ const CrearEventos = () => {
           {loadingUbicaciones ? (
             <p>Cargando ubicaciones...</p>
           ) : errorUbicaciones ? (
-            <p className="text-red-500">Error al cargar ubicaciones.</p>
+            <p className="text-red-500">Error al cargar ubicaciones: {errorUbicaciones}</p>
           ) : (
             <select
               name="ubicacion"
@@ -262,7 +442,7 @@ const CrearEventos = () => {
           {loadingTiposEventos ? (
             <p>Cargando tipos de eventos...</p>
           ) : errorTiposEventos ? (
-            <p className="text-red-500">Error al cargar tipos de eventos.</p>
+            <p className="text-red-500">Error al cargar tipos de eventos: {errorTiposEventos}</p>
           ) : (
             <select
               name="tipo_evento"

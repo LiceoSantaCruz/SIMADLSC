@@ -1,22 +1,57 @@
-import React from 'react';
+// src/components/UserEventos.jsx
+
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import UseFetchEventos from './Hook/UseFetchEventos';
-import EventosService from './Service/EventosService';
 import Swal from 'sweetalert2';
 import '@sweetalert2/theme-bulma/bulma.css';
-import { FaInfoCircle, FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
+import { FaInfoCircle, FaPlus } from 'react-icons/fa';
 
 const UserEventos = () => {
-  const { data: eventos, setData, loading, error } = UseFetchEventos('Aprobado');
+  // Estado para manejar el filtro de estado
+  const [filterStatus, setFilterStatus] = useState('Aprobado');
 
+  // Hook para obtener eventos sin filtrar inicialmente
+  const { data: eventos, loading, error } = UseFetchEventos();
+
+  // Estado para almacenar eventos filtrados
+  const [filteredEvents, setFilteredEvents] = useState([]);
+
+  // Función para formatear la hora al formato HH:MM
+  const formatTime = (timeStr) => {
+    if (!timeStr) return 'N/A';
+
+    // Divide la cadena por los dos puntos
+    const parts = timeStr.split(':');
+
+    // Verifica que al menos tenga horas y minutos
+    if (parts.length < 2) return timeStr;
+
+    const hours = parts[0].padStart(2, '0');
+    const minutes = parts[1].padStart(2, '0');
+
+    return `${hours}:${minutes}`;
+  };
+
+  // useEffect para filtrar eventos según el estado seleccionado
+  useEffect(() => {
+    if (eventos) {
+      const filtered = eventos.filter(
+        (evento) => evento.estadoEvento?.nombre.toLowerCase() === filterStatus.toLowerCase()
+      );
+      setFilteredEvents(filtered);
+    }
+  }, [eventos, filterStatus]);
+
+  // Función para manejar el clic en un evento y mostrar detalles
   const handleEventoClick = (evento) => {
     Swal.fire({
       title: evento.nombre_Evento,
       html: `
         <p><strong>Descripción:</strong> ${evento.descripcion_Evento || 'N/A'}</p>
         <p><strong>Fecha:</strong> ${new Date(evento.fecha_Evento).toLocaleDateString()}</p>
-        <p><strong>Hora de Inicio:</strong> ${evento.hora_inicio_Evento || 'No especificado'}</p>
-        <p><strong>Hora de Fin:</strong> ${evento.hora_fin_Evento || 'No especificado'}</p>
+        <p><strong>Hora de Inicio:</strong> ${formatTime(evento.hora_inicio_Evento)}</p>
+        <p><strong>Hora de Fin:</strong> ${formatTime(evento.hora_fin_Evento)}</p>
         <p><strong>Dirigido A:</strong> ${evento.dirigidoA?.nombre || 'No especificado'}</p>
         <p><strong>Estado:</strong> ${evento.estadoEvento?.nombre || 'No especificado'}</p>
         <p><strong>Tipo de Evento:</strong> ${evento.tipoEvento?.nombre || 'No especificado'}</p>
@@ -27,44 +62,8 @@ const UserEventos = () => {
     });
   };
 
-  const handleDelete = (id) => {
-    Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'No podrás revertir esta acción.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#EF4444', // Tailwind rojo-500
-      cancelButtonColor: '#2563EB', // Tailwind azul-600
-      confirmButtonText: 'Sí, eliminar',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        deleteEvento(id);
-      }
-    });
-  };
-
-  const deleteEvento = async (id) => {
-    try {
-      await EventosService.deleteEvento(id);
-      Swal.fire({
-        icon: 'success',
-        title: 'Eliminado',
-        text: 'Tu solicitud de evento ha sido eliminada.',
-        confirmButtonColor: '#2563EB',
-      }).then(() => {
-        setData((prevEventos) => prevEventos.filter((evento) => evento.id_Evento !== id));
-      });
-    } catch (err) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: err.response?.data?.message || 'Error al eliminar el evento',
-        confirmButtonColor: '#2563EB',
-      });
-    }
-  };
-
-  React.useEffect(() => {
+  // Manejo de errores
+  useEffect(() => {
     if (error) {
       Swal.fire({
         icon: 'error',
@@ -75,6 +74,7 @@ const UserEventos = () => {
     }
   }, [error]);
 
+  // Manejo de la carga
   if (loading)
     return (
       <div className="flex items-center justify-center p-6 bg-gray-100 min-h-screen">
@@ -84,20 +84,56 @@ const UserEventos = () => {
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
+      {/* Encabezado con título y botón para crear evento */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Mis Solicitudes de Eventos</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Solicitudes de eventos</h1>
         <Link
-          to="/crear-evento"
+          to="/crear-eventos"
           className="flex items-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-          title="Crear Nuevo Evento"
+          title="Crear nuevo evento"
         >
           <FaPlus className="mr-2" />
           Crear Evento
         </Link>
       </div>
 
-      {eventos.length === 0 ? (
-        <p className="text-gray-600">No tienes solicitudes de eventos.</p>
+      {/* Barra de filtros */}
+      <div className="mb-6 flex space-x-4">
+        <button
+          onClick={() => setFilterStatus('Aprobado')}
+          className={`px-4 py-2 rounded ${
+            filterStatus === 'Aprobado'
+              ? 'bg-blue-600 text-white'
+              : 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-200'
+          } transition`}
+        >
+          Aprobados
+        </button>
+        <button
+          onClick={() => setFilterStatus('Pendiente')}
+          className={`px-4 py-2 rounded ${
+            filterStatus === 'Pendiente'
+              ? 'bg-yellow-500 text-white'
+              : 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-200'
+          } transition`}
+        >
+          Pendientes
+        </button>
+        <button
+          onClick={() => setFilterStatus('Rechazado')}
+          className={`px-4 py-2 rounded ${
+            filterStatus === 'Rechazado'
+              ? 'bg-red-600 text-white'
+              : 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-200'
+          } transition`}
+        >
+          Rechazados
+        </button>
+      </div>
+
+      {/* Tabla de eventos */}
+      {filteredEvents.length === 0 ? (
+        <p className="text-gray-600">No tienes solicitudes de eventos en este estado.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white rounded-lg shadow-lg overflow-hidden">
@@ -105,15 +141,18 @@ const UserEventos = () => {
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Nombre</th>
                 <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Fecha</th>
+                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Hora</th>
                 <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Estado</th>
                 <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {eventos.map((evento, index) => (
+              {filteredEvents.map((evento, index) => (
                 <tr
                   key={evento.id_Evento}
-                  className={`hover:bg-gray-100 transition ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
+                  className={`hover:bg-gray-100 transition ${
+                    index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
+                  }`}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{evento.nombre_Evento}</div>
@@ -124,11 +163,24 @@ const UserEventos = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                    <div className="text-sm text-gray-900">
+                      {formatTime(evento.hora_inicio_Evento)} - {formatTime(evento.hora_fin_Evento)}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
+                        evento.estadoEvento.nombre === 'Aprobado'
+                          ? 'bg-green-100 text-green-800'
+                          : evento.estadoEvento.nombre === 'Pendiente'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}
+                    >
                       {evento.estadoEvento.nombre}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap flex space-x-4">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <button
                       onClick={() => handleEventoClick(evento)}
                       className="flex items-center text-blue-600 hover:text-blue-800"
@@ -136,23 +188,6 @@ const UserEventos = () => {
                     >
                       <FaInfoCircle className="mr-1" />
                       Ver Info
-                    </button>
-                    <Link
-  to={`/eventos-edit/${evento.id_Evento}`}
-  className="flex items-center text-yellow-500 hover:text-yellow-700"
-  title="Editar Evento"
->
-  <FaEdit className="mr-1" />
-  Editar
-</Link>
-
-                    <button
-                      onClick={() => handleDelete(evento.id_Evento)}
-                      className="flex items-center text-red-500 hover:text-red-700"
-                      title="Eliminar Evento"
-                    >
-                      <FaTrash className="mr-1" />
-                      Eliminar
                     </button>
                   </td>
                 </tr>

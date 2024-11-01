@@ -1,7 +1,8 @@
+// src/Service/EventosService.js
 
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3000/'; 
+const API_BASE_URL = 'http://localhost:3000'; // Asegúrate de que esta sea la URL correcta de tu API
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -24,19 +25,49 @@ const EventosService = {
   },
 
   // Obtener eventos del usuario
-  getUserEventos: async () => {
+  getUserEventos: async () => { // Asegúrate de que este endpoint exista y sea correcto
     try {
-      const response = await axiosInstance.get('/eventos');
+      const response = await axiosInstance.get('/eventos/user'); // Cambiar a la ruta correcta si es diferente
       return response.data;
     } catch (error) {
       console.error('Error al obtener eventos del usuario:', error);
+      throw error;
+    }
+    
+  },
+  getDirigidosA: async () => {
+    try {
+      const response = await axiosInstance.get('/dirigido-a');
+      return response.data; // Asumiendo que la respuesta es un array de dirigidos a
+    } catch (error) {
+      console.error('Error al obtener "Dirigido a":', error);
+      throw error;
+    }
+  },
+
+  // Obtener eventos filtrados
+  getFilteredEventos: async (filtros = {}) => {
+    try {
+      const queryParams = new URLSearchParams();
+
+      // Añadir parámetros de filtrado si existen
+      if (filtros.fechaDesde) queryParams.append('fechaDesde', filtros.fechaDesde);
+      if (filtros.fechaHasta) queryParams.append('fechaHasta', filtros.fechaHasta);
+      if (filtros.horaDesde) queryParams.append('horaDesde', filtros.horaDesde);
+      if (filtros.horaHasta) queryParams.append('horaHasta', filtros.horaHasta);
+      if (filtros.estado) queryParams.append('estado', filtros.estado);
+
+      const response = await axiosInstance.get(`/eventos/lista?${queryParams.toString()}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener eventos filtrados:', error);
       throw error;
     }
   },
 
   // Obtener un evento por ID
   getEventoById: (id) => {
-    return axios.get(`${'http://localhost:3000'}/eventos/${id}`);
+    return axiosInstance.get(`/eventos/${id}`);
   },
 
   // Crear un nuevo evento
@@ -52,21 +83,22 @@ const EventosService = {
 
   // Actualizar un evento existente
   updateEvento: (id, evento) => {
-    return axios.put(`${'http://localhost:3000'}/eventos/${id}`, evento);
+    return axiosInstance.put(`/eventos/${id}`, evento);
   },
 
   // Aprobar un evento
   approveEvento: (id) => {
-    return axios.patch(`${'http://localhost:3000'}/eventos/${id}/approve`);
-  },
-
-  deleteEvento: (id) => {
-    return axios.delete(`${'http://localhost:3000'}/eventos/${id}`);
+    return axiosInstance.patch(`/eventos/${id}/approve`);
   },
 
   // Rechazar un evento
   rejectEvento: (id) => {
-    return axios.patch(`${'http://localhost:3000'}/eventos/${id}/reject`);
+    return axiosInstance.patch(`/eventos/${id}/reject`);
+  },
+
+  // Eliminar un evento
+  deleteEvento: (id) => {
+    return axiosInstance.delete(`/eventos/${id}`);
   },
 
   // Obtener todas las ubicaciones
@@ -87,6 +119,17 @@ const EventosService = {
       return response.data; // Asumiendo que la respuesta es un array de tipos de eventos
     } catch (error) {
       console.error('Error al obtener tipos de eventos:', error);
+      throw error;
+    }
+  },
+
+  // Obtener estados de eventos
+  getEstadosEventos: async () => {
+    try {
+      const response = await axiosInstance.get('/estado-eventos'); // Asegúrate de que esta ruta exista en tu backend
+      return response.data; // Asumiendo que la respuesta es un array de estados de eventos
+    } catch (error) {
+      console.error('Error al obtener estados de eventos:', error);
       throw error;
     }
   },
