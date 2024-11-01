@@ -15,8 +15,18 @@ const UseFetchEventos = (type = 'all') => {
 
   // Estados para Tipos de Evento
   const [tiposEventos, setTiposEventos] = useState([]);
-  const [loadingTiposEventos, setLoadingTiposEventos] = useState(true); // Setter Correcto
+  const [loadingTiposEventos, setLoadingTiposEventos] = useState(true);
   const [errorTiposEventos, setErrorTiposEventos] = useState(null);
+
+  // Estados para Estados de Evento
+  const [estadosEventos, setEstadosEventos] = useState([]);
+  const [loadingEstadosEventos, setLoadingEstadosEventos] = useState(true);
+  const [errorEstadosEventos, setErrorEstadosEventos] = useState(null);
+
+  // Estados para Dirigidos A
+  const [dirigidosA, setDirigidosA] = useState([]);
+  const [loadingDirigidosA, setLoadingDirigidosA] = useState(true);
+  const [errorDirigidosA, setErrorDirigidosA] = useState(null);
 
   useEffect(() => {
     const fetchEventos = async () => {
@@ -65,9 +75,38 @@ const UseFetchEventos = (type = 'all') => {
       }
     };
 
-    // Realizar las dos solicitudes en paralelo
+    const fetchEstadosEventos = async () => {
+      setLoadingEstadosEventos(true);
+      try {
+        const response = await EventosService.getEstadosEventos();
+        setEstadosEventos(response);
+      } catch (err) {
+        setErrorEstadosEventos(err.response?.data?.message || 'Error al obtener estados de eventos');
+      } finally {
+        setLoadingEstadosEventos(false);
+      }
+    };
+
+    const fetchDirigidosA = async () => {
+      setLoadingDirigidosA(true);
+      try {
+        const response = await EventosService.getDirigidosA();
+        setDirigidosA(response);
+      } catch (err) {
+        setErrorDirigidosA(err.response?.data?.message || 'Error al obtener "Dirigido a"');
+      } finally {
+        setLoadingDirigidosA(false);
+      }
+    };
+
+    // Realizar todas las solicitudes en paralelo
     const fetchAll = async () => {
-      await Promise.all([fetchUbicaciones(), fetchTiposEventos()]);
+      await Promise.all([
+        fetchUbicaciones(),
+        fetchTiposEventos(),
+        fetchEstadosEventos(),
+        fetchDirigidosA(),
+      ]);
     };
 
     fetchAll();
@@ -83,7 +122,13 @@ const UseFetchEventos = (type = 'all') => {
     errorUbicaciones,
     tiposEventos,
     loadingTiposEventos,
-    errorTiposEventos
+    errorTiposEventos,
+    estadosEventos,
+    loadingEstadosEventos,
+    errorEstadosEventos,
+    dirigidosA, // Añadido
+    loadingDirigidosA, // Añadido
+    errorDirigidosA, // Añadido
   };
 };
 

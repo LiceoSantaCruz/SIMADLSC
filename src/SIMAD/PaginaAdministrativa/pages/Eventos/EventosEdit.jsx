@@ -1,3 +1,5 @@
+// src/EventosEdit.jsx
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -8,13 +10,17 @@ import EventosService from './Service/EventosService';
 const EventosEdit = () => {
   const { id } = useParams(); // Obtenemos el id del evento desde la URL
   const navigate = useNavigate();
+  
   const { 
     ubicaciones, 
     loadingUbicaciones, 
     errorUbicaciones,
     tiposEventos,
     loadingTiposEventos,
-    errorTiposEventos
+    errorTiposEventos,
+    dirigidosA, // **Añadido**
+    loadingDirigidosA, // **Añadido**
+    errorDirigidosA, // **Añadido**
   } = UseFetchEventos();
 
   const [formData, setFormData] = useState({
@@ -83,11 +89,21 @@ const EventosEdit = () => {
     e.preventDefault();
 
     // Validaciones
-    if (!formData.ubicacion || !formData.tipo_evento) {
+    if (!formData.nombre_Evento.trim()) { // Añadido para validar nombre del evento
       Swal.fire({
         icon: 'warning',
         title: 'Advertencia',
-        text: 'Por favor, selecciona una ubicación y un tipo de evento.',
+        text: 'El nombre del evento no puede estar vacío.',
+        confirmButtonColor: '#2563EB',
+      });
+      return;
+    }
+
+    if (!formData.ubicacion || !formData.tipo_evento || !formData.id_dirigido_a) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Advertencia',
+        text: 'Por favor, selecciona una ubicación, un tipo de evento y a quién está dirigido.',
         confirmButtonColor: '#2563EB',
       });
       return;
@@ -122,11 +138,54 @@ const EventosEdit = () => {
       return;
     }
 
+    // **Validación Opcional: Fecha no en el pasado y al menos 3 días de anticipación**
+    const isNotPastDate = (fecha) => {
+      const selectedDate = new Date(fecha);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      selectedDate.setHours(0, 0, 0, 0);
+      return selectedDate >= today;
+    };
+
+    const isAtLeastThreeDaysAhead = (fecha) => {
+      const selectedDate = new Date(fecha);
+      const today = new Date();
+      const minDate = new Date();
+      minDate.setDate(today.getDate() + 3);
+
+      // Comparar solo fechas, sin considerar la hora
+      selectedDate.setHours(0,0,0,0);
+      minDate.setHours(0,0,0,0);
+      today.setHours(0,0,0,0);
+
+      return selectedDate >= minDate;
+    };
+
+    if (!isNotPastDate(fechaEvento)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Advertencia',
+        text: 'La fecha del evento no puede estar en el pasado.',
+        confirmButtonColor: '#2563EB',
+      });
+      return;
+    }
+
+    if (!isAtLeastThreeDaysAhead(fechaEvento)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Advertencia',
+        text: 'El evento debe ser reservado con al menos 3 días de anticipación.',
+        confirmButtonColor: '#2563EB',
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const payload = {
-        nombre_Evento: formData.nombre_Evento,
-        descripcion_Evento: formData.descripcion_Evento,
+        nombre_Evento: formData.nombre_Evento.trim(),
+        descripcion_Evento: formData.descripcion_Evento.trim(),
         fecha_Evento: fechaEvento, // Mantener en formato YYYY-MM-DD
         hora_inicio_Evento: horaInicio,
         hora_fin_Evento: horaFin,
@@ -208,6 +267,14 @@ const EventosEdit = () => {
             onChange={handleChange}
             className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             required
+            min={(() => {
+              const today = new Date();
+              today.setDate(today.getDate() + 3);
+              const day = String(today.getDate()).padStart(2, '0');
+              const month = String(today.getMonth() + 1).padStart(2, '0'); // Los meses empiezan en 0
+              const year = today.getFullYear();
+              return `${year}-${month}-${day}`;
+            })()}
           />
           {/* Mostrar la fecha formateada */}
           {formData.fecha_Evento && (
@@ -246,18 +313,26 @@ const EventosEdit = () => {
         {/* Campo de Dirigido a */}
         <div className="mb-6">
           <label className="block text-sm font-medium mb-2">Dirigido a</label>
-          <select
-            name="id_dirigido_a"
-            value={formData.id_dirigido_a}
-            onChange={handleChange}
-            className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            required
-          >
-            <option value="">Selecciona un público</option>
-            <option value="1">Estudiantes</option>
-            <option value="2">Público en General</option>
-            {/* Agrega más opciones según tus necesidades */}
-          </select>
+          {loadingDirigidosA ? (
+            <p>Cargando públicos...</p>
+          ) : errorDirigidosA ? (
+            <p className="text-red-500">Error al cargar los públicos: {errorDirigidosA}</p>
+          ) : (
+            <select
+              name="id_dirigido_a"
+              value={formData.id_dirigido_a}
+              onChange={handleChange}
+              className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            >
+              <option value="">Selecciona un público</option>
+              {dirigidosA.map((publico) => (
+                <option key={publico.id} value={publico.id}>
+                  {publico.nombre}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         {/* Campo de Ubicación */}
@@ -266,7 +341,7 @@ const EventosEdit = () => {
           {loadingUbicaciones ? (
             <p>Cargando ubicaciones...</p>
           ) : errorUbicaciones ? (
-            <p className="text-red-500">Error al cargar ubicaciones.</p>
+            <p className="text-red-500">Error al cargar ubicaciones: {errorUbicaciones}</p>
           ) : (
             <select
               name="ubicacion"
@@ -291,7 +366,7 @@ const EventosEdit = () => {
           {loadingTiposEventos ? (
             <p>Cargando tipos de eventos...</p>
           ) : errorTiposEventos ? (
-            <p className="text-red-500">Error al cargar tipos de eventos.</p>
+            <p className="text-red-500">Error al cargar tipos de eventos: {errorTiposEventos}</p>
           ) : (
             <select
               name="tipo_evento"
