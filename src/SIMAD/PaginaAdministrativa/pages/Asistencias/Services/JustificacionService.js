@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/justificacion-ausencia';
+const API_URL = 'https://simadlsc-backend-production.up.railway.app/justificacion-ausencia';
 
 export const crearJustificacion = async (idAsistencia, descripcion) => {
     const response = await fetch(`${API_URL}/${idAsistencia}`, {

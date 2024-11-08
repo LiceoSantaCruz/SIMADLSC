@@ -1,5 +1,5 @@
 
-const API_URL = 'http://localhost:3000/materias';
+const API_URL = 'https://simadlsc-backend-production.up.railway.app/materias';
 
 export const obtenerMaterias = async () => {
   const response = await fetch(API_URL);

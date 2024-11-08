@@ -1,6 +1,6 @@
 // src/services/profesor.service.js
 
-const API_URL = 'http://localhost:3000/profesores';
+const API_URL = 'https://simadlsc-backend-production.up.railway.app/profesores';
 
 export const obtenerProfesores = async () => {
   const response = await fetch(API_URL);

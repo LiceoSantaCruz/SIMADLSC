@@ -6,7 +6,7 @@ export const useForgotPassword = () => {
 
   const handleForgotPassword = async (email_Usuario) => {
     try {
-      const response = await fetch('http://localhost:3000/auth/forgot-password', {
+      const response = await fetch('https://simadlsc-backend-production.up.railway.app//auth/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

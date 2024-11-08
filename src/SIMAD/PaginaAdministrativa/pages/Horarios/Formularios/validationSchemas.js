@@ -1,5 +1,3 @@
-// src/SIMAD/PaginaAdministrativa/pages/Horarios/Formularios/validationSchemas.js
-import * as Yup from 'yup';
 
 // src/SIMAD/PaginaAdministrativa/pages/Horarios/Formularios/validationSchemas.js
 

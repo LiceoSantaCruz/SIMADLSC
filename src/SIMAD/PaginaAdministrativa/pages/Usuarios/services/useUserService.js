@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:3000/users';  // URL base para las peticiones
+const BASE_URL = 'https://simadlsc-backend-production.up.railway.app//users';  // URL base para las peticiones
 
 // Obtener todos los usuarios
 export const getAllUsers = async (token) => {

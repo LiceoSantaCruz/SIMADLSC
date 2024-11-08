@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/grados';
+const API_URL = 'https://simadlsc-backend-production.up.railway.app/grados';
 
 export const obtenerGrados = async () => {
   const response = await fetch(API_URL);

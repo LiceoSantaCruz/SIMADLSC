@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/periodos';
+const API_URL = 'https://simadlsc-backend-production.up.railway.app/periodos';
 
 export const obtenerPeriodos = async () => {
     const response = await fetch(API_URL);

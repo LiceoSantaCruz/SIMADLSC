@@ -1,7 +1,7 @@
 // src/auth/services/resetPasswordService.js
 export const resetPassword = async (token, contraseña_Usuario) => {
   try {
-    const response = await fetch('http://localhost:3000/auth/reset-password', {
+    const response = await fetch('https://simadlsc-backend-production.up.railway.app/auth/reset-password', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

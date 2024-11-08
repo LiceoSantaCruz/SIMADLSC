@@ -1,7 +1,7 @@
 export const fetchUserProfile = async () => {
     const token = localStorage.getItem('token'); 
   
-    const response = await fetch('http://localhost:3000/profile', {
+    const response = await fetch('https://simadlsc-backend-production.up.railway.app/profile', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

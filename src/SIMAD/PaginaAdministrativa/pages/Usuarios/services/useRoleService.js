@@ -1,5 +1,5 @@
 // services/useRoleService.js
-const BASE_URL = 'http://localhost:3000'; // Asegúrate de ajustar esta URL según tu API
+const BASE_URL = 'https://simadlsc-backend-production.up.railway.app/'; // Asegúrate de ajustar esta URL según tu API
 
 // Función para obtener todos los roles
 export const getAllRoles = async (token) => {

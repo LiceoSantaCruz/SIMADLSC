@@ -1,6 +1,6 @@
 // services/matriculaService.js
 
-const API_URL = 'http://localhost:3000/matriculas'; // Reemplaza con la URL de tu API backend
+const API_URL = 'https://simadlsc-backend-production.up.railway.app/matriculas'; // Reemplaza con la URL de tu API backend
 
 export const createMatricula = async (matriculaData) => {
   

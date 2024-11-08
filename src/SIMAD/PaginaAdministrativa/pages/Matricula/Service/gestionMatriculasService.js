@@ -1,6 +1,6 @@
 // services/gestionMatriculasService.js
 
-const API_URL = 'http://localhost:3000/matriculas'; // Reemplaza con la URL de tu API backend
+const API_URL = 'https://simadlsc-backend-production.up.railway.app/matriculas'; // Reemplaza con la URL de tu API backend
 
 // Obtener todas las matrículas con estado pendiente
 export const obtenerMatriculasPendientes = async () => {

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = 'http://localhost:3000/asistencias';
+const API_URL = 'https://simadlsc-backend-production.up.railway.app/asistencias';
 export const obtenerGestionAsistencias = async (filtros) => {
   const { periodo, fecha, grado, materia, seccion } = filtros;
 
