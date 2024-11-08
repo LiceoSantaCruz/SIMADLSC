@@ -3,10 +3,11 @@ import { useDatosIniciales } from "./Hook/useDatosIniciales";
 import { actualizarAsistencia, eliminarAsistencia, obtenerGestionAsistencias, obtenerTodasLasAsistencias } from "./Services/GestionAsistenciaService";
 import { usePeriodos } from "./Hook/usePeriodos";
 import EditarAsistenciaModal from "./components/EditarAsistenciaModal";
+import NoResultsModal from "./components/NoResultsModal";
 
 export const GestionAsistencia = () => {
-  const { materias, grados, secciones, error: errorDatos } = useDatosIniciales();
-  const { periodos, error: errorPeriodos } = usePeriodos(); 
+  const { materias, grados, secciones } = useDatosIniciales();
+  const { periodos } = usePeriodos(); 
 
   const [asistencias, setAsistencias] = useState([]);
   const [filtros, setFiltros] = useState({
@@ -19,6 +20,7 @@ export const GestionAsistencia = () => {
   const [error, setError] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [asistenciaSeleccionada, setAsistenciaSeleccionada] = useState(null);
+  const [noResultsVisible, setNoResultsVisible] = useState(false); // Nuevo estado para el modal de resultados
 
   // Nueva función para obtener todas las asistencias al cargar el componente
   useEffect(() => {
@@ -39,11 +41,17 @@ export const GestionAsistencia = () => {
   const handleBuscar = async () => {
     try {
       const data = await obtenerGestionAsistencias(filtros);
-      setAsistencias(data);
-      setError('');
+      if (data.length === 0) {
+        setNoResultsVisible(true); // Mostrar modal si no hay resultados
+      } else {
+        setAsistencias(data);
+        setNoResultsVisible(false); // Cerrar el modal si hay resultados
+      }
     } catch (err) {
+      console.error('Error al obtener las asistencias:', err);
       setError('Error al obtener las asistencias');
       setAsistencias([]);
+      setNoResultsVisible(true); // También mostrar modal en caso de error
     }
   };
 
@@ -81,12 +89,13 @@ export const GestionAsistencia = () => {
     }
   };
 
+  const handleCloseModal = () => {
+    setNoResultsVisible(false); // Cerrar el modal
+  };
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Gestión de Asistencias</h1>
-      {errorDatos && <p className="text-red-500">{errorDatos}</p>}
-      {errorPeriodos && <p className="text-red-500">{errorPeriodos}</p>}
-      {error && <p className="text-red-500">{error}</p>}
 
       <div className="mb-4 grid grid-cols-1 md:grid-cols-5 gap-4">
         <select
@@ -222,7 +231,13 @@ export const GestionAsistencia = () => {
           onClose={() => setModalVisible(false)}
         />
       )}
+
+      {noResultsVisible && (
+        <NoResultsModal 
+          message="No se encontraron asistencias con los criterios de búsqueda." 
+          onClose={handleCloseModal} 
+        />
+      )}
     </div>
   );
-
 }
