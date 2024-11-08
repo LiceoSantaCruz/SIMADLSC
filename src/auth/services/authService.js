@@ -1,6 +1,6 @@
 export const AuthService = {
     resetPassword: async (token, contraseña_Usuario) => {
-      const response = await fetch('https://simadlsc-backend-production.up.railway.app//auth/reset-password', {
+      const response = await fetch('https://simadlsc-backend-production.up.railway.app/auth/reset-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -33,7 +33,7 @@ export default function LoginPage() {
       localStorage.removeItem("userData");
 
       // Realizar la petición al servidor para el login
-      const response = await fetch("http://localhost:3000/auth/login", {
+      const response = await fetch("https://simadlsc-backend-production.up.railway.app/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
