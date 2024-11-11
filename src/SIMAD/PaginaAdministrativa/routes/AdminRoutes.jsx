@@ -42,6 +42,7 @@ export const AdminRoutes = () => {
   return (
     <div className="flex-grow p-6 bg-gray-100 min-h-screen overflow-auto">
       <Routes>
+
         <Route path="/" element={<Navigate to="/info" replace />} />
          {/* Rutas de inicio personalizadas según el rol */}
          {role === 'admin' || role === 'superadmin' ? (
