@@ -8,7 +8,7 @@ const Navbar = () => {
         
         {/* Logo */}
         <div className="text-2xl font-bold">
-          <Link to="/" className="hover:text-yellow-400 transition duration-300">
+          <Link to="images/logoliceo.png" className="hover:text-yellow-400 transition duration-300">
             Liceo Santa Cruz
           </Link>
         </div>
