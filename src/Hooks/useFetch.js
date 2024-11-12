@@ -21,7 +21,6 @@ const useFetch = (url, dependencies = []) => {
       setLoading(false);
     }
   }, [url]);
-
   useEffect(() => {
     fetchData();
   }, [fetchData, ...dependencies]);
