@@ -23,10 +23,19 @@ const CrearEventos = () => {
     errorDirigidosA, // Añadido
   } = UseFetchEventos();
 
+  // Función para obtener la fecha en formato YYYY-MM-DD
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Los meses empiezan en 0
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const [formData, setFormData] = useState({
     nombre_Evento: '',
     descripcion_Evento: '',
-    fecha_Evento: '',
+    fecha_Evento: getTodayDate(), // Establece la fecha actual como valor inicial
     hora_inicio_Evento: '',
     hora_fin_Evento: '',
     id_dirigido_a: '',
@@ -40,21 +49,6 @@ const CrearEventos = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-  };
-
-  // Función para verificar si la fecha es al menos 3 días en el futuro
-  const isAtLeastThreeDaysAhead = (fecha) => {
-    const selectedDate = new Date(fecha);
-    const today = new Date();
-    const minDate = new Date();
-    minDate.setDate(today.getDate() + 3);
-
-    // Comparar solo fechas, sin considerar la hora
-    selectedDate.setHours(0,0,0,0);
-    minDate.setHours(0,0,0,0);
-    today.setHours(0,0,0,0);
-
-    return selectedDate >= minDate;
   };
 
   // Función para verificar si la fecha no está en el pasado
@@ -111,17 +105,6 @@ const CrearEventos = () => {
         icon: 'warning',
         title: 'Advertencia',
         text: 'La fecha del evento no puede estar en el pasado.',
-        confirmButtonColor: '#2563EB',
-      });
-      return;
-    }
-
-    // Validar que la fecha sea al menos 3 días en el futuro
-    if (!isAtLeastThreeDaysAhead(formData.fecha_Evento)) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Advertencia',
-        text: 'El evento debe ser reservado con al menos 3 días de anticipación.',
         confirmButtonColor: '#2563EB',
       });
       return;
@@ -224,35 +207,7 @@ const CrearEventos = () => {
       return;
     }
 
-    /*
-    // Validación de solapamiento (opcional)
-    try {
-      const isOverlapping = await EventosService.checkOverlap({
-        fecha_Evento: fechaEvento,
-        hora_inicio_Evento: horaInicio,
-        hora_fin_Evento: horaFin,
-        id_ubicacion: parseInt(formData.ubicacion, 10),
-      });
-
-      if (isOverlapping) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Advertencia',
-          text: 'La ubicación está ocupada en el horario especificado.',
-          confirmButtonColor: '#2563EB',
-        });
-        return;
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error al verificar la disponibilidad de la ubicación.',
-        confirmButtonText: 'Aceptar',
-      });
-      return;
-    }
-    */
+    // Eliminada la validación de solapamiento
 
     setIsLoading(true);
     try {
@@ -304,9 +259,6 @@ const CrearEventos = () => {
     }
   };
 
-  // Función para formatear la fecha solo para la visualización (opcional)
-
-
   return (
     <div className="p-6 bg-gray-100 min-h-screen flex justify-center items-center">
       <form
@@ -349,14 +301,7 @@ const CrearEventos = () => {
             onChange={handleChange}
             className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             required
-            min={(() => {
-              const today = new Date();
-              today.setDate(today.getDate() + 3);
-              const day = String(today.getDate()).padStart(2, '0');
-              const month = String(today.getMonth() + 1).padStart(2, '0'); // Los meses empiezan en 0
-              const year = today.getFullYear();
-              return `${year}-${month}-${day}`;
-            })()}
+            min={getTodayDate()} // Establece el mínimo a la fecha actual
           />
         </div>
 
