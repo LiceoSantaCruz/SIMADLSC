@@ -32,6 +32,16 @@ const CrearEventos = () => {
     return `${year}-${month}-${day}`;
   };
 
+  // Función para obtener la fecha mínima (hoy + 3 días)
+  const getMinDate = () => {
+    const minDate = new Date();
+    minDate.setDate(minDate.getDate() + 3);
+    const year = minDate.getFullYear();
+    const month = String(minDate.getMonth() + 1).padStart(2, '0');
+    const day = String(minDate.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const [formData, setFormData] = useState({
     nombre_Evento: '',
     descripcion_Evento: '',
@@ -51,16 +61,19 @@ const CrearEventos = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  // Función para verificar si la fecha no está en el pasado
-  const isNotPastDate = (fecha) => {
+  // Función para verificar si la fecha es al menos 3 días en el futuro
+  const isAtLeastThreeDaysAhead = (fecha) => {
     const selectedDate = new Date(fecha);
     const today = new Date();
+    const minDate = new Date();
+    minDate.setDate(today.getDate() + 3);
 
     // Comparar solo fechas, sin considerar la hora
     selectedDate.setHours(0,0,0,0);
+    minDate.setHours(0,0,0,0);
     today.setHours(0,0,0,0);
 
-    return selectedDate >= today;
+    return selectedDate >= minDate;
   };
 
   const handleSubmit = async (e) => {
@@ -99,12 +112,12 @@ const CrearEventos = () => {
       return;
     }
 
-    // Validar que la fecha no esté en el pasado
-    if (!isNotPastDate(formData.fecha_Evento)) {
+    // Validar que la fecha sea al menos 3 días en el futuro
+    if (!isAtLeastThreeDaysAhead(formData.fecha_Evento)) {
       Swal.fire({
         icon: 'warning',
         title: 'Advertencia',
-        text: 'La fecha del evento no puede estar en el pasado.',
+        text: 'El evento debe ser reservado con al menos 3 días de anticipación.',
         confirmButtonColor: '#2563EB',
       });
       return;
