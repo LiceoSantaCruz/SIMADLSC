@@ -1,9 +1,14 @@
-// ListaHorarios.jsx
 import React, { useState, useMemo } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import FormularioHorarioEstudiante from '../Formularios/FormularioHorarioEstudiante';
 import PropTypes from 'prop-types';
+
+// URL base de la API
+const API_BASE_URL =
+  process.env.NODE_ENV === 'production'
+    ? 'https://simadlsc-backend-production.up.railway.app'
+    : 'http://localhost:3000';
 
 // Función utilitaria para formatear hora de 24 horas a 12 horas con AM/PM
 const formatearHora12 = (hora24) => {
@@ -42,7 +47,7 @@ const ListaHorarios = ({ horarios, onEditHorario, setHorarios, materias, profeso
 
     if (confirmacion.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:3000/horarios/${id}`);
+        await axios.delete(`${API_BASE_URL}/horarios/${id}`);
         setHorarios(horarios.filter((horario) => horario.id_Horario !== id));
         Swal.fire('¡Eliminado!', 'El horario ha sido eliminado exitosamente.', 'success');
       } catch (err) {
@@ -55,7 +60,7 @@ const ListaHorarios = ({ horarios, onEditHorario, setHorarios, materias, profeso
   // Función para abrir el modal de edición
   const abrirModalEditar = async (horarioId) => {
     try {
-      const response = await axios.get(`http://localhost:3000/horarios/${horarioId}`);
+      const response = await axios.get(`${API_BASE_URL}/horarios/${horarioId}`);
       setHorarioSeleccionado(response.data);
       setModalAbierto(true);
     } catch (error) {
@@ -175,7 +180,6 @@ const ListaHorarios = ({ horarios, onEditHorario, setHorarios, materias, profeso
                             <p>
                               <strong>Aula:</strong> {horario.aula?.nombre_Aula || 'N/A'}
                             </p>
-                            {/* Puedes agregar más detalles aquí si lo consideras necesario */}
                           </div>
                         </div>
                       </td>

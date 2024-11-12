@@ -1,4 +1,3 @@
-// FormularioHorarioEstudiante.jsx
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -6,6 +5,11 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import { HorarioEstudianteSchema } from './validationSchemas';
 import PropTypes from 'prop-types';
+
+const API_BASE_URL =
+  process.env.NODE_ENV === 'production'
+    ? 'https://simadlsc-backend-production.up.railway.app'
+    : 'http://localhost:3000';
 
 const FormularioHorarioEstudiante = ({
   onSubmitSuccess,
@@ -21,7 +25,7 @@ const FormularioHorarioEstudiante = ({
     handleSubmit,
     watch,
     setValue,
-    setError, // Para asignar errores específicos
+    setError,
     formState: { errors, isSubmitting },
     reset,
   } = useForm({
@@ -38,7 +42,7 @@ const FormularioHorarioEstudiante = ({
     },
   });
 
-  const [errorGeneral, setErrorGeneral] = useState(''); // Para errores generales
+  const [errorGeneral, setErrorGeneral] = useState('');
   const gradoSeleccionado = watch('gradoId');
   const [seccionesDisponibles, setSeccionesDisponibles] = useState([]);
 
@@ -46,7 +50,7 @@ const FormularioHorarioEstudiante = ({
     const fetchSecciones = async () => {
       if (gradoSeleccionado) {
         try {
-          const response = await axios.get(`http://localhost:3000/secciones?gradoId=${gradoSeleccionado}`);
+          const response = await axios.get(`${API_BASE_URL}/secciones?gradoId=${gradoSeleccionado}`);
           setSeccionesDisponibles(response.data);
         } catch (error) {
           console.error('Error al obtener las secciones:', error);
@@ -62,20 +66,17 @@ const FormularioHorarioEstudiante = ({
 
   useEffect(() => {
     if (initialData) {
-      // Establecemos todos los campos excepto las horas
       setValue('gradoId', initialData.gradoId || '');
       setValue('seccionId', initialData.seccionId || '');
       setValue('materiaId', initialData.materiaId || '');
       setValue('profesorId', initialData.profesorId || '');
       setValue('dia_semana_Horario', initialData.dia_semana_Horario || '');
       setValue('aulaId', initialData.aulaId || '');
-      // No pre-poblamos hora_inicio_Horario ni hora_fin_Horario
     }
   }, [initialData, setValue]);
 
   const onSubmit = async (data) => {
     try {
-      // Resetear errores generales antes de intentar enviar
       setErrorGeneral('');
 
       const transformedData = {
@@ -92,31 +93,25 @@ const FormularioHorarioEstudiante = ({
       let response;
 
       if (initialData) {
-        // Editar horario existente
         response = await axios.put(
-          `http://localhost:3000/horarios/estudiante/${initialData.id_Horario}`,
+          `${API_BASE_URL}/horarios/estudiante/${initialData.id_Horario}`,
           transformedData
         );
         Swal.fire('Éxito', 'Horario de estudiante actualizado exitosamente.', 'success');
       } else {
-        // Crear nuevo horario
-        response = await axios.post('http://localhost:3000/horarios/estudiante', transformedData);
+        response = await axios.post(`${API_BASE_URL}/horarios/estudiante`, transformedData);
         Swal.fire('Éxito', 'Horario de estudiante creado exitosamente.', 'success');
       }
 
       reset();
-
       if (onSubmitSuccess) onSubmitSuccess(response.data);
     } catch (error) {
       console.error('Error al guardar el horario de estudiante:', error);
 
       if (error.response && error.response.data) {
-        console.log('Respuesta de error del backend:', error.response.data);
-
         const { errors: backendErrors, message: backendMessage, error: backendError } = error.response.data;
 
         if (backendErrors && typeof backendErrors === 'object') {
-          // Asignar errores a los campos correspondientes
           Object.keys(backendErrors).forEach((field) => {
             setError(field, {
               type: 'server',
@@ -125,15 +120,11 @@ const FormularioHorarioEstudiante = ({
           });
         }
 
-        // Determinar el mensaje de error
         const message = backendMessage || backendError || 'Hubo un problema al guardar el horario.';
-
         if (message) {
-          // Asignar error general
           setErrorGeneral(message);
         }
 
-        // Mostrar alerta
         Swal.fire('Error', 'Hubo un problema al guardar el horario. Revisa los errores en el formulario.', 'error');
       } else {
         setErrorGeneral('Hubo un problema inesperado al guardar el horario.');
@@ -141,7 +132,6 @@ const FormularioHorarioEstudiante = ({
       }
     }
   };
-
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-6">
       <h2 className="text-2xl font-bold mb-4">
@@ -313,3 +303,5 @@ FormularioHorarioEstudiante.propTypes = {
 };
 
 export default FormularioHorarioEstudiante;
+
+

@@ -6,6 +6,12 @@ import 'jspdf-autotable';
 
 const MySwal = withReactContent(Swal);
 
+// URL base de la API
+const API_BASE_URL =
+  process.env.NODE_ENV === 'production'
+    ? 'https://simadlsc-backend-production.up.railway.app'
+    : 'http://localhost:3000';
+
 export const HorarioProf = () => {
   const [profesores, setProfesores] = useState([]);
   const [idProfesorSeleccionado, setIdProfesorSeleccionado] = useState(null);
@@ -23,7 +29,7 @@ export const HorarioProf = () => {
   useEffect(() => {
     const obtenerProfesores = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/profesores`, {
+        const response = await fetch(`${API_BASE_URL}/profesores`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -54,7 +60,7 @@ export const HorarioProf = () => {
 
         if (!profesorId) return;
 
-        const profesorResponse = await fetch(`http://localhost:3000/profesores/${profesorId}`, {
+        const profesorResponse = await fetch(`${API_BASE_URL}/profesores/${profesorId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -68,7 +74,7 @@ export const HorarioProf = () => {
         setNombreProfesor(profesorData.nombre_Profesor);
         setApellidosProfesor(`${profesorData.apellido1_Profesor} ${profesorData.apellido2_Profesor}`);
 
-        const horariosResponse = await fetch(`http://localhost:3000/horarios/profesor/${profesorId}`, {
+        const horariosResponse = await fetch(`${API_BASE_URL}/horarios/profesor/${profesorId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

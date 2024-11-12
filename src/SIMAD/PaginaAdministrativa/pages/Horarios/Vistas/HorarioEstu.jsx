@@ -7,17 +7,22 @@ import 'jspdf-autotable';
 
 const MySwal = withReactContent(Swal);
 
+// URL base de la API
+const API_BASE_URL =
+  process.env.NODE_ENV === 'production'
+    ? 'https://simadlsc-backend-production.up.railway.app'
+    : 'http://localhost:3000';
+
 export const HorarioEstu = () => {
   const [nombreEstudiante, setNombreEstudiante] = useState('');
   const [apellidosEstudiante, setApellidosEstudiante] = useState('');
   const [seccion, setSeccion] = useState('');
   const [horarios, setHorarios] = useState([]);
-  const [secciones, setSecciones] = useState([]); // Lista de secciones para seleccionar
+  const [secciones, setSecciones] = useState([]);
   const [seccionSeleccionada, setSeccionSeleccionada] = useState('');
   const [error, setError] = useState(null);
   const [cargando, setCargando] = useState(true);
 
-  // Obtener el rol desde el localStorage
   const role = localStorage.getItem('role');
   const estudianteId = localStorage.getItem('id_estudiante');
 
@@ -26,21 +31,18 @@ export const HorarioEstu = () => {
       try {
         setCargando(true);
 
-        // Cargar todas las secciones si el rol es admin o superadmin
         if (role === 'admin' || role === 'superadmin') {
-          const responseSecciones = await axios.get('http://localhost:3000/secciones');
+          const responseSecciones = await axios.get(`${API_BASE_URL}/secciones`);
           setSecciones(responseSecciones.data);
         }
 
-        // Si es estudiante, cargar sus datos y sección
         if (role === 'estudiante' && estudianteId) {
-          const responseEstudiante = await axios.get(`http://localhost:3000/estudiantes/${estudianteId}`);
+          const responseEstudiante = await axios.get(`${API_BASE_URL}/estudiantes/${estudianteId}`);
           const dataEstudiante = responseEstudiante.data;
-          console.log(dataEstudiante);
           setNombreEstudiante(dataEstudiante.nombre_Estudiante);
           setApellidosEstudiante(`${dataEstudiante.apellido1_Estudiante} ${dataEstudiante.apellido2_Estudiante}`);
           setSeccion(dataEstudiante.seccion?.nombre_Seccion || 'Sin Sección');
-          setSeccionSeleccionada(dataEstudiante.seccion.id_Seccion); // Establecer la sección del estudiante
+          setSeccionSeleccionada(dataEstudiante.seccion.id_Seccion);
         }
 
         setCargando(false);
@@ -57,16 +59,16 @@ export const HorarioEstu = () => {
   useEffect(() => {
     const obtenerHorarios = async () => {
       if (!seccionSeleccionada) return;
-      
+
       try {
         setCargando(true);
-        const responseHorarios = await axios.get(`http://localhost:3000/horarios/seccion/${seccionSeleccionada}`);
+        const responseHorarios = await axios.get(`${API_BASE_URL}/horarios/seccion/${seccionSeleccionada}`);
         const horariosOrdenados = responseHorarios.data.sort((a, b) => a.hora_inicio_Horario.localeCompare(b.hora_inicio_Horario));
         setHorarios(horariosOrdenados);
         setCargando(false);
       } catch (error) {
         console.error('Error al obtener los horarios:', error);
-        setHorarios([]); // Establece horarios como un array vacío si no se encuentran datos
+        setHorarios([]);
         setCargando(false);
       }
     };
@@ -139,7 +141,7 @@ export const HorarioEstu = () => {
         <>
           <h1 className="text-3xl font-bold mb-4">Sección: {seccion}</h1>
           <h2 className="text-2xl font-bold mb-6">
-            Hola,{nombreEstudiante}{apellidosEstudiante}! Bienvenido al horario.
+            Hola, {nombreEstudiante} {apellidosEstudiante}! Bienvenido al horario.
           </h2>
         </>
       )}

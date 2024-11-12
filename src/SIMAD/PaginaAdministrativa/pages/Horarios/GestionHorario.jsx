@@ -9,53 +9,27 @@ import ToggleButton from '../../../../Components/ToggleButton';
 import ErrorMessage from '../../../../Components/ErrorMessage';
 import LoadingIndicator from '../../../../Components/LoadingIndicator';
 
+// Definir la URL base de la API dependiendo del entorno
+const API_BASE_URL = window.location.hostname === 'localhost'
+  ? 'http://localhost:3000' // URL de desarrollo
+  : 'https://simadlsc-backend-production.up.railway.app'; // URL de producción
+
 export const GestionHorario = () => {
   const [formularioAbierto, setFormularioAbierto] = useState(false);
   const [horarios, setHorarios] = useState([]);
   const [horarioEdit, setHorarioEdit] = useState(null); // Estado para el horario a editar
 
   // Utilizar el hook personalizado useFetch para obtener datos
-  const {
-    data: grados,
-    loading: loadingGrados,
-    error: errorGrados,
-  } = useFetch('http://localhost:3000/grados');
-
-  const {
-    data: secciones,
-    loading: loadingSecciones,
-    error: errorSecciones,
-  } = useFetch('http://localhost:3000/secciones');
-  
-  const {
-    data: materias,
-    loading: loadingMaterias,
-    error: errorMaterias,
-  } = useFetch('http://localhost:3000/materias');
-  
-  const {
-    data: profesores,
-    loading: loadingProfesores,
-    error: errorProfesores,
-  } = useFetch('http://localhost:3000/profesores');
-  
-  const {
-    data: aulas,
-    loading: loadingAulas,
-    error: errorAulas,
-  } = useFetch('http://localhost:3000/aulas');
-  
-  const {
-    data: horariosData,
-    loading: loadingHorarios,
-    error: errorHorarios,
-    refetch: refetchHorarios,
-  } = useFetch('http://localhost:3000/horarios');
+  const { data: grados, loading: loadingGrados, error: errorGrados } = useFetch(`${API_BASE_URL}/grados`);
+  const { data: secciones, loading: loadingSecciones, error: errorSecciones } = useFetch(`${API_BASE_URL}/secciones`);
+  const { data: materias, loading: loadingMaterias, error: errorMaterias } = useFetch(`${API_BASE_URL}/materias`);
+  const { data: profesores, loading: loadingProfesores, error: errorProfesores } = useFetch(`${API_BASE_URL}/profesores`);
+  const { data: aulas, loading: loadingAulas, error: errorAulas } = useFetch(`${API_BASE_URL}/aulas`);
+  const { data: horariosData, loading: loadingHorarios, error: errorHorarios, refetch: refetchHorarios } = useFetch(`${API_BASE_URL}/horarios`);
 
   // Actualizar horarios al obtener los datos iniciales
   useEffect(() => {
     if (horariosData) {
-      console.log("Horarios Data:", horariosData);
       setHorarios(horariosData);
     }
   }, [horariosData]);
@@ -105,27 +79,13 @@ export const GestionHorario = () => {
     refetchHorarios();
   };
 
-  // Manejar estados de carga y errores
-  const isLoading =
-    loadingGrados ||
-    loadingMaterias ||
-    loadingProfesores ||
-    loadingAulas ||
-    loadingHorarios ||
-    loadingSecciones;
-  const hasError =
-    errorGrados ||
-    errorMaterias ||
-    errorProfesores ||
-    errorAulas ||
-    errorHorarios ||
-    errorSecciones;
+  // Manejar estados de carga y errores de manera simplificada
+  const isLoading = [loadingGrados, loadingSecciones, loadingMaterias, loadingProfesores, loadingAulas, loadingHorarios].some(Boolean);
+  const hasError = [errorGrados, errorSecciones, errorMaterias, errorProfesores, errorAulas, errorHorarios].some(Boolean);
 
   // Función para formatear la hora de 24 horas a 12 horas con AM/PM
   const formatearHora = (hora24) => {
-    if (!hora24) {
-      return "N/A"; // Si la hora no está disponible, retornar "N/A"
-    }
+    if (!hora24) return "N/A"; // Si la hora no está disponible, retornar "N/A"
     const [hora, minuto] = hora24.split(':');
     let horaNum = parseInt(hora, 10);
     const ampm = horaNum >= 12 ? 'PM' : 'AM';
@@ -156,13 +116,12 @@ export const GestionHorario = () => {
 
     // Agregar filas
     horarios.forEach((horario) => {
-      // Acceder directamente a los datos anidados dentro del objeto horario
       const grado = horario.seccion?.gradoId || 'N/A';
       const seccion = horario.seccion?.nombre_Seccion || 'N/A';
       const materia = horario.materia?.nombre_Materia || 'N/A';
-      const profesor = horario.profesor 
-                        ? `${horario.profesor.nombre_Profesor} ${horario.profesor.apellido1_Profesor} ${horario.profesor.apellido2_Profesor}` 
-                        : 'N/A';
+      const profesor = horario.profesor
+        ? `${horario.profesor.nombre_Profesor} ${horario.profesor.apellido1_Profesor} ${horario.profesor.apellido2_Profesor}`
+        : 'N/A';
       const aula = horario.aula?.nombre_Aula || 'N/A';
 
       tableRows.push([
@@ -208,19 +167,8 @@ export const GestionHorario = () => {
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
           onClick={exportarPdf}
-          disabled={
-            horarios.length === 0 ||
-            loadingGrados ||
-            loadingSecciones ||
-            loadingMaterias ||
-            loadingProfesores ||
-            loadingAulas
-          }
-          title={
-            horarios.length === 0
-              ? "No hay horarios para exportar"
-              : "Exportar todos los horarios como PDF"
-          }
+          disabled={horarios.length === 0 || isLoading}
+          title={horarios.length === 0 ? "No hay horarios para exportar" : "Exportar todos los horarios como PDF"}
         >
           Exportar Todos los Horarios como PDF
         </button>
@@ -236,17 +184,16 @@ export const GestionHorario = () => {
       {!isLoading && !hasError && (
         <>
           {formularioAbierto ? (
-           <FormularioHorarioEstudiante
-             onSubmitSuccess={horarioEdit ? handleUpdateHorario : handleSubmitSuccess}
-             onCancel={() => setFormularioAbierto(false)}
-             initialData={horarioEdit}
-             grados={grados}
-             materias={materias}
-             profesores={profesores}
-             aulas={aulas}
-           />
+            <FormularioHorarioEstudiante
+              onSubmitSuccess={horarioEdit ? handleUpdateHorario : handleSubmitSuccess}
+              onCancel={() => setFormularioAbierto(false)}
+              initialData={horarioEdit}
+              grados={grados}
+              materias={materias}
+              profesores={profesores}
+              aulas={aulas}
+            />
           ) : (
-            // Asegúrate de que los datos requeridos no sean undefined antes de renderizar la lista
             materias && profesores && aulas && (
               <ListaHorarios
                 horarios={horarios}

@@ -7,8 +7,8 @@ export const Footer = () => {
         
         {/* Columna 1: Logo y descripción */}
         <div className="text-center md:text-left">
-        <img src="images/logoliceo.png" alt="Liceo Santa Cruz" style={{ width: '40px', height: '40px' }} className="mx-auto md:mx-0 mb-4" />
-        <p className="text-sm">
+          <img src="/images/IMG_4153.JPG" alt="Liceo Santa Cruz" style={{ width: '40px', height: '40px' }} className="mx-auto md:mx-0 mb-4" />
+          <p className="text-sm">
             Liceo Santa Cruz Clímaco A. Pérez. <br />
             Somos una huella de éxito en el tiempo, con el futuro en tus manos.
           </p>
@@ -51,7 +51,7 @@ export const Footer = () => {
 
       {/* Copyright */}
       <div className="text-center mt-4 text-sm">
-      © 2024 Liceo Santa Cruz. Todos los derechos reservados      
+        © 2024 Liceo Santa Cruz. Todos los derechos reservados      
       </div>
     </footer>
   );

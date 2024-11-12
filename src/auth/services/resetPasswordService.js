@@ -21,6 +21,6 @@ export const resetPassword = async (token, contraseña_Usuario) => {
     return await response.json();
   } catch (error) {
     console.error('Error en resetPasswordService:', error); // Log de errores
-    throw error; // Asegúrate de lanzar el error para que el componente lo capture
+    throw error; // Lanzamos el error para que el componente lo capture
   }
 };

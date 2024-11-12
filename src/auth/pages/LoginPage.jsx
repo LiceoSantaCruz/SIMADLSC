@@ -1,12 +1,14 @@
 import { useState } from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import { useNavigate } from 'react-router-dom';
 
 const MySwal = withReactContent(Swal);
 
 export default function LoginPage() {
   const [email_Usuario, setEmail_Usuario] = useState("");
   const [contraseña_Usuario, setContraseña_Usuario] = useState("");
+  const navigate = useNavigate(); // Mueve useNavigate aquí
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -106,13 +108,12 @@ export default function LoginPage() {
       });
 
       // Redirigir al usuario a la página principal o una específica según el rol
-      // Asegúrate de que la redirección sea correcta según tu lógica
       if (role === "profesor") {
-        window.location.href = "/horarios/profesor"; // Redirigir a la página de horarios del profesor
+        navigate("/horarios/profesor"); // Redirigir a la página de horarios del profesor
       } else if (role === "estudiante") {
-        window.location.href = "/horarios/estudiante"; // Redirigir a la página de horarios del estudiante
+        navigate("/horarios/estudiante"); // Redirigir a la página de horarios del estudiante
       } else {
-        window.location.href = "/"; // Redirigir a la página principal
+        navigate("/"); // Redirigir a la página principal
       }
 
     } catch (error) {
@@ -125,12 +126,14 @@ export default function LoginPage() {
     }
   };
 
+  // Función para redirigir a "paginainformativa"
   const handleGoBack = () => {
-    window.location.href = "/paginainformativa";
+    navigate("/paginainformativa");
   };
 
+  // Función para redirigir a "forgot-password"
   const ForgotPassword = () => {
-    window.location.href = "/auth/forgot-password";
+    navigate("/auth/forgot-password");
   };
 
   return (
