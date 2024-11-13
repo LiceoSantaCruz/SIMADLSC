@@ -150,8 +150,8 @@ export const SideBar = () => {
                                 {(role === 'admin' || role === 'superadmin') && (
                                     <>
                                         <Link to="/gestion-matricula" className="block py-1 hover:text-gray-400">Gestión matrícula</Link>
-                                        <Link to="/matricula-ordinaria" className="block py-1 hover:text-gray-400">Matrícula ordinaria</Link>
-                                        <Link to="/matricula-extraordinaria" className="block py-1 hover:text-gray-400">Matrícula extraordinaria</Link>
+                                        {/* <Link to="/matricula-ordinaria" className="block py-1 hover:text-gray-400">Matrícula ordinaria</Link>
+                                        <Link to="/matricula-extraordinaria" className="block py-1 hover:text-gray-400">Matrícula extraordinaria</Link> */}
                                     </>
                                 )}
                             </div>
