@@ -14,7 +14,7 @@ export const useMatriculaForm = () => {
       apellido2_Estudiante: '',
       edad: '',
       telefono: '',
-      Cedula: '',
+      cedula: '', // Asegúrate de que 'cedula' está incluida aquíedula: '',
       correo_estudiantil: '',
       fecha_nacimiento: '',
       sexo: '',
