@@ -55,7 +55,7 @@ export const obtenerReporteAsistencias = async (cedula, fechaInicio, fechaFin, i
   if (fechaFin) params.append('fechaFin', fechaFin);
   if (idPeriodo) params.append('id_Periodo', idPeriodo);
 
-  const url = `http://localhost:3000/asistencias/reporte/${cedula}?${params.toString()}`;
+  const url = `https://simadlsc-backend-production.up.railway.app/asistencias/reporte/${cedula}?${params.toString()}`;
 
   
     const response = await fetch(url);
