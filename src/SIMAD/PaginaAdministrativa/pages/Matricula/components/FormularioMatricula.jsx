@@ -112,8 +112,8 @@ export const FormularioMatricula = () => {
                 </label>
                 <input
                   type="text"
-                  name="estudiante.Cedula"
-                  value={formData.estudiante.Cedula}
+                  name="estudiante.cedula"
+                  value={formData.estudiante.cedula}
                   onChange={handleChange}
                   className="border p-2 rounded-md w-full"
                 />
