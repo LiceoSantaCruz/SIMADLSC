@@ -1,9 +1,11 @@
-const BASE_URL = 'https://simadlsc-backend-production.up.railway.app/users';  // URL base para las peticiones
+//const BASE_URL = 'https://simadlsc-backend-production.up.railway.app/users';  // URL base para las peticiones
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 // Obtener todos los usuarios
 export const getAllUsers = async (token) => {
   try {
-    const response = await fetch(`${BASE_URL}`, {
+    const response = await fetch(`${API_URL}/users`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -28,7 +30,7 @@ export const createUser = async (userData, token) => {
     throw new Error('No se proporcionó un token de autenticación');
   }
   try {
-    const response = await fetch(`${BASE_URL}/register`, {
+    const response = await fetch(`${API_URL}/users/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -55,7 +57,7 @@ export const createStudentUser = async (userData, studentData, token) => {
     throw new Error('No se proporcionó un token de autenticación');
   }
   try {
-    const response = await fetch(`${BASE_URL}/register-student`, {
+    const response = await fetch(`${API_URL}/users/register-student`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -79,7 +81,7 @@ export const createStudentUser = async (userData, studentData, token) => {
 // Actualizar un usuario existente
 export const updateUser = async (id, userData, token) => {
   try {
-    const response = await fetch(`${BASE_URL}/${id}`, {
+    const response = await fetch(`${API_URL}/users/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -102,7 +104,7 @@ export const updateUser = async (id, userData, token) => {
 // Eliminar un usuario
 export const deleteUser = async (id, token) => {
   try {
-    const response = await fetch(`${BASE_URL}/${id}`, {
+    const response = await fetch(`${API_URL}/users/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -129,7 +131,7 @@ export const deleteUser = async (id, token) => {
 // Bloquear o desbloquear un usuario
 export const toggleBlockUser = async (id, bloqueado_Usuario, token) => {
   try {
-    const response = await fetch(`${BASE_URL}/${id}/block`, {
+    const response = await fetch(`${API_URL}/users/${id}/block`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

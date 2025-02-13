@@ -38,7 +38,6 @@ const UseFetchEventos = (type = 'all') => {
         } else {
           response = await EventosService.getAllEventos();
         }
-        console.log('Fetched eventos:', response); // Para depuración
         setData(response);
       } catch (err) {
         setError(err.response?.data?.message || 'Error al obtener eventos');

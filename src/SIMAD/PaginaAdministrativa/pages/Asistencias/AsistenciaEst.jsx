@@ -6,37 +6,68 @@ import useProfesores from "./Hook/useProfesores";
 import useSecciones from "./Hook/useSecciones";
 import useEstudiantesPorSeccion from "./Hook/useEstudiantesPorSeccion";
 import { usePeriodos } from "./Hook/usePeriodos";
+import ErrorModal from "./components/ErrorModal";
+import SuccessModal from "./components/SuccessModal ";
 
 export const AsistenciaEst = () => {
   const { grados } = useGrados();
   const { materias } = useMaterias();
   const { profesores } = useProfesores();
-  const { periodos } = usePeriodos(); 
+  const { periodos } = usePeriodos();
 
   const [formData, setFormData] = useState({
-    fecha: '',
-    id_Materia: '',
-    id_grado: '',
-    id_Seccion: '',
-    id_Profesor: '',
-    id_Periodo: '', 
+    fecha: "",
+    id_Materia: "",
+    id_grado: "",
+    id_Seccion: "",
+    id_Profesor: "",
+    id_Periodo: "",
+    lecciones: [],
   });
+
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false); // Nuevo estado para el modal de error personalizado
 
   const { secciones, loading: loadingSecciones } = useSecciones(formData.id_grado);
   const { estudiantes, setEstudiantes, loading: loadingEstudiantes } = useEstudiantesPorSeccion(formData.id_Seccion);
   const { handleCrearAsistencias, loading, error } = useCrearAsistencia();
 
+  // Validar si el día seleccionado es sábado o domingo
+  const isWeekend = (date) => {
+    const day = new Date(date).getDay();
+    return day === 0 || day === 6; // Domingo (0) y sábado (6)
+  };
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
 
-    if (e.target.name === 'id_grado') {
-      setFormData((prevData) => ({ ...prevData, id_Seccion: '' }));
-      setEstudiantes([]);
-    } 
+    if (name === "fecha") {
+      if (isWeekend(value)) {
+        // Mostrar modal de error si es fin de semana
+        setShowErrorModal(true);
+        setFormData((prevData) => ({ ...prevData, fecha: "" })); // Limpiar el campo de fecha
+        return;
+      }
+    }
 
-    if (e.target.name === 'id_Seccion') {
+    setFormData({ ...formData, [name]: value });
+
+    if (name === "id_grado") {
+      setFormData((prevData) => ({ ...prevData, id_Seccion: "" }));
       setEstudiantes([]);
     }
+
+    if (name === "id_Seccion") {
+      setEstudiantes([]);
+    }
+  };
+
+  const handleLeccionToggle = (leccion) => {
+    const updatedLecciones = formData.lecciones.includes(leccion)
+      ? formData.lecciones.filter((l) => l !== leccion)
+      : [...formData.lecciones, leccion];
+
+    setFormData({ ...formData, lecciones: updatedLecciones });
   };
 
   const handleEstadoChange = (id_Estudiante, estado) => {
@@ -59,31 +90,35 @@ export const AsistenciaEst = () => {
       id_grado: formData.id_grado,
       id_Seccion: formData.id_Seccion,
       id_Profesor: formData.id_Profesor,
-      id_Periodo: formData.id_Periodo, // Agregar el periodo a los datos de asistencia
+      id_Periodo: formData.id_Periodo,
+      lecciones: formData.lecciones,
     }));
 
-    await handleCrearAsistencias(asistenciasData);
+    try {
+      await handleCrearAsistencias(asistenciasData);
 
-    // Mostrar prompt de éxito y limpiar el formulario
-    window.alert("¡Asistencia creada exitosamente!");
+      setShowSuccessModal(true);
 
-    setFormData({
-      fecha: '',
-      id_Materia: '',
-      id_grado: '',
-      id_Seccion: '',
-      id_Profesor: '',
-      id_Periodo: '', 
-    });
-    setEstudiantes([]);
+      setFormData({
+        fecha: "",
+        id_Materia: "",
+        id_grado: "",
+        id_Seccion: "",
+        id_Profesor: "",
+        id_Periodo: "",
+        lecciones: [],
+      });
+      setEstudiantes([]);
+    } catch (err) {
+      // El error ya se maneja desde el hook y pasa al estado `error`
+    }
   };
 
   return (
     <div className="container mx-auto p-4">
       <h2 className="text-2xl font-semibold mb-4">Registrar Asistencia</h2>
-      
+
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md">
-        {error && <p className="text-red-500">{error}</p>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block mb-2">Fecha:</label>
@@ -164,7 +199,7 @@ export const AsistenciaEst = () => {
               <option value="">Seleccionar Profesor</option>
               {profesores.map((profesor) => (
                 <option key={profesor.id_Profesor} value={profesor.id_Profesor}>
-                  {profesor.nombre_Profesor}
+                  {profesor.nombre_Profesor} {profesor.apellido1_Profesor} {profesor.apellido2_Profesor}
                 </option>
               ))}
             </select>
@@ -186,7 +221,31 @@ export const AsistenciaEst = () => {
               ))}
             </select>
           </div>
+          <div className="col-span-2">
+            <label className="block mb-2">Seleccionar Lecciones:</label>
+            <div className="grid grid-cols-5 gap-2">
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((leccion) => (
+                <label key={leccion} className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    value={leccion}
+                    checked={formData.lecciones.includes(leccion)}
+                    onChange={() => handleLeccionToggle(leccion)}
+                    className="form-checkbox"
+                  />
+                  <span>Lección {leccion}</span>
+                </label>
+              ))}
+            </div>
+            <p className="mt-2 text-gray-600">
+              Seleccionadas:{" "}
+              {formData.lecciones.length > 0
+                ? formData.lecciones.sort().join("/")
+                : "Ninguna"}
+            </p>
+          </div>
         </div>
+
         <h3 className="text-xl font-semibold mt-6 mb-4">Lista de Estudiantes</h3>
         <div className="overflow-x-auto">
           {loadingEstudiantes ? (
@@ -202,12 +261,18 @@ export const AsistenciaEst = () => {
               <tbody>
                 {estudiantes.map((estudiante) => (
                   <tr key={estudiante.id_Estudiante}>
-                    <td className="border px-4 py-2">{estudiante.nombre_Estudiante} {estudiante.apellido1_Estudiante}</td>
+                    <td className="border px-4 py-2">
+                      {estudiante.nombre_Estudiante}{" "}
+                      {estudiante.apellido1_Estudiante}
+                    </td>
                     <td className="border px-4 py-2">
                       <select
                         value={estudiante.estado}
                         onChange={(e) =>
-                          handleEstadoChange(estudiante.id_Estudiante, e.target.value)
+                          handleEstadoChange(
+                            estudiante.id_Estudiante,
+                            e.target.value
+                          )
                         }
                         className="p-1 border rounded"
                       >
@@ -228,9 +293,29 @@ export const AsistenciaEst = () => {
           disabled={loading}
           className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
         >
-          {loading ? 'Guardando...' : 'Guardar Asistencia'}
+          {loading ? "Guardando..." : "Guardar Asistencia"}
         </button>
       </form>
+
+      {/* Modales */}
+      {error && (
+        <ErrorModal
+          message={error}
+          onClose={() => {}}
+        />
+      )}
+      {showErrorModal && (
+        <ErrorModal
+          message="No se pueden seleccionar sábados ni domingos como fecha de asistencia."
+          onClose={() => setShowErrorModal(false)}
+        />
+      )}
+      {showSuccessModal && (
+        <SuccessModal
+          message="¡Asistencia creada exitosamente!"
+          onClose={() => setShowSuccessModal(false)}
+        />
+      )}
     </div>
   );
-}
+};

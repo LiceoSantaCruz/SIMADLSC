@@ -2,10 +2,12 @@
 
 import axios from 'axios';
 
-const API_BASE_URL = 'https://simadlsc-backend-production.up.railway.app/'; // Asegúrate de que esta sea la URL correcta de tu API
+//https://simadlsc-backend-production.up.railway.app/
+
+const API_URL = import.meta.env.VITE_API_URL; // Asegúrate de que esta sea la URL correcta de tu API
 
 const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${localStorage.getItem('token')}`, // Asegúrate de almacenar el token JWT al iniciar sesión

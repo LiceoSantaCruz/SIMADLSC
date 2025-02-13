@@ -1,7 +1,9 @@
 // src/auth/services/resetPasswordService.js
+const API_URL = import.meta.env.VITE_API_URL;
+//https://simadlsc-backend-production.up.railway.app/auth/reset-password
 export const resetPassword = async (token, contraseña_Usuario) => {
   try {
-    const response = await fetch('https://simadlsc-backend-production.up.railway.app/auth/reset-password', {
+    const response = await fetch(`${API_URL}/auth/reset-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

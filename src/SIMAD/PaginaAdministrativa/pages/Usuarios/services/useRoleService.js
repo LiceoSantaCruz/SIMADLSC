@@ -1,9 +1,9 @@
-const BASE_URL = 'https://simadlsc-backend-production.up.railway.app'; // Asegúrate de ajustar esta URL según tu API
 
-// Función para obtener todos los roles
+const API_URL = import.meta.env.VITE_API_URL;
+// const BASE_URL = 'https://simadlsc-backend-production.up.railway.app';
 export const getAllRoles = async (token) => {
   try {
-    const response = await fetch(`${BASE_URL}/roles`, {
+    const response = await fetch(`${API_URL}/roles`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

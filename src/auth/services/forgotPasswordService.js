@@ -1,6 +1,10 @@
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+//https://simadlsc-backend-production.up.railway.app/auth/forgot-password
 export const forgotPassword = async (email_Usuario) => {
   try {
-    const response = await fetch('https://simadlsc-backend-production.up.railway.app/auth/forgot-password', {
+    const response = await fetch(`${API_URL}/auth/forgot-password}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

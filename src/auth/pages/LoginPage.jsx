@@ -34,8 +34,11 @@ export default function LoginPage() {
       localStorage.removeItem("id_Profesor");
       localStorage.removeItem("userData");
 
+      const API_URL = import.meta.env.VITE_API_URL;
+
+      //https://simadlsc-backend-production.up.railway.app/auth/login
       // Realizar la petición al servidor para el login
-      const response = await fetch("https://simadlsc-backend-production.up.railway.app/auth/login", {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -64,7 +67,6 @@ export default function LoginPage() {
       }
 
       const data = await response.json();
-      console.log("Respuesta completa del backend:", data); // Esto ya lo tienes
       
       // Extraer los datos relevantes de la respuesta
       const role = data.role; // Asegúrate de que esto sea correcto
@@ -73,7 +75,6 @@ export default function LoginPage() {
       const idEstudiante = data.payload?.id_Estudiante; // Cambia esta línea
       const userData = data.user_data; // Verifica si esto es correcto
       
-      console.log("Datos recibidos:", role, token, idProfesor, idEstudiante, userData);
       
       // Verificar si existe un rol
       if (!role) {

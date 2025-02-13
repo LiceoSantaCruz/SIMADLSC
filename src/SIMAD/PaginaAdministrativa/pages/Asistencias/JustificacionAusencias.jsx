@@ -2,16 +2,22 @@ import { useState } from "react";
 import { crearJustificacion } from "./Services/JustificacionService";
 import useMaterias from "./Hook/useMaterias";
 import { useAsistenciaByCedula } from "./Hook/useAsistenciaByCedula";
+import JustificationModal from "./components/JustificationModal";
+import SuccessModal from "./components/SuccessModal ";
 
 export const JustificacionAusencias = () => {
   const { materias } = useMaterias();
   const { asistencias, loading, error, searchAsistencias } = useAsistenciaByCedula();
 
   const [formData, setFormData] = useState({
-    cedula: '',
-    id_Materia: '',
-    fecha: '',
+    cedula: "",
+    id_Materia: "",
+    fecha: "",
   });
+
+  const [showJustificationModal, setShowJustificationModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [selectedAsistenciaId, setSelectedAsistenciaId] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -22,17 +28,21 @@ export const JustificacionAusencias = () => {
     searchAsistencias(formData);
   };
 
-  const handleJustificar = async (asistenciaId) => {
-    const descripcion = prompt('Ingrese el motivo de justificación');
-    if (descripcion) {
-      try {
-        await crearJustificacion(asistenciaId, descripcion);
-        alert('Justificación guardada con éxito');
-        // Actualizar la lista de asistencias después de justificar
-        searchAsistencias(formData);
-      } catch (err) {
-        alert('Error al justificar la ausencia');
-      }
+  const handleJustificar = (asistenciaId) => {
+    setSelectedAsistenciaId(asistenciaId);
+    setShowJustificationModal(true);
+  };
+
+  const handleConfirmJustification = async (descripcion) => {
+    try {
+      await crearJustificacion(selectedAsistenciaId, descripcion);
+      setShowJustificationModal(false);
+      setShowSuccessModal(true); // Mostrar modal de éxito
+      setSelectedAsistenciaId(null);
+      // Actualizar la lista de asistencias después de justificar
+      searchAsistencias(formData);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -69,7 +79,6 @@ export const JustificacionAusencias = () => {
         </div>
       </form>
 
-      {error && <p className="text-red-500">{error}</p>}
       {loading ? (
         <p>Cargando asistencias...</p>
       ) : (
@@ -85,7 +94,7 @@ export const JustificacionAusencias = () => {
           </thead>
           <tbody>
             {asistencias.map((asistencia) => (
-              <tr key={asistencia.asistencia_id}>
+              <tr key={asistencia.asistencia_id} className="text-center">
                 <td className="border px-4 py-2">{asistencia.fecha}</td>
                 <td className="border px-4 py-2">{asistencia.id_Materia.nombre_Materia}</td>
                 <td className="border px-4 py-2">{asistencia.id_Profesor.nombre_Profesor}</td>
@@ -94,7 +103,7 @@ export const JustificacionAusencias = () => {
                   <button
                     onClick={() => handleJustificar(asistencia.asistencia_id)}
                     className="bg-green-700 text-white px-2 py-1 rounded"
-                    disabled={asistencia.estado !== 'A'}
+                    disabled={asistencia.estado !== "A"}
                   >
                     Justificar
                   </button>
@@ -104,6 +113,20 @@ export const JustificacionAusencias = () => {
           </tbody>
         </table>
       )}
+
+      {/* Modales */}
+      {showJustificationModal && (
+        <JustificationModal
+          onConfirm={handleConfirmJustification}
+          onClose={() => setShowJustificationModal(false)}
+        />
+      )}
+      {showSuccessModal && (
+        <SuccessModal
+          message="¡Justificación guardada con éxito!"
+          onClose={() => setShowSuccessModal(false)} // Cierra correctamente el modal
+        />
+      )}
     </div>
   );
-}
+};

@@ -1,7 +1,12 @@
-const API_URL = 'https://simadlsc-backend-production.up.railway.app/justificacion-ausencia';
 
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+
+
+//! /justificacion-ausencia
 export const crearJustificacion = async (idAsistencia, descripcion) => {
-    const response = await fetch(`${API_URL}/${idAsistencia}`, {
+    const response = await fetch(`${API_URL}/justificacion-ausencia/${idAsistencia}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -17,7 +22,7 @@ export const crearJustificacion = async (idAsistencia, descripcion) => {
 };
 
 export const obtenerJustificaciones = async () => {
-    const response = await fetch(API_URL);
+    const response = await fetch(`${API_URL}/justificacion-ausencia`);
     if (!response.ok) {
         throw new Error('Error al obtener las justificaciones');
     }
