@@ -1,9 +1,13 @@
 
-const API_URL = 'https://simadlsc-backend-production.up.railway.app/materias';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
+
+//! /materias
 export const obtenerMaterias = async () => {
-  const response = await fetch(API_URL);
+  const response = await fetch(`${API_URL}/materias`);
   if (!response.ok) throw new Error('Error al obtener materias');
   const data = await response.json();
   return data; 
 };
+

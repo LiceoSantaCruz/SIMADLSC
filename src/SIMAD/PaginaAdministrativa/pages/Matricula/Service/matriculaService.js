@@ -1,10 +1,9 @@
 // services/matriculaService.js
-
-const API_URL = 'https://simadlsc-backend-production.up.railway.app/matriculas'; // Reemplaza con la URL de tu API backend
-
+//https://simadlsc-backend-production.up.railway.app/matriculas
+const API_URL = import.meta.env.VITE_API_URL;
 export const createMatricula = async (matriculaData) => {
   
-    const response = await fetch( API_URL, {
+    const response = await fetch(`${API_URL}/matriculas`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

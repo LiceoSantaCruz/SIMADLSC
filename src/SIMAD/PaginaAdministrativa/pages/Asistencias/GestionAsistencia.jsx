@@ -4,54 +4,55 @@ import { actualizarAsistencia, eliminarAsistencia, obtenerGestionAsistencias, ob
 import { usePeriodos } from "./Hook/usePeriodos";
 import EditarAsistenciaModal from "./components/EditarAsistenciaModal";
 import NoResultsModal from "./components/NoResultsModal";
-
+import ConfirmDeleteModal from "./components/ConfirmDeleteModal ";
 export const GestionAsistencia = () => {
   const { materias, grados, secciones } = useDatosIniciales();
-  const { periodos } = usePeriodos(); 
+  const { periodos } = usePeriodos();
 
   const [asistencias, setAsistencias] = useState([]);
   const [filtros, setFiltros] = useState({
-    periodo: '',
-    fecha: '',
-    grado: '',
-    materia: '',
-    seccion: '',
+    periodo: "",
+    fecha: "",
+    grado: "",
+    materia: "",
+    seccion: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [asistenciaSeleccionada, setAsistenciaSeleccionada] = useState(null);
-  const [noResultsVisible, setNoResultsVisible] = useState(false); // Nuevo estado para el modal de resultados
+  const [noResultsVisible, setNoResultsVisible] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [asistenciaIdToDelete, setAsistenciaIdToDelete] = useState(null);
 
-  // Nueva función para obtener todas las asistencias al cargar el componente
   useEffect(() => {
     const fetchAsistencias = async () => {
       try {
-        const data = await obtenerTodasLasAsistencias(); 
+        const data = await obtenerTodasLasAsistencias();
         setAsistencias(data);
-        setError('');
+        setError("");
       } catch (err) {
-        setError('Error al obtener las asistencias');
+        setError("Error al obtener las asistencias");
         setAsistencias([]);
       }
     };
 
     fetchAsistencias();
-  }, []); // Se ejecuta al montar el componente
+  }, []);
 
   const handleBuscar = async () => {
     try {
       const data = await obtenerGestionAsistencias(filtros);
       if (data.length === 0) {
-        setNoResultsVisible(true); // Mostrar modal si no hay resultados
+        setNoResultsVisible(true);
       } else {
         setAsistencias(data);
-        setNoResultsVisible(false); // Cerrar el modal si hay resultados
+        setNoResultsVisible(false);
       }
     } catch (err) {
-      console.error('Error al obtener las asistencias:', err);
-      setError('Error al obtener las asistencias');
+      console.error("Error al obtener las asistencias:", err);
+      setError("Error al obtener las asistencias");
       setAsistencias([]);
-      setNoResultsVisible(true); // También mostrar modal en caso de error
+      setNoResultsVisible(true);
     }
   };
 
@@ -61,7 +62,7 @@ export const GestionAsistencia = () => {
   };
 
   const handleEditar = (id) => {
-    const asistencia = asistencias.find(a => a.asistencia_id === id);
+    const asistencia = asistencias.find((a) => a.asistencia_id === id);
     setAsistenciaSeleccionada(asistencia);
     setModalVisible(true);
   };
@@ -69,28 +70,37 @@ export const GestionAsistencia = () => {
   const handleUpdate = async (id, updatedData) => {
     try {
       await actualizarAsistencia(id, updatedData);
-      // Actualizar la lista de asistencias después de la actualización
-      setAsistencias(asistencias.map(a => (a.asistencia_id === id ? { ...a, ...updatedData } : a)));
-      setModalVisible(false); // Cerrar el modal después de la actualización
+      setAsistencias(
+        asistencias.map((a) =>
+          a.asistencia_id === id ? { ...a, ...updatedData } : a
+        )
+      );
+      setModalVisible(false);
     } catch (err) {
-      setError('Error al actualizar la asistencia');
+      setError("Error al actualizar la asistencia");
     }
   };
 
-  const handleEliminar = async (id) => {
-    const confirmar = window.confirm("¿Estás seguro de que deseas eliminar esta asistencia?");
-    if (confirmar) {
-      try {
-        await eliminarAsistencia(id);
-        setAsistencias(asistencias.filter((asistencia) => asistencia.asistencia_id !== id));
-      } catch (err) {
-        setError('Error al eliminar la asistencia');
-      }
+  const handleEliminar = (id) => {
+    setAsistenciaIdToDelete(id);
+    setDeleteModalVisible(true);
+  };
+
+  const confirmEliminar = async () => {
+    try {
+      await eliminarAsistencia(asistenciaIdToDelete);
+      setAsistencias(
+        asistencias.filter((asistencia) => asistencia.asistencia_id !== asistenciaIdToDelete)
+      );
+      setDeleteModalVisible(false);
+      setAsistenciaIdToDelete(null);
+    } catch (err) {
+      setError("Error al eliminar la asistencia");
     }
   };
 
   const handleCloseModal = () => {
-    setNoResultsVisible(false); // Cerrar el modal
+    setNoResultsVisible(false);
   };
 
   return (
@@ -180,19 +190,21 @@ export const GestionAsistencia = () => {
               <th className="border px-4 py-2">Materia</th>
               <th className="border px-4 py-2">Sección</th>
               <th className="border px-4 py-2">Estado</th>
+              <th className="border px-4 py-2">Lecciones</th>
               <th className="border px-4 py-2">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {asistencias.map((asistencia) => (
-              <tr key={asistencia.asistencia_id}>
+              <tr key={asistencia.asistencia_id} className="text-center">
                 <td className="border px-4 py-2">
-                  {asistencia.id_Estudiante.nombre_Estudiante}{' '}
-                  {asistencia.id_Estudiante.apellido1_Estudiante}
+                  {asistencia.id_Estudiante.nombre_Estudiante}{" "}
+                  {asistencia.id_Estudiante.apellido1_Estudiante}{" "}
+                  {asistencia.id_Estudiante.apellido2_Estudiante}
                 </td>
                 <td className="border px-4 py-2">{asistencia.fecha}</td>
                 <td className="border px-4 py-2">
-                  {asistencia.id_Profesor.nombre_Profesor}{' '}
+                  {asistencia.id_Profesor.nombre_Profesor}{" "}
                   {asistencia.id_Profesor.apellido1_Profesor}
                 </td>
                 <td className="border px-4 py-2">
@@ -202,6 +214,11 @@ export const GestionAsistencia = () => {
                   {asistencia.id_Seccion.nombre_Seccion}
                 </td>
                 <td className="border px-4 py-2">{asistencia.estado}</td>
+                <td className="border px-4 py-2">
+                  {typeof asistencia.lecciones === "string"
+                    ? asistencia.lecciones.split(",").join(", ")
+                    : "N/A"}
+                </td>
                 <td className="border px-4 py-2">
                   <button
                     onClick={() => handleEditar(asistencia.asistencia_id)}
@@ -233,11 +250,19 @@ export const GestionAsistencia = () => {
       )}
 
       {noResultsVisible && (
-        <NoResultsModal 
-          message="No se encontraron asistencias con los criterios de búsqueda." 
-          onClose={handleCloseModal} 
+        <NoResultsModal
+          message="No se encontraron asistencias con los criterios de búsqueda."
+          onClose={handleCloseModal}
+        />
+      )}
+
+      {deleteModalVisible && (
+        <ConfirmDeleteModal
+          message="¿Estás seguro de que deseas eliminar esta asistencia?"
+          onConfirm={confirmEliminar}
+          onCancel={() => setDeleteModalVisible(false)}
         />
       )}
     </div>
   );
-}
+};

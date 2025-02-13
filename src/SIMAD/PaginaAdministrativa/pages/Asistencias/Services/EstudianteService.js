@@ -1,8 +1,10 @@
 
-const API_URL = 'https://simadlsc-backend-production.up.railway.app/estudiantes';
+ 
+const API_URL = import.meta.env.VITE_API_URL;
 
+//! /estudiantes
 export const obtenerEstudiantes = async () => {
-  const response = await fetch(API_URL);
+  const response = await fetch(`${API_URL}/estudiantes`);
   if (!response.ok) throw new Error('Error al obtener estudiantes');
   const data = response.json();
   return data;
@@ -11,7 +13,7 @@ export const obtenerEstudiantes = async () => {
 
 export const getEstudiantesBySeccion = async (id_Seccion) => {
   try {
-    const response = await fetch(`${API_URL}/seccion/${id_Seccion}`);
+    const response = await fetch(`${API_URL}/estudiantes/seccion/${id_Seccion}`);
     if (!response.ok) throw new Error('Error al obtener los estudiantes');
     return await response.json();
   } catch (error) {

@@ -12,40 +12,42 @@ export const useReporteAsistencia = () => {
     const [error, setError] = useState(null);
   
     const buscarAsistencias = async () => {
-      try {
-        setError(null);
-        const data = await obtenerReporteAsistencias(cedula, fechaInicio, fechaFin, idPeriodo);
-        setAsistencias(data);
-  
-        // Auto-completar grado y sección si hay datos
-        if (data.length > 0) {
-          setGrado(data[0].id_grado.nivel);
-          setSeccion(data[0].id_Seccion.nombre_Seccion);
-        } else {
-          setGrado('');
-          setSeccion('');
+        try {
+            setError(null); // Limpia el error antes de hacer la búsqueda
+            const data = await obtenerReporteAsistencias(cedula, fechaInicio, fechaFin, idPeriodo);
+            
+            if (data && data.length > 0) {
+                setAsistencias(data); // Establece los datos si no son vacíos
+                setGrado(data[0].id_grado.nivel);
+                setSeccion(data[0].id_Seccion.nombre_Seccion);
+            } else {
+                setAsistencias([]); // Si no hay datos, asegúrate de limpiar
+                setGrado('');
+                setSeccion('');
+                setError("No se encontraron asistencias para los filtros ingresados."); // Mostrar error si no hay datos
+            }
+        } catch (err) {
+            setAsistencias([]); // Asegura que el estado esté limpio
+            setGrado('');
+            setSeccion('');
+            setError("Error al obtener las asistencias"); // Mostrar error si algo falla
         }
-      } catch (err) {
-        setError(err.message);
-        setAsistencias([]);
-        setGrado('');
-        setSeccion('');
-      }
     };
   
     return {
-      cedula,
-      setCedula,
-      grado,
-      seccion,
-      fechaInicio,
-      setFechaInicio,
-      fechaFin,
-      setFechaFin,
-      idPeriodo,
-      setIdPeriodo,
-      asistencias,
-      error,
-      buscarAsistencias,
+        cedula,
+        setCedula,
+        grado,
+        seccion,
+        fechaInicio,
+        setFechaInicio,
+        fechaFin,
+        setFechaFin,
+        idPeriodo,
+        setIdPeriodo,
+        asistencias,
+        setAsistencias,
+        error,
+        buscarAsistencias,
     };
   };

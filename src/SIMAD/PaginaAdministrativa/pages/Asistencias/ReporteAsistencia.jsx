@@ -2,6 +2,8 @@ import { useReporteAsistencia } from './Hook/useReporteAsistencia';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { usePeriodos } from './Hook/usePeriodos';
+import ErrorModal from './components/ErrorModal';
+import { useEffect, useState } from 'react';
 
 export const ReporteAsistencia = () => {
   const {
@@ -16,45 +18,76 @@ export const ReporteAsistencia = () => {
     setFechaFin,
     setIdPeriodo,
     asistencias,
+    setAsistencias, // Aseguramos acceso directo a este estado
     error,
     buscarAsistencias,
-    
   } = useReporteAsistencia();
 
-  const {periodos} = usePeriodos();
+  const { periodos } = usePeriodos();
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
-  const handleSubmit = (e) => {
+  const estudianteNombre =
+    asistencias.length > 0
+      ? `${asistencias[0]?.id_Estudiante?.nombre_Estudiante} ${asistencias[0]?.id_Estudiante?.apellido1_Estudiante} ${asistencias[0]?.id_Estudiante?.apellido2_Estudiante || ""}`
+      : "";
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    buscarAsistencias();
+    setAsistencias([]); // Limpiar asistencias antes de nueva búsqueda
+    setShowErrorModal(false); // Ocultar modal de error si está visible
+
+    await buscarAsistencias();
   };
 
+  // Manejar los resultados de la búsqueda después de actualizar `asistencias`
+  useEffect(() => {
+    if (asistencias.length === 0 && error) {
+      setShowErrorModal(true);
+    }
+  }, [asistencias, error]); // Verifica cambios en asistencias y error
+
   const handleExportPDF = () => {
-    const input = document.getElementById('reporte-asistencias');
+    const input = document.getElementById("reporte-asistencias");
     html2canvas(input)
       .then((canvas) => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4");
         const imgWidth = 210;
         const pageHeight = 295;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         let heightLeft = imgHeight;
         let position = 0;
 
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
 
         while (heightLeft >= 0) {
           position = heightLeft - imgHeight;
           pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
           heightLeft -= pageHeight;
         }
 
         pdf.save(`Reporte_Asistencias_${cedula}.pdf`);
       })
       .catch((err) => {
-        console.error('Error al generar el PDF:', err);
+        console.error("Error al generar el PDF:", err);
       });
+  };
+
+  const traducirEstado = (estado) => {
+    switch (estado) {
+      case "P":
+        return "Presente";
+      case "A":
+        return "Ausente";
+      case "E":
+        return "Escapado";
+      case "J":
+        return "Justificado";
+      default:
+        return "Desconocido";
+    }
   };
 
   return (
@@ -69,7 +102,10 @@ export const ReporteAsistencia = () => {
 
       {/* Formulario de búsqueda */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <form className="grid grid-cols-1 md:grid-cols-3 gap-4" onSubmit={handleSubmit}>
+        <form
+          className="grid grid-cols-1 md:grid-cols-3 gap-4"
+          onSubmit={handleSubmit}
+        >
           <div>
             <label htmlFor="cedula" className="block text-sm font-medium text-gray-700">
               Cédula del Estudiante
@@ -114,7 +150,6 @@ export const ReporteAsistencia = () => {
             />
           </div>
 
-          {/* Select para el periodo */}
           <div>
             <label htmlFor="idPeriodo" className="block text-sm font-medium text-gray-700">
               Periodo
@@ -145,20 +180,17 @@ export const ReporteAsistencia = () => {
         </form>
       </div>
 
-      {/* Mostrar error si existe */}
-      {error && (
-        <div className="bg-red-100 text-red-700 p-4 rounded mb-6">
-          {error}
-        </div>
-      )}
-
       {/* Resultados */}
       {asistencias.length > 0 && (
         <>
-          <div id="reporte-asistencias" className="bg-white p-4 rounded-lg shadow overflow-x-auto">
+          <div
+            id="reporte-asistencias"
+            className="bg-white p-4 rounded-lg shadow overflow-x-auto"
+          >
             <div className="mb-4">
               <h3 className="text-lg font-semibold">Grado: {grado}</h3>
               <h3 className="text-lg font-semibold">Sección: {seccion}</h3>
+              <h3 className="text-lg font-semibold">Estudiante: {estudianteNombre}</h3>
             </div>
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -186,12 +218,8 @@ export const ReporteAsistencia = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       {new Date(asistencia.fecha).toLocaleDateString()}
                     </td>
-                    <td
-                      className={`px-6 py-4 whitespace-nowrap ${
-                        asistencia.estado === 'PRESENTE' ? 'text-green-600' : 'text-red-600'
-                      }`}
-                    >
-                      {asistencia.estado}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {traducirEstado(asistencia.estado)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {asistencia.id_Materia.nombre_Materia}
@@ -202,7 +230,7 @@ export const ReporteAsistencia = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       {asistencia.justificacionAusencia
                         ? asistencia.justificacionAusencia.descripcion
-                        : 'N/A'}
+                        : "N/A"}
                     </td>
                   </tr>
                 ))}
@@ -210,7 +238,6 @@ export const ReporteAsistencia = () => {
             </table>
           </div>
 
-          {/* Botón para exportar a PDF */}
           <div className="mt-6">
             <button
               onClick={handleExportPDF}
@@ -220,6 +247,16 @@ export const ReporteAsistencia = () => {
             </button>
           </div>
         </>
+      )}
+
+      {/* Modal de error */}
+      {showErrorModal && (
+        <ErrorModal
+          message={
+            "No se encontraron asistencias para la cédula proporcionada con los filtros seleccionados."
+          }
+          onClose={() => setShowErrorModal(false)}
+        />
       )}
     </div>
   );

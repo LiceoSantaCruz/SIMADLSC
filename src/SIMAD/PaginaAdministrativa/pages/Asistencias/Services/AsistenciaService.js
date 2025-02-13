@@ -1,8 +1,9 @@
 
-const API_URL = 'https://simadlsc-backend-production.up.railway.app/asistencias';
+ 
+ const API_URL = import.meta.env.VITE_API_URL;
 
 export const crearAsistencias = async (asistenciasData) => {
-  const response = await fetch(API_URL, {
+  const response = await fetch(`${API_URL}/asistencias`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -15,13 +16,13 @@ export const crearAsistencias = async (asistenciasData) => {
 };
 
 export const obtenerAsistencias = async () => {
-  const response = await fetch(API_URL);
+  const response = await fetch(`${API_URL}/asistencias`);
   if (!response.ok) throw new Error('Error al obtener asistencias');
   return await response.json();
 };
 
 export const justificarAusencia = async (asistenciaId, justificacion) => {
-  const response = await fetch(`${API_URL}/${asistenciaId}/justificar`, {
+  const response = await fetch(`${API_URL}/asistencias/${asistenciaId}/justificar`, {
       method: 'PATCH',
       headers: {
           'Content-Type': 'application/json',
@@ -35,7 +36,7 @@ export const justificarAusencia = async (asistenciaId, justificacion) => {
 };
 
 export const fetchAsistencias = async ({ cedula, fecha, id_Materia }) => {
-  let url = `${API_URL}/estudiante/${cedula}`;
+  let url = `${API_URL}/asistencias/estudiante/${cedula}`;
   const params = new URLSearchParams();
   if (fecha) params.append('fecha', fecha);
   if (id_Materia) params.append('id_Materia', id_Materia);
@@ -50,15 +51,12 @@ export const fetchAsistencias = async ({ cedula, fecha, id_Materia }) => {
 };
 
 export const obtenerReporteAsistencias = async (cedula, fechaInicio, fechaFin, idPeriodo) => {
-  const params = new URLSearchParams();
-  if (fechaInicio) params.append('fechaInicio', fechaInicio);
-  if (fechaFin) params.append('fechaFin', fechaFin);
-  if (idPeriodo) params.append('id_Periodo', idPeriodo);
+    const params = new URLSearchParams();
+    if (fechaInicio) params.append('fechaInicio', fechaInicio);
+    if (fechaFin) params.append('fechaFin', fechaFin);
+    if (idPeriodo) params.append('id_Periodo', idPeriodo);
 
-  const url = `https://simadlsc-backend-production.up.railway.app/asistencias/reporte/${cedula}?${params.toString()}`;
-
-  
-    const response = await fetch(url);
+    const response = await fetch(`${API_URL}/asistencias/reporte/${cedula}?${params.toString()}`);
     if (!response.ok) {
       throw new Error('Error al obtener los datos');
     }
