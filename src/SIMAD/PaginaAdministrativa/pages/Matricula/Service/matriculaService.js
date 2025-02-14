@@ -13,7 +13,6 @@ export const createMatricula = async (matriculaData) => {
 
     if (!response.ok) throw new Error('Error al crear matricula');
     const data = await response.json();
-    console.log(data)
     return data;
 
    } 

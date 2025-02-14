@@ -95,7 +95,6 @@ export const useMatriculaForm = () => {
         delete matriculaData.estudiante.Presenta_alguna_enfermedad;
       }
   
-      console.log('Datos a enviar:', matriculaData);
   
       await createMatricula(matriculaData);
   
