@@ -1,7 +1,9 @@
+
+const API_URL = import.meta.env.VITE_API_URL;
 export const fetchUserProfile = async () => {
     const token = localStorage.getItem('token'); 
   
-    const response = await fetch('https://simadlsc-backend-production.up.railway.app/profile', {
+    const response = await fetch(`${API_URL}/profile`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
