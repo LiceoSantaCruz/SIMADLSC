@@ -1,6 +1,6 @@
-import useGrados from "../../Asistencias/Hook/useGrados";
-import { useMatriculaForm } from "../Hooks/useMatriculaForm";
-import { usePeriodos } from "../Hooks/usePeriodos";
+import useGrados from "../../Asistencias/Hook/useGrados"
+import { useMatriculaForm } from "../Hooks/useMatriculaForm"
+import { usePeriodos } from "../Hooks/usePeriodos"
 
 export const FormularioMatricula = () => {
   const {
@@ -8,24 +8,28 @@ export const FormularioMatricula = () => {
     setPage,
     formData,
     handleChange,
-    handleRadioChange,
     handleSubmit,
-    handleDownload,
+    handleDownloadPDF,
     isSubmitting,
-  } = useMatriculaForm();
+  } = useMatriculaForm()
 
-  const { periodos } = usePeriodos();
-  const { grados } = useGrados();
+  const { periodos } = usePeriodos()
+  const { grados } = useGrados()
 
   return (
     <div className="max-w-3xl mx-auto p-4 bg-white shadow-md">
-      <h1 className="text-center text-2xl font-bold mb-6">
+      <h1 className="text-center text-2xl font-bold mb-2">
         Boleta de Matrícula Año 2025
       </h1>
+      <p className="text-center text-gray-600 mb-6">
+        Por favor, complete todos los campos solicitados con datos verídicos.
+        Verifique la información antes de enviar el formulario.
+      </p>
 
       <form className="space-y-6" onSubmit={handleSubmit}>
         {page === 1 ? (
           <>
+            {/* Página 1: Datos del Estudiante */}
             <div className="flex justify-between">
               <div>
                 <label className="block text-gray-700">Periodo:</label>
@@ -74,10 +78,13 @@ export const FormularioMatricula = () => {
             </div>
 
             <h2 className="text-lg font-semibold">Datos del Estudiante</h2>
+            <p className="text-sm text-gray-500 mb-2">
+              Complete la información personal del estudiante. Asegúrese de que los datos sean correctos.
+            </p>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-700">Nombre:</label>
+                <label className="block text-gray-700">Nombre Completo:</label>
                 <input
                   type="text"
                   name="estudiante.nombre_Estudiante"
@@ -107,18 +114,16 @@ export const FormularioMatricula = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700">
-                  Nº Cédula o Pasaporte:
-                </label>
+                <label className="block text-gray-700">Nº Cédula o Pasaporte:</label>
                 <input
                   type="text"
                   name="estudiante.cedula"
                   value={formData.estudiante.cedula}
                   onChange={handleChange}
+                  placeholder="5-0123-0456"
                   className="border p-2 rounded-md w-full"
                 />
               </div>
-              {/* Campo de teléfono del estudiante agregado aquí */}
               <div>
                 <label className="block text-gray-700">Teléfono:</label>
                 <input
@@ -130,9 +135,7 @@ export const FormularioMatricula = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700">
-                  Correo Estudiantil:
-                </label>
+                <label className="block text-gray-700">Correo Estudiantil:</label>
                 <input
                   type="email"
                   name="estudiante.correo_estudiantil"
@@ -151,7 +154,7 @@ export const FormularioMatricula = () => {
                   name="estudiante.sexo"
                   value="Femenino"
                   checked={formData.estudiante.sexo === "Femenino"}
-                  onChange={handleRadioChange}
+                  onChange={handleChange}
                   className="mr-2"
                 />
                 Femenino
@@ -162,7 +165,7 @@ export const FormularioMatricula = () => {
                   name="estudiante.sexo"
                   value="Masculino"
                   checked={formData.estudiante.sexo === "Masculino"}
-                  onChange={handleRadioChange}
+                  onChange={handleChange}
                   className="mr-2"
                 />
                 Masculino
@@ -171,9 +174,7 @@ export const FormularioMatricula = () => {
 
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-gray-700">
-                  Lugar de Nacimiento:
-                </label>
+                <label className="block text-gray-700">Lugar de Nacimiento:</label>
                 <input
                   type="text"
                   name="estudiante.lugar_de_nacimiento"
@@ -183,9 +184,7 @@ export const FormularioMatricula = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700">
-                  Fecha de Nacimiento:
-                </label>
+                <label className="block text-gray-700">Fecha de Nacimiento:</label>
                 <input
                   type="date"
                   name="estudiante.fecha_nacimiento"
@@ -220,16 +219,14 @@ export const FormularioMatricula = () => {
             </div>
 
             <div className="flex space-x-4">
-              <label className="block text-gray-700">
-                Condición Migratoria:
-              </label>
+              <label className="block text-gray-700">Condición Migratoria:</label>
               <label className="inline-flex items-center">
                 <input
                   type="radio"
                   name="estudiante.condicion_migratoria"
                   value="Legal"
                   checked={formData.estudiante.condicion_migratoria === "Legal"}
-                  onChange={handleRadioChange}
+                  onChange={handleChange}
                   className="mr-2"
                 />
                 Legal
@@ -239,10 +236,8 @@ export const FormularioMatricula = () => {
                   type="radio"
                   name="estudiante.condicion_migratoria"
                   value="Refugiado"
-                  checked={
-                    formData.estudiante.condicion_migratoria === "Refugiado"
-                  }
-                  onChange={handleRadioChange}
+                  checked={formData.estudiante.condicion_migratoria === "Refugiado"}
+                  onChange={handleChange}
                   className="mr-2"
                 />
                 Refugiado
@@ -252,10 +247,8 @@ export const FormularioMatricula = () => {
                   type="radio"
                   name="estudiante.condicion_migratoria"
                   value="Ilegal"
-                  checked={
-                    formData.estudiante.condicion_migratoria === "Ilegal"
-                  }
-                  onChange={handleRadioChange}
+                  checked={formData.estudiante.condicion_migratoria === "Ilegal"}
+                  onChange={handleChange}
                   className="mr-2"
                 />
                 Ilegal
@@ -263,22 +256,19 @@ export const FormularioMatricula = () => {
             </div>
 
             <div>
-              <label className="block text-gray-700">
-                Repite alguna materia:
-              </label>
+              <label className="block text-gray-700">Repite alguna materia:</label>
               <input
                 type="text"
                 name="estudiante.Repite_alguna_materia"
                 value={formData.estudiante.Repite_alguna_materia}
                 onChange={handleChange}
-                className="border p-2 rounded-md w-full"
+                className="border p-2 rounded-md w-full mt-1"
+                placeholder="Si repite alguna materia, ingrese el nombre; de lo contrario, déjelo en blanco."
               />
             </div>
 
             <div>
-              <label className="block text-gray-700">
-                Institución de Procedencia:
-              </label>
+              <label className="block text-gray-700">Institución de Procedencia:</label>
               <input
                 type="text"
                 name="estudiante.institucion_de_procedencia"
@@ -290,9 +280,7 @@ export const FormularioMatricula = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-700">
-                  Tipo de Adecuación:
-                </label>
+                <label className="block text-gray-700">Tipo de Adecuación:</label>
                 <select
                   name="estudiante.tipo_de_adecuacion"
                   value={formData.estudiante.tipo_de_adecuacion}
@@ -316,7 +304,7 @@ export const FormularioMatricula = () => {
                       name="estudiante.recibe_religion"
                       value="Si"
                       checked={formData.estudiante.recibe_religion === "Si"}
-                      onChange={handleRadioChange}
+                      onChange={handleChange}
                       className="mr-2"
                     />
                     Sí
@@ -327,7 +315,7 @@ export const FormularioMatricula = () => {
                       name="estudiante.recibe_religion"
                       value="No"
                       checked={formData.estudiante.recibe_religion === "No"}
-                      onChange={handleRadioChange}
+                      onChange={handleChange}
                       className="mr-2"
                     />
                     No
@@ -346,7 +334,7 @@ export const FormularioMatricula = () => {
                       name="estudiante.presenta_carta"
                       value="Si"
                       checked={formData.estudiante.presenta_carta === "Si"}
-                      onChange={handleRadioChange}
+                      onChange={handleChange}
                       className="mr-2"
                     />
                     Sí
@@ -357,7 +345,7 @@ export const FormularioMatricula = () => {
                       name="estudiante.presenta_carta"
                       value="No"
                       checked={formData.estudiante.presenta_carta === "No"}
-                      onChange={handleRadioChange}
+                      onChange={handleChange}
                       className="mr-2"
                     />
                     No
@@ -366,14 +354,13 @@ export const FormularioMatricula = () => {
               </div>
             </div>
 
-            <h2 className="text-lg font-semibold">
-              Enfermedades y Medicamentos
-            </h2>
+            <h2 className="text-lg font-semibold">Enfermedades y Medicamentos</h2>
+            <p className="text-sm text-gray-500 mb-2">
+              Si el estudiante presenta alguna condición médica o necesita medicación específica, indíquelo aquí.
+            </p>
 
             <div>
-              <label className="block text-gray-700">
-                Presenta alguna enfermedad:
-              </label>
+              <label className="block text-gray-700">Presenta alguna enfermedad:</label>
               <input
                 type="text"
                 name="estudiante.Presenta_alguna_enfermedad"
@@ -384,9 +371,7 @@ export const FormularioMatricula = () => {
             </div>
 
             <div>
-              <label className="block text-gray-700">
-                Medicamentos que debe tomar:
-              </label>
+              <label className="block text-gray-700">Medicamentos que debe tomar:</label>
               <input
                 type="text"
                 name="estudiante.medicamentos_que_debe_tomar"
@@ -397,9 +382,7 @@ export const FormularioMatricula = () => {
             </div>
 
             <div>
-              <label className="block text-gray-700">
-                Ruta que viaja el estudiante:
-              </label>
+              <label className="block text-gray-700">Ruta que viaja el estudiante:</label>
               <input
                 type="text"
                 name="estudiante.Ruta_de_viaje"
@@ -422,10 +405,13 @@ export const FormularioMatricula = () => {
         ) : (
           <>
             <h2 className="text-lg font-semibold">Datos del Encargado Legal</h2>
+            <p className="text-sm text-gray-500 mb-2">
+              Ingrese la información del encargado legal o tutor del estudiante. Asegúrese de completar todos los campos.
+            </p>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-700">Nombre:</label>
+                <label className="block text-gray-700">Nombre Completo:</label>
                 <input
                   type="text"
                   name="encargadoLegal.nombre_Encargado_Legal"
@@ -461,6 +447,7 @@ export const FormularioMatricula = () => {
                   name="encargadoLegal.N_Cedula"
                   value={formData.encargadoLegal.N_Cedula}
                   onChange={handleChange}
+                  placeholder="5-0123-0456"
                   className="border p-2 rounded-md w-full"
                 />
               </div>
@@ -526,36 +513,6 @@ export const FormularioMatricula = () => {
               </div>
             </div>
 
-            {/* Si tienes otros campos adicionales, agrégalos aquí */}
-
-            {/* <div className="mt-4">
-              <label className="block text-gray-700 mb-2">
-                Autorizo a la Institución para que utilice derecho de imagen de mi hijo (con fines educativos):
-              </label>
-              <label className="inline-flex items-center">
-                <input
-                  type="radio"
-                  name="encargadoLegal.autorizacionImagen"
-                  value="Si"
-                  checked={formData.encargadoLegal.autorizacionImagen === 'Si'}
-                  onChange={handleRadioChange}
-                  className="mr-2"
-                />
-                Sí
-              </label>
-              <label className="inline-flex items-center ml-4">
-                <input
-                  type="radio"
-                  name="encargadoLegal.autorizacionImagen"
-                  value="No"
-                  checked={formData.encargadoLegal.autorizacionImagen === 'No'}
-                  onChange={handleRadioChange}
-                  className="mr-2"
-                />
-                No
-              </label>
-            </div> */}
-
             <div className="flex justify-center space-x-4 mt-6">
               <button
                 type="button"
@@ -573,17 +530,17 @@ export const FormularioMatricula = () => {
               </button>
               <button
                 type="button"
-                onClick={handleDownload}
+                onClick={handleDownloadPDF}
                 className="bg-green-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-green-600"
               >
-                Descargar
+                Descargar PDF con datos
               </button>
             </div>
           </>
         )}
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default FormularioMatricula;
+export default FormularioMatricula
