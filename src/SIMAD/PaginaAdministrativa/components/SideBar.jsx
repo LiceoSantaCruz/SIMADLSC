@@ -31,7 +31,6 @@ export const SideBar = () => {
 
         // Actualiza el estado de autenticación
         setIsAuthenticated(false);
-        console.log('Token y rol eliminados');
 
         // Redirige utilizando useNavigate
         window.location.href = '/paginainformativa';

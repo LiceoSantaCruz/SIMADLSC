@@ -12,9 +12,7 @@ import { GestionHorario } from '../pages/Horarios/GestionHorario';
 import { HorarioEstu } from '../pages/Horarios/Vistas/HorarioEstu';
 import { HorarioProf } from '../pages/Horarios/Vistas/HorarioProf';
 import { FormularioMatricula } from '../pages/Matricula/components/FormularioMatricula';
-//import { GestionMatricula } from '../pages/Matricula/GestionMatricula';
-//import { MatriculaOrdinaria } from '../pages/Matricula/MatriculaOrdinaria';
-import { MatriculaExtraordinaria } from '../pages/Matricula/Vite/MatriculaExtraordinaria';
+import { MatriculaExtraordinaria } from '../pages/Matricula/pages/MatriculaExtraordinaria';
 import GestionUsuarios from '../pages/Usuarios/GestionUsuarios';
 import CrearUsuario from '../pages/Usuarios/CrearUsuario';
 import { MiPerfil } from '../pages/Perfil/MiPerfil';
@@ -22,8 +20,7 @@ import CrearEventos from '../pages/Eventos/CrearEventos';
 import Eventos from '../pages/Eventos/Eventos';
 import UserEventos from '../pages/Eventos/UserEventos';
 import EventosEdit from '../pages/Eventos/EventosEdit';
-import GestionMatriculas from '../pages/Matricula/GestionMatricula';
-//import GestionMatriculas from '../pages/Matricula/GestionMatricula';
+import GestionMatriculas from '../pages/Matricula/pages/GestionMatricula';
  
 export const AdminRoutes = () => {
   const [role, setRole] = useState(localStorage.getItem('role'));

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import useGestionMatriculas from './Hooks/useGestionMatriculas';
+import useGestionMatriculas from '../Hooks/useGestionMatriculas';
 import Swal from 'sweetalert2';
 
 const GestionMatriculas = () => {
