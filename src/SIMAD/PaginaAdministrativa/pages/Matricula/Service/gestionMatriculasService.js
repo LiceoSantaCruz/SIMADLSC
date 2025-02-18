@@ -1,34 +1,56 @@
-// services/gestionMatriculasService.js
-//https://simadlsc-backend-production.up.railway.app/matriculas
+// Ajusta a la URL real de tu backend NestJS:
+const API_URL = import.meta.env.VITE_API_URL || 'https://tu-backend.com/api';
 
-const API_URL = import.meta.env.VITE_API_URL;
+/**
+ * Obtiene TODAS las matrículas (o solo pendientes, según tu endpoint).
+ * Ajusta la ruta "/matricula" o "/matricula/pendientes" como necesites.
+ */
+export const getAllMatriculas = async () => {
+ 
+    const response = await fetch(`${API_URL}/matriculas`);
+    if (!response.ok) throw new Error('Error al obtener las matrículas');
+    
+    const data = await response.json();
+    return data;
 
-// Obtener todas las matrículas con estado pendiente
-export const obtenerMatriculasPendientes = async () => {
-  const response = await fetch(`${API_URL}?estado=pendiente`);
-  if (!response.ok) throw new Error('Error al obtener las matrículas pendientes');
-  const data = await response.json();
-  return data;
+};
+export const updateEstadoMatricula = async (idMatricula, nuevoEstado) => {
+  // Convertir el estado a código esperado
+  const estadoCodigo =
+    nuevoEstado === 'Aceptado'
+      ? 'AC'
+      : nuevoEstado === 'Rechazado'
+      ? 'RE'
+      : nuevoEstado;
+
+  const response = await fetch(`${API_URL}/matriculas/estado/${idMatricula}`, {
+    method: 'PATCH',
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nuevoEstado: estadoCodigo }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Error al actualizar el estado de la matrícula');
+  }
+
+  const text = await response.text();
+  return text ? JSON.parse(text) : {};
 };
 
-// Aprobar una matrícula y asignar sección
-export const aprobarMatricula = async (idMatricula, seccionId) => {
-  const response = await fetch(`${API_URL}/${idMatricula}/aprobar`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ estado_Matricula: 'Aprobada', seccionId }),
+/**
+ * Elimina una matrícula.
+ * @param {number} idMatricula - ID de la matrícula a eliminar.
+ */
+export const deleteMatricula = async (idMatricula) => {
+  const response = await fetch(`${API_URL}/matriculas/${idMatricula}`, {  
+    method: 'DELETE',
   });
-  if (!response.ok) throw new Error('Error al aprobar la matrícula');
-  return await response.json();
-};
 
-// Rechazar una matrícula
-export const rechazarMatricula = async (idMatricula) => {
-  const response = await fetch(`${API_URL}/${idMatricula}/rechazar`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ estado_Matricula: 'Rechazada' }),
-  });
-  if (!response.ok) throw new Error('Error al rechazar la matrícula');
-  return await response.json();
+  if (!response.ok) {
+    throw new Error('Error al eliminar la matrícula');
+  }
+
+  // Verificar si la respuesta tiene contenido antes de intentar parsear JSON
+  const text = await response.text();
+  return text ? JSON.parse(text) : {};
 };
