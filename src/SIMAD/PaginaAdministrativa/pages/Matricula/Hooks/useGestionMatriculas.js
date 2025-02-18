@@ -1,89 +1,92 @@
-// hooks/useGestionMatriculas.js
-
 import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
-import { aprobarMatricula, obtenerMatriculasPendientes, rechazarMatricula } from '../Service/gestionMatriculasService';
+import {
+  getAllMatriculas,
+  updateEstadoMatricula, 
+  deleteMatricula,
+} from '../Service/gestionMatriculasService';
 
-export const useGestionMatriculas = () => {
+export function useGestionMatriculas() {
   const [matriculas, setMatriculas] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchMatriculas = async () => {
-      try {
-        setLoading(true);
-        const data = await obtenerMatriculasPendientes();
-        setMatriculas(data);
-      } catch (err) {
-        setError('Error al cargar las matrículas');
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Para búsqueda por cédula
+  const [searchTerm, setSearchTerm] = useState('');
 
+  // Cargar las matrículas al montar
+  useEffect(() => {
     fetchMatriculas();
   }, []);
 
-  const handleApprove = async (idMatricula, seccionId) => {
+  const fetchMatriculas = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      await aprobarMatricula(idMatricula, seccionId);
-      setMatriculas((prev) =>
-        prev.map((matricula) =>
-          matricula.id_Matricula === idMatricula
-            ? { ...matricula, estado_Matricula: 'Aprobada', seccionId }
-            : matricula
-        )
-      );
+      const data = await getAllMatriculas();
+      setMatriculas(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Actualizar estado de matrícula (Aceptado o Rechazado)
+  const handleUpdateEstado = async (idMatricula, nuevoEstado) => {
+    try {
+      await updateEstadoMatricula(idMatricula, nuevoEstado);
       Swal.fire({
         icon: 'success',
-        title: 'Aprobado',
-        text: 'La matrícula ha sido aprobada.',
-        confirmButtonColor: '#2563EB',
+        title: 'Actualizada',
+        text: `La matrícula ha sido ${nuevoEstado.toLowerCase()}.`,
       });
+      fetchMatriculas();
     } catch (err) {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Error al aprobar la matrícula.',
-        confirmButtonColor: '#2563EB',
+        text: err.message,
       });
     }
   };
 
-  const handleReject = async (idMatricula) => {
+  // Eliminar matrícula
+  const handleDelete = async (idMatricula) => {
     try {
-      await rechazarMatricula(idMatricula);
-      setMatriculas((prev) =>
-        prev.map((matricula) =>
-          matricula.id_Matricula === idMatricula
-            ? { ...matricula, estado_Matricula: 'Rechazada' }
-            : matricula
-        )
-      );
+      await deleteMatricula(idMatricula);
       Swal.fire({
         icon: 'success',
-        title: 'Rechazado',
-        text: 'La matrícula ha sido rechazada.',
-        confirmButtonColor: '#2563EB',
+        title: 'Eliminada',
+        text: 'La matrícula ha sido eliminada.',
       });
-    } catch (error) {
+      fetchMatriculas();
+    } catch (err) {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Error al rechazar la matrícula.',
-        confirmButtonColor: '#2563EB',
+        text: err.message,
       });
     }
   };
 
+  // Manejar cambios en el input de búsqueda
+  const handleSearchChange = (term) => {
+    setSearchTerm(term);
+  };
+
+  // Filtrar matrículas por cédula del estudiante
+  const filteredMatriculas = matriculas.filter((mat) =>
+    mat.estudiante.cedula?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return {
-    matriculas,
+    matriculas: filteredMatriculas,
     loading,
     error,
-    handleApprove,
-    handleReject,
+    searchTerm,
+    handleSearchChange,
+    handleUpdateEstado,
+    handleDelete,
   };
-};
-
-export default useGestionMatriculas;
+}

@@ -1,6 +1,6 @@
-import useGrados from "../../Asistencias/Hook/useGrados"
-import { useMatriculaForm } from "../Hooks/useMatriculaForm"
-import { usePeriodos } from "../Hooks/usePeriodos"
+import useGrados from "../../Asistencias/Hook/useGrados";
+import { useMatriculaForm } from "../Hooks/useMatriculaForm";
+import { usePeriodos } from "../Hooks/usePeriodos";
 
 export const FormularioMatricula = () => {
   const {
@@ -11,10 +11,10 @@ export const FormularioMatricula = () => {
     handleSubmit,
     handleDownloadPDF,
     isSubmitting,
-  } = useMatriculaForm()
+  } = useMatriculaForm();
 
-  const { periodos } = usePeriodos()
-  const { grados } = useGrados()
+  const { periodos } = usePeriodos();
+  const { grados } = useGrados();
 
   return (
     <div className="max-w-3xl mx-auto p-4 bg-white shadow-md">
@@ -114,7 +114,9 @@ export const FormularioMatricula = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700">Nº Cédula o Pasaporte:</label>
+                <label className="block text-gray-700">
+                  Nº Cédula o Pasaporte:
+                </label>
                 <input
                   type="text"
                   name="estudiante.cedula"
@@ -220,12 +222,13 @@ export const FormularioMatricula = () => {
 
             <div className="flex space-x-4">
               <label className="block text-gray-700">Condición Migratoria:</label>
+              {/* Aquí se usan valores en minúscula para coincidir con el JSON */}
               <label className="inline-flex items-center">
                 <input
                   type="radio"
                   name="estudiante.condicion_migratoria"
-                  value="Legal"
-                  checked={formData.estudiante.condicion_migratoria === "Legal"}
+                  value="legal"
+                  checked={formData.estudiante.condicion_migratoria === "legal"}
                   onChange={handleChange}
                   className="mr-2"
                 />
@@ -235,8 +238,8 @@ export const FormularioMatricula = () => {
                 <input
                   type="radio"
                   name="estudiante.condicion_migratoria"
-                  value="Refugiado"
-                  checked={formData.estudiante.condicion_migratoria === "Refugiado"}
+                  value="refugiado"
+                  checked={formData.estudiante.condicion_migratoria === "refugiado"}
                   onChange={handleChange}
                   className="mr-2"
                 />
@@ -246,8 +249,8 @@ export const FormularioMatricula = () => {
                 <input
                   type="radio"
                   name="estudiante.condicion_migratoria"
-                  value="Ilegal"
-                  checked={formData.estudiante.condicion_migratoria === "Ilegal"}
+                  value="ilegal"
+                  checked={formData.estudiante.condicion_migratoria === "ilegal"}
                   onChange={handleChange}
                   className="mr-2"
                 />
@@ -533,14 +536,14 @@ export const FormularioMatricula = () => {
                 onClick={handleDownloadPDF}
                 className="bg-green-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-green-600"
               >
-                Descargar PDF con datos
+                Descargar PDF
               </button>
             </div>
           </>
         )}
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default FormularioMatricula
+export default FormularioMatricula;
