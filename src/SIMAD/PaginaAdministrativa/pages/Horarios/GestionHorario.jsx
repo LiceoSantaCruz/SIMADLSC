@@ -11,7 +11,7 @@ import LoadingIndicator from '../../../../Components/LoadingIndicator';
 
 // Definir la URL base de la API dependiendo del entorno
 const API_BASE_URL = window.location.hostname === 'localhost'
-  ? 'http://localhost:3000' // URL de desarrollo
+  ? 'http://localhost:5173' // URL de desarrollo
   : 'https://simadlsc-backend-production.up.railway.app'; // URL de producción
 
 export const GestionHorario = () => {
