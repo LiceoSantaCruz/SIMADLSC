@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 const API_BASE_URL =
   process.env.NODE_ENV === 'production'
     ? 'https://simadlsc-backend-production.up.railway.app'
-    : 'http://localhost:5173';
+    : 'http://localhost:3000';
 
 const FormularioHorarioEstudiante = ({
   onSubmitSuccess,
