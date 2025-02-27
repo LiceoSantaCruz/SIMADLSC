@@ -18,34 +18,24 @@ const CrearEventos = () => {
     estadosEventos,
     loadingEstadosEventos,
     errorEstadosEventos,
-    dirigidosA, // Añadido
-    loadingDirigidosA, // Añadido
-    errorDirigidosA, // Añadido
+    dirigidosA,
+    loadingDirigidosA,
+    errorDirigidosA,
   } = UseFetchEventos();
 
-  // Función para obtener la fecha en formato YYYY-MM-DD
+  // Función para obtener la fecha actual en formato YYYY-MM-DD (hora local)
   const getTodayDate = () => {
     const today = new Date();
     const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0'); // Los meses empiezan en 0
+    const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
-  // Función para obtener la fecha mínima (hoy + 3 días)
-  const getMinDate = () => {
-    const minDate = new Date();
-    minDate.setDate(minDate.getDate() + 3);
-    const year = minDate.getFullYear();
-    const month = String(minDate.getMonth() + 1).padStart(2, '0');
-    const day = String(minDate.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
 
   const [formData, setFormData] = useState({
     nombre_Evento: '',
     descripcion_Evento: '',
-    fecha_Evento: getTodayDate(), // Establece la fecha actual como valor inicial
+    fecha_Evento: getTodayDate(),
     hora_inicio_Evento: '',
     hora_fin_Evento: '',
     id_dirigido_a: '',
@@ -61,25 +51,24 @@ const CrearEventos = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  // Función para verificar si la fecha es al menos 3 días en el futuro
+  /**
+   * Función para verificar que la fecha sea al menos 3 días de anticipación.
+   * Usamos split para crear la fecha local (sin la parte horaria) y compararla.
+   */
   const isAtLeastThreeDaysAhead = (fecha) => {
-    const selectedDate = new Date(fecha);
+    const [year, month, day] = fecha.split('-').map(Number);
+    const selectedDate = new Date(year, month - 1, day); // Se crea la fecha a medianoche local
     const today = new Date();
-    const minDate = new Date();
-    minDate.setDate(today.getDate() + 3);
-
-    // Comparar solo fechas, sin considerar la hora
-    selectedDate.setHours(0,0,0,0);
-    minDate.setHours(0,0,0,0);
-    today.setHours(0,0,0,0);
-
+    today.setHours(0, 0, 0, 0);
+    // Sumamos 3 días (en milisegundos)
+    const tresDias = 3 * 24 * 60 * 60 * 1000;
+    const minDate = new Date(today.getTime() + tresDias);
     return selectedDate >= minDate;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validar que el nombre del evento no esté vacío
     if (!formData.nombre_Evento.trim()) {
       Swal.fire({
         icon: 'warning',
@@ -90,7 +79,6 @@ const CrearEventos = () => {
       return;
     }
 
-    // Validar que se hayan seleccionado Ubicación y Tipo de Evento
     if (!formData.ubicacion || !formData.tipo_evento) {
       Swal.fire({
         icon: 'warning',
@@ -101,7 +89,6 @@ const CrearEventos = () => {
       return;
     }
 
-    // Validar que fecha_Evento, hora_inicio_Evento y hora_fin_Evento estén completos
     if (!formData.fecha_Evento || !formData.hora_inicio_Evento || !formData.hora_fin_Evento) {
       Swal.fire({
         icon: 'warning',
@@ -112,7 +99,6 @@ const CrearEventos = () => {
       return;
     }
 
-    // Validar que la fecha sea al menos 3 días en el futuro
     if (!isAtLeastThreeDaysAhead(formData.fecha_Evento)) {
       Swal.fire({
         icon: 'warning',
@@ -123,81 +109,12 @@ const CrearEventos = () => {
       return;
     }
 
-    // Validar que los estados de eventos se hayan cargado correctamente
-    if (loadingEstadosEventos) {
-      Swal.fire({
-        icon: 'info',
-        title: 'Cargando...',
-        text: 'Por favor, espera mientras se cargan los estados del evento.',
-        showConfirmButton: false,
-      });
-      return;
-    }
-
-    if (errorEstadosEventos) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error al cargar los estados del evento.',
-        confirmButtonText: 'Aceptar',
-      });
-      return;
-    }
-
-    if (loadingDirigidosA) { // Añadido para manejar carga de "Dirigido a"
-      Swal.fire({
-        icon: 'info',
-        title: 'Cargando...',
-        text: 'Por favor, espera mientras se cargan los públicos.',
-        showConfirmButton: false,
-      });
-      return;
-    }
-
-    if (errorDirigidosA) { // Añadido para manejar errores de "Dirigido a"
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error al cargar los públicos.',
-        confirmButtonText: 'Aceptar',
-      });
-      return;
-    }
-
-    // Validar que se haya seleccionado "Dirigido a"
-    if (!formData.id_dirigido_a) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Advertencia',
-        text: 'Por favor, selecciona a quién está dirigido el evento.',
-        confirmButtonColor: '#2563EB',
-      });
-      return;
-    }
-
-    // Encontrar el ID del estado 'pendiente'
-    const estadoPendiente = estadosEventos.find(
-      (estado) => estado.nombre.toLowerCase() === 'pendiente'
-    );
-
-    if (!estadoPendiente) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No se encontró el estado "pendiente".',
-        confirmButtonText: 'Aceptar',
-      });
-      return;
-    }
-
-    // Convertir fecha y hora a formatos adecuados
-    const fechaEvento = formData.fecha_Evento; // "YYYY-MM-DD"
-    const horaInicio = formData.hora_inicio_Evento; // "HH:mm:ss"
-    const horaFin = formData.hora_fin_Evento; // "HH:mm:ss"
-
-    // Verificar que las horas sean válidas
-    const fechaInicio = new Date(`${fechaEvento}T${horaInicio}`);
-    const fechaFinObj = new Date(`${fechaEvento}T${horaFin}`);
+    // Crear objetos Date usando split para que se construyan en hora local
+    const [year, month, day] = formData.fecha_Evento.split('-').map(Number);
+    const [startHour, startMinute] = formData.hora_inicio_Evento.split(':').map(Number);
+    const fechaInicio = new Date(year, month - 1, day, startHour, startMinute);
+    const [endHour, endMinute] = formData.hora_fin_Evento.split(':').map(Number);
+    const fechaFinObj = new Date(year, month - 1, day, endHour, endMinute);
 
     if (isNaN(fechaInicio.getTime()) || isNaN(fechaFinObj.getTime())) {
       Swal.fire({
@@ -209,7 +126,17 @@ const CrearEventos = () => {
       return;
     }
 
-    // Asegurarse que la hora de fin sea después de la hora de inicio
+    const diffInMs = fechaFinObj - fechaInicio;
+    if (diffInMs < 3600000) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Advertencia',
+        text: 'La duración del evento debe ser de al menos 1 hora.',
+        confirmButtonColor: '#2563EB',
+      });
+      return;
+    }
+
     if (fechaFinObj <= fechaInicio) {
       Swal.fire({
         icon: 'error',
@@ -220,20 +147,77 @@ const CrearEventos = () => {
       return;
     }
 
-    // Eliminada la validación de solapamiento
+    if (loadingEstadosEventos) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Cargando...',
+        text: 'Por favor, espera mientras se cargan los estados del evento.',
+        showConfirmButton: false,
+      });
+      return;
+    }
+    if (errorEstadosEventos) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al cargar los estados del evento.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+    if (loadingDirigidosA) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Cargando...',
+        text: 'Por favor, espera mientras se cargan los públicos.',
+        showConfirmButton: false,
+      });
+      return;
+    }
+    if (errorDirigidosA) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al cargar los públicos.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+    if (!formData.id_dirigido_a) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Advertencia',
+        text: 'Por favor, selecciona a quién está dirigido el evento.',
+        confirmButtonColor: '#2563EB',
+      });
+      return;
+    }
+
+    const estadoPendiente = estadosEventos.find(
+      (estado) => estado.nombre.toLowerCase() === 'pendiente'
+    );
+    if (!estadoPendiente) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se encontró el estado "pendiente".',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
 
     setIsLoading(true);
     try {
       const payload = {
         nombre_Evento: formData.nombre_Evento.trim(),
         descripcion_Evento: formData.descripcion_Evento.trim(),
-        fecha_Evento: fechaEvento, // "YYYY-MM-DD"
-        hora_inicio_Evento: horaInicio, // "HH:mm:ss"
-        hora_fin_Evento: horaFin, // "HH:mm:ss"
+        fecha_Evento: formData.fecha_Evento,
+        hora_inicio_Evento: formData.hora_inicio_Evento,
+        hora_fin_Evento: formData.hora_fin_Evento,
         id_dirigido_a: parseInt(formData.id_dirigido_a, 10),
         id_ubicacion: parseInt(formData.ubicacion, 10),
         id_tipo_evento: parseInt(formData.tipo_evento, 10),
-        id_estado_evento: estadoPendiente.id, // Usando el ID dinámico
+        id_estado_evento: estadoPendiente.id,
       };
 
       await EventosService.createEvento(payload);
@@ -250,10 +234,10 @@ const CrearEventos = () => {
         },
         buttonsStyling: false,
       }).then(() => {
-        navigate('/user-eventos'); // Redirige a la vista de solicitudes del usuario
+        navigate('/user-eventos');
       });
     } catch (err) {
-      console.error('Error al crear evento:', err); // Para depuración
+      console.error('Error al crear evento:', err);
       Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -282,10 +266,14 @@ const CrearEventos = () => {
 
         {/* Campo de Nombre del Evento */}
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Nombre del Evento</label>
+          <label htmlFor="nombre_Evento" className="block text-sm font-medium mb-2">
+            Nombre del Evento
+          </label>
           <input
             type="text"
+            id="nombre_Evento"
             name="nombre_Evento"
+            placeholder="Ej: Feria de Ciencias"
             value={formData.nombre_Evento}
             onChange={handleChange}
             className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -295,9 +283,13 @@ const CrearEventos = () => {
 
         {/* Campo de Descripción */}
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Descripción</label>
+          <label htmlFor="descripcion_Evento" className="block text-sm font-medium mb-2">
+            Descripción del Evento
+          </label>
           <textarea
+            id="descripcion_Evento"
             name="descripcion_Evento"
+            placeholder="Ej: Un evento para mostrar proyectos de investigación y actividades culturales de nuestros estudiantes"
             value={formData.descripcion_Evento}
             onChange={handleChange}
             className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -306,24 +298,30 @@ const CrearEventos = () => {
 
         {/* Campo de Fecha del Evento */}
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Fecha del Evento</label>
+          <label htmlFor="fecha_Evento" className="block text-sm font-medium mb-2">
+            Fecha del Evento
+          </label>
           <input
             type="date"
+            id="fecha_Evento"
             name="fecha_Evento"
             value={formData.fecha_Evento}
             onChange={handleChange}
             className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             required
-            min={getTodayDate()} // Establece el mínimo a la fecha actual
+            min={getTodayDate()}
           />
         </div>
 
         {/* Campos de Hora de Inicio y Fin */}
         <div className="mb-4 flex space-x-4">
           <div className="w-1/2">
-            <label className="block text-sm font-medium mb-2">Hora de Inicio</label>
+            <label htmlFor="hora_inicio_Evento" className="block text-sm font-medium mb-2">
+              Hora de Inicio
+            </label>
             <input
               type="time"
+              id="hora_inicio_Evento"
               name="hora_inicio_Evento"
               value={formData.hora_inicio_Evento}
               onChange={handleChange}
@@ -332,9 +330,12 @@ const CrearEventos = () => {
             />
           </div>
           <div className="w-1/2">
-            <label className="block text-sm font-medium mb-2">Hora de Fin</label>
+            <label htmlFor="hora_fin_Evento" className="block text-sm font-medium mb-2">
+              Hora de Fin
+            </label>
             <input
               type="time"
+              id="hora_fin_Evento"
               name="hora_fin_Evento"
               value={formData.hora_fin_Evento}
               onChange={handleChange}
@@ -346,13 +347,16 @@ const CrearEventos = () => {
 
         {/* Campo de Dirigido a */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Dirigido a</label>
+          <label htmlFor="id_dirigido_a" className="block text-sm font-medium mb-2">
+            Dirigido a
+          </label>
           {loadingDirigidosA ? (
             <p>Cargando públicos...</p>
           ) : errorDirigidosA ? (
             <p className="text-red-500">Error al cargar los públicos: {errorDirigidosA}</p>
           ) : (
             <select
+              id="id_dirigido_a"
               name="id_dirigido_a"
               value={formData.id_dirigido_a}
               onChange={handleChange}
@@ -371,13 +375,16 @@ const CrearEventos = () => {
 
         {/* Campo de Ubicación */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Ubicación</label>
+          <label htmlFor="ubicacion" className="block text-sm font-medium mb-2">
+            Ubicación
+          </label>
           {loadingUbicaciones ? (
             <p>Cargando ubicaciones...</p>
           ) : errorUbicaciones ? (
             <p className="text-red-500">Error al cargar ubicaciones: {errorUbicaciones}</p>
           ) : (
             <select
+              id="ubicacion"
               name="ubicacion"
               value={formData.ubicacion}
               onChange={handleChange}
@@ -396,13 +403,16 @@ const CrearEventos = () => {
 
         {/* Campo de Tipo de Evento */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Tipo de Evento</label>
+          <label htmlFor="tipo_evento" className="block text-sm font-medium mb-2">
+            Tipo de Evento
+          </label>
           {loadingTiposEventos ? (
             <p>Cargando tipos de eventos...</p>
           ) : errorTiposEventos ? (
             <p className="text-red-500">Error al cargar tipos de eventos: {errorTiposEventos}</p>
           ) : (
             <select
+              id="tipo_evento"
               name="tipo_evento"
               value={formData.tipo_evento}
               onChange={handleChange}

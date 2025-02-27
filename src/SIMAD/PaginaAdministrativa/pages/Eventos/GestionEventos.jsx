@@ -1,7 +1,7 @@
 // src/GestionEventos.jsx
 
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import EventosService from './Service/EventosService';
 import UseFetchEventos from './Hook/UseFetchEventos';
 import Swal from 'sweetalert2';
@@ -28,31 +28,37 @@ const GestionEventos = () => {
     fecha: '',
   });
 
-  const navigate = useNavigate();
+  const [filterStatus, setFilterStatus] = useState('Todos');
+
+  // Estado para la paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const eventsPerPage = 6;
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Estado para manejar el filtro de estado mediante botones
-  const [filterStatus, setFilterStatus] = useState('Todos');
-
   // Función para formatear la hora al formato HH:MM
   const formatTime = (timeStr) => {
     if (!timeStr) return 'N/A';
-
     const parts = timeStr.split(':');
-
     if (parts.length < 2) return timeStr;
-
     const hours = parts[0].padStart(2, '0');
     const minutes = parts[1].padStart(2, '0');
-
     return `${hours}:${minutes}`;
   };
 
-  // Handlers para Aprobar y Rechazar
+  // Función para formatear una fecha a "YYYY-MM-DD" (usada en el filtrado)
+  const formatDateToYMD = (date) => {
+    if (typeof date === 'string') return date;
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Handlers para aprobar, rechazar, eliminar y ver info
   const handleApprove = (id) => {
     Swal.fire({
       title: '¿Estás seguro?',
@@ -85,11 +91,6 @@ const GestionEventos = () => {
     });
   };
 
-  // Handlers para Editar y Eliminar
-  const handleEdit = (id) => {
-    navigate(`/eventos-edit/${id}`); // Asegúrate de tener una ruta para editar eventos
-  };
-
   const handleDelete = (id) => {
     Swal.fire({
       title: '¿Estás seguro?',
@@ -106,16 +107,15 @@ const GestionEventos = () => {
     });
   };
 
-  // Handler para Ver Información
   const handleViewInfo = (evento) => {
     Swal.fire({
       title: evento.nombre_Evento,
       html: `
         <p><strong>Descripción:</strong> ${evento.descripcion_Evento || 'N/A'}</p>
-        <p><strong>Fecha:</strong> ${new Date(evento.fecha_Evento).toLocaleDateString()}</p>
+        <p><strong>Fecha:</strong> ${new Date(evento.fecha_Evento + "T00:00:00").toLocaleDateString('es-ES')}</p>
         <p><strong>Hora de Inicio:</strong> ${formatTime(evento.hora_inicio_Evento)}</p>
         <p><strong>Hora de Fin:</strong> ${formatTime(evento.hora_fin_Evento)}</p>
-        <p><strong>Dirigido A:</strong> ${evento.dirigidoA?.nombre || 'Sin Público'}</p>
+        <p><strong>Dirigido a:</strong> ${evento.dirigidoA?.nombre || 'Sin Público'}</p>
         <p><strong>Estado:</strong> ${evento.estadoEvento?.nombre || 'Sin Estado'}</p>
         <p><strong>Tipo de Evento:</strong> ${evento.tipoEvento?.nombre || 'Sin Tipo'}</p>
         <p><strong>Ubicación:</strong> ${evento.ubicacion?.nombre || 'Sin Ubicación'}</p>
@@ -125,7 +125,6 @@ const GestionEventos = () => {
     });
   };
 
-  // Funciones para Aprobar, Rechazar, Editar y Eliminar Eventos
   const approveEvento = async (id) => {
     try {
       await EventosService.approveEvento(id);
@@ -202,7 +201,7 @@ const GestionEventos = () => {
   };
 
   // Filtrado de Eventos
-  const filteredEventos = eventos.filter((evento) => {
+  let filteredEventos = eventos.filter((evento) => {
     const matchesEstado = filterStatus === 'Todos'
       ? true
       : evento.estadoEvento?.nombre.trim().toLowerCase() === filterStatus.trim().toLowerCase();
@@ -212,13 +211,30 @@ const GestionEventos = () => {
       : true;
 
     const matchesFecha = filters.fecha
-      ? new Date(evento.fecha_Evento).toISOString().split('T')[0] === filters.fecha
+      ? formatDateToYMD(new Date(evento.fecha_Evento)) === filters.fecha
       : true;
 
     return matchesEstado && matchesDirigidoA && matchesFecha;
   });
 
-  // Manejo de Errores
+  // Ordenar eventos de la fecha y hora más reciente a la más antigua.
+  filteredEventos = filteredEventos.sort((a, b) => {
+    const dateA = new Date(a.fecha_Evento + "T00:00:00");
+    const dateB = new Date(b.fecha_Evento + "T00:00:00");
+    if (dateB - dateA !== 0) {
+      return dateB - dateA;
+    }
+    const [hourA, minuteA] = a.hora_inicio_Evento.split(':').map(Number);
+    const [hourB, minuteB] = b.hora_inicio_Evento.split(':').map(Number);
+    return (hourB * 60 + minuteB) - (hourA * 60 + minuteA);
+  });
+
+  // Paginación
+  const indexOfLastEvent = currentPage * eventsPerPage;
+  const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
+  const currentEventos = filteredEventos.slice(indexOfFirstEvent, indexOfLastEvent);
+  const totalPages = Math.ceil(filteredEventos.length / eventsPerPage);
+
   useEffect(() => {
     if (error || errorUbicaciones || errorTiposEventos || errorEstadosEventos) {
       Swal.fire({
@@ -230,7 +246,6 @@ const GestionEventos = () => {
     }
   }, [error, errorUbicaciones, errorTiposEventos, errorEstadosEventos]);
 
-  // Funciones para obtener opciones únicas para los filtros adicionales
   const getUniqueDirigidoA = () => {
     const dirigidos = eventos.map((evento) => evento.dirigidoA?.nombre).filter(Boolean);
     return [...new Set(dirigidos)];
@@ -251,7 +266,7 @@ const GestionEventos = () => {
         </Link>
       </div>
 
-      {/* Barra de filtros por estado con botones */}
+      {/* Barra de filtros por estado */}
       <div className="mb-6 flex space-x-4">
         <button
           onClick={() => setFilterStatus('Todos')}
@@ -297,7 +312,6 @@ const GestionEventos = () => {
 
       {/* Filtros adicionales */}
       <div className="mb-6 flex flex-wrap gap-4">
-        {/* Filtro por Dirigido a */}
         <select
           name="dirigido_a"
           value={filters.dirigido_a}
@@ -311,8 +325,6 @@ const GestionEventos = () => {
             </option>
           ))}
         </select>
-
-        {/* Filtro por Fecha */}
         <input
           type="date"
           name="fecha"
@@ -328,94 +340,83 @@ const GestionEventos = () => {
       ) : filteredEventos.length === 0 ? (
         <div className="text-center">No hay eventos que coincidan con los filtros.</div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white rounded-lg shadow-lg overflow-hidden">
-            <thead className="bg-blue-500 text-white">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Nombre</th>
-                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Fecha</th>
-                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Hora</th>
-                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Dirigido a</th>
-                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Estado</th>
-                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {filteredEventos.map((evento, index) => (
-                <tr
-                  key={evento.id_Evento}
-                  className={`hover:bg-gray-100 transition ${
-                    index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
-                  }`}
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{evento.nombre_Evento}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {new Date(evento.fecha_Evento).toLocaleDateString()}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {formatTime(evento.hora_inicio_Evento)} - {formatTime(evento.hora_fin_Evento)}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{evento.dirigidoA?.nombre || 'Sin Público'}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
-                        evento.estadoEvento.nombre === 'Aprobado'
-                          ? 'bg-green-100 text-green-800'
-                          : evento.estadoEvento.nombre === 'Pendiente'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}
-                    >
-                      {evento.estadoEvento.nombre}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap flex space-x-2">
-                    <button
-                      onClick={() => handleViewInfo(evento)}
-                      className="flex items-center text-blue-600 hover:text-blue-800"
-                      title="Ver Información"
-                    >
-                      <FaInfoCircle className="mr-1" />
-                      Ver Info
-                    </button>
-
-                    {evento.estadoEvento.nombre.trim().toLowerCase() === 'pendiente' ? (
-                      <>
-                        <button
-                          onClick={() => handleApprove(evento.id_Evento)}
-                          className="flex items-center text-green-600 hover:text-green-800"
-                          title="Aprobar Evento"
-                        >
-                          <FaEdit className="mr-1" />
-                          Aprobar
-                        </button>
-                        <button
-                          onClick={() => handleReject(evento.id_Evento)}
-                          className="flex items-center text-red-600 hover:text-red-800"
-                          title="Rechazar Evento"
-                        >
-                          <FaTrash className="mr-1" />
-                          Rechazar
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => handleEdit(evento.id_Evento)}
-                          className="flex items-center text-yellow-600 hover:text-yellow-800"
-                          title="Editar Evento"
-                        >
-                          <FaEdit className="mr-1" />
-                          Editar
-                        </button>
+        <>
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-white rounded-lg shadow-lg overflow-hidden">
+              <thead className="bg-blue-500 text-white">
+                <tr>
+                  <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Nombre</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Fecha</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Hora</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Dirigido a</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Estado</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {currentEventos.map((evento, index) => (
+                  <tr
+                    key={evento.id_Evento}
+                    className={`hover:bg-gray-100 transition ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{evento.nombre_Evento}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {new Date(evento.fecha_Evento + "T00:00:00").toLocaleDateString('es-ES')}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {formatTime(evento.hora_inicio_Evento)} - {formatTime(evento.hora_fin_Evento)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{evento.dirigidoA?.nombre || 'Sin Público'}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
+                          evento.estadoEvento.nombre === 'Aprobado'
+                            ? 'bg-green-100 text-green-800'
+                            : evento.estadoEvento.nombre === 'Pendiente'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
+                      >
+                        {evento.estadoEvento.nombre}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap flex space-x-2">
+                      <button
+                        onClick={() => handleViewInfo(evento)}
+                        className="flex items-center text-blue-600 hover:text-blue-800"
+                        title="Ver Información"
+                      >
+                        <FaInfoCircle className="mr-1" />
+                        Ver Info
+                      </button>
+                      {evento.estadoEvento.nombre.trim().toLowerCase() === 'pendiente' ? (
+                        <>
+                          <button
+                            onClick={() => handleApprove(evento.id_Evento)}
+                            className="flex items-center text-green-600 hover:text-green-800"
+                            title="Aprobar Evento"
+                          >
+                            <FaEdit className="mr-1" />
+                            Aprobar
+                          </button>
+                          <button
+                            onClick={() => handleReject(evento.id_Evento)}
+                            className="flex items-center text-red-600 hover:text-red-800"
+                            title="Rechazar Evento"
+                          >
+                            <FaTrash className="mr-1" />
+                            Rechazar
+                          </button>
+                        </>
+                      ) : (
                         <button
                           onClick={() => handleDelete(evento.id_Evento)}
                           className="flex items-center text-red-600 hover:text-red-800"
@@ -424,14 +425,33 @@ const GestionEventos = () => {
                           <FaTrash className="mr-1" />
                           Eliminar
                         </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Controles de paginación en tonos de azul */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-4">
+              {Array.from({ length: totalPages }, (_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentPage(index + 1)}
+                  className={`mx-1 px-3 py-1 rounded ${
+                    currentPage === index + 1
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-blue-100 text-blue-800'
+                  } text-sm transition`}
+                >
+                  {index + 1}
+                </button>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

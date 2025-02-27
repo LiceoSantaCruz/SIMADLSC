@@ -13,7 +13,7 @@ import { Matricula } from './components/Matricula'
 import { SobreNosotros } from './components/SobreNosotros';
 import { Servicios } from './components/Servicios';
 import { VideoAboutUs } from './components/VideoAboutUs'
-
+import EventosPublicos from './components/EventosPublicos';
 
 
 
@@ -50,6 +50,9 @@ const SimadPage = () => {
     
     {/* Eventos */}
     <Eventos/>
+
+     {/* Eventos */}
+     <EventosPublicos/>
 
     {/* Servicios */}
     <Servicios/>
