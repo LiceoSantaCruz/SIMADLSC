@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useGestionMatriculas } from "../Hooks/useGestionMatriculas";
 import ConfirmDeleteModal from "../../Asistencias/components/ConfirmDeleteModal ";
+
 export default function GestionMatricula() {
   const {
     matriculas,
@@ -20,10 +21,6 @@ export default function GestionMatricula() {
   // Filtros adicionales: nivel y estado
   const [selectedNivelFilter, setSelectedNivelFilter] = useState("");
   const [selectedEstadoFilter, setSelectedEstadoFilter] = useState("");
-
-  // Estado para paginación
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
 
   // Mapa para mostrar el nombre completo de la adecuación
   const adecuacionMap = {
@@ -78,26 +75,6 @@ export default function GestionMatricula() {
     return cumpleNivel && cumpleEstado;
   });
 
-  // Paginación: calcular índices y subconjunto
-  const totalItems = Math.min(finalMatriculas.length, 100); // máximo 100 registros
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const indexOfLast = currentPage * itemsPerPage;
-  const indexOfFirst = indexOfLast - itemsPerPage;
-  const paginatedMatriculas = finalMatriculas.slice(indexOfFirst, indexOfLast);
-
-  // Manejadores de paginación
-  const goToNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage((prev) => prev + 1);
-    }
-  };
-
-  const goToPrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
-    }
-  };
-
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Gestión de Matrículas</h2>
@@ -113,10 +90,7 @@ export default function GestionMatricula() {
         />
         <select
           value={selectedNivelFilter}
-          onChange={(e) => {
-            setSelectedNivelFilter(e.target.value);
-            setCurrentPage(1);
-          }}
+          onChange={(e) => setSelectedNivelFilter(e.target.value)}
           className="border p-2 rounded-md"
         >
           <option value="">Todos los niveles</option>
@@ -128,10 +102,7 @@ export default function GestionMatricula() {
         </select>
         <select
           value={selectedEstadoFilter}
-          onChange={(e) => {
-            setSelectedEstadoFilter(e.target.value);
-            setCurrentPage(1);
-          }}
+          onChange={(e) => setSelectedEstadoFilter(e.target.value)}
           className="border p-2 rounded-md"
         >
           <option value="">Todos los estados</option>
@@ -163,15 +134,25 @@ export default function GestionMatricula() {
             </tr>
           </thead>
           <tbody>
-            {paginatedMatriculas.map((mat) => (
+            {finalMatriculas.map((mat) => (
               <tr key={mat.id_Matricula}>
                 <td className="px-4 py-2 border">{mat.id_Matricula}</td>
-                <td className="px-4 py-2 border">{mat.estudiante.apellido1_Estudiante}</td>
-                <td className="px-4 py-2 border">{mat.estudiante.apellido2_Estudiante}</td>
-                <td className="px-4 py-2 border">{mat.estudiante.nombre_Estudiante}</td>
+                <td className="px-4 py-2 border">
+                  {mat.estudiante.apellido1_Estudiante}
+                </td>
+                <td className="px-4 py-2 border">
+                  {mat.estudiante.apellido2_Estudiante}
+                </td>
+                <td className="px-4 py-2 border">
+                  {mat.estudiante.nombre_Estudiante}
+                </td>
                 <td className="px-4 py-2 border">{mat.estudiante.cedula}</td>
-                <td className="px-4 py-2 border">{mat.estudiante.grado.nivel}</td>
-                <td className="px-4 py-2 border">{mat.periodo.nombre_Periodo}</td>
+                <td className="px-4 py-2 border">
+                  {mat.estudiante.grado.nivel}
+                </td>
+                <td className="px-4 py-2 border">
+                  {mat.periodo.nombre_Periodo}
+                </td>
                 <td className="px-4 py-2 border">{mat.estado_Matricula}</td>
                 <td className="px-4 py-2 border space-x-2">
                   <button
@@ -211,7 +192,7 @@ export default function GestionMatricula() {
                 </td>
               </tr>
             ))}
-            {paginatedMatriculas.length === 0 && (
+            {finalMatriculas.length === 0 && (
               <tr>
                 <td colSpan={9} className="text-center py-4">
                   No se encontraron matrículas
@@ -220,27 +201,6 @@ export default function GestionMatricula() {
             )}
           </tbody>
         </table>
-      </div>
-
-      {/* Componentes de paginación */}
-      <div className="flex justify-center items-center gap-4 mt-4">
-        <button
-          onClick={goToPrevPage}
-          disabled={currentPage === 1}
-          className="bg-gray-300 px-4 py-2 rounded-md disabled:opacity-50"
-        >
-          Anterior
-        </button>
-        <span>
-          Página {currentPage} de {totalPages}
-        </span>
-        <button
-          onClick={goToNextPage}
-          disabled={currentPage === totalPages}
-          className="bg-gray-300 px-4 py-2 rounded-md disabled:opacity-50"
-        >
-          Siguiente
-        </button>
       </div>
 
       {/* Modal de información adicional */}
