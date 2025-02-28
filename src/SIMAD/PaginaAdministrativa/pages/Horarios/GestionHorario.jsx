@@ -18,6 +18,8 @@ export const GestionHorario = () => {
   const [formularioAbierto, setFormularioAbierto] = useState(false);
   const [horarios, setHorarios] = useState([]);
   const [horarioEdit, setHorarioEdit] = useState(null); // Estado para el horario a editar
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // Número de elementos por página
 
   // Utilizar el hook personalizado useFetch para obtener datos
   const { data: grados, loading: loadingGrados, error: errorGrados } = useFetch(`${API_BASE_URL}/grados`);
@@ -152,6 +154,14 @@ export const GestionHorario = () => {
     doc.save('Gestion_Horarios.pdf');
   };
 
+  // Calcular los horarios a mostrar en la página actual
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentHorarios = horarios.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Cambiar de página
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <h1 className="text-3xl font-bold mb-6">Gestión de Horarios</h1>
@@ -195,15 +205,28 @@ export const GestionHorario = () => {
             />
           ) : (
             materias && profesores && aulas && (
-              <ListaHorarios
-                horarios={horarios}
-                onEditHorario={handleEditHorario} // Pasar la función de edición
-                setHorarios={setHorarios}
-                materias={materias}
-                profesores={profesores}
-                aulas={aulas}
-                secciones={secciones}
-              />
+              <>
+                <ListaHorarios
+                  horarios={currentHorarios}
+                  onEditHorario={handleEditHorario} // Pasar la función de edición
+                  setHorarios={setHorarios}
+                  materias={materias}
+                  profesores={profesores}
+                  aulas={aulas}
+                  secciones={secciones}
+                />
+                <div className="flex justify-center mt-4">
+                  {Array.from({ length: Math.ceil(horarios.length / itemsPerPage) }, (_, index) => (
+                    <button
+                      key={index + 1}
+                      onClick={() => paginate(index + 1)}
+                      className={`mx-1 px-3 py-1 rounded ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                </div>
+              </>
             )
           )}
         </>
