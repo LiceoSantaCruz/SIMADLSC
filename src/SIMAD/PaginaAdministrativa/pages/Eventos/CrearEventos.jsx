@@ -442,6 +442,6 @@ const CrearEventos = () => {
       </form>
     </div>
   );
-};
+}; 
 
 export default CrearEventos;

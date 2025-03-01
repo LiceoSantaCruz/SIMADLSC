@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import useFetch from '../../../../Hooks/useFetch';
@@ -9,17 +10,22 @@ import ToggleButton from '../../../../Components/ToggleButton';
 import ErrorMessage from '../../../../Components/ErrorMessage';
 import LoadingIndicator from '../../../../Components/LoadingIndicator';
 
-// Definir la URL base de la API dependiendo del entorno
+const MySwal = withReactContent(Swal);
+
+// URL base de la API dependiendo del entorno
 const API_BASE_URL = window.location.hostname === 'localhost'
-  ? 'http://localhost:3000' // URL de desarrollo
-  : 'https://simadlsc-backend-production.up.railway.app'; // URL de producción
+  ? 'http://localhost:3000'
+  : 'https://simadlsc-backend-production.up.railway.app';
 
 export const GestionHorario = () => {
   const [formularioAbierto, setFormularioAbierto] = useState(false);
   const [horarios, setHorarios] = useState([]);
-  const [horarioEdit, setHorarioEdit] = useState(null); // Estado para el horario a editar
+  const [horarioEdit, setHorarioEdit] = useState(null); // Horario a editar
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // Elementos por página
+  const [seccionSeleccionada, setSeccionSeleccionada] = useState('');
 
-  // Utilizar el hook personalizado useFetch para obtener datos
+  // Hook para obtener datos
   const { data: grados, loading: loadingGrados, error: errorGrados } = useFetch(`${API_BASE_URL}/grados`);
   const { data: secciones, loading: loadingSecciones, error: errorSecciones } = useFetch(`${API_BASE_URL}/secciones`);
   const { data: materias, loading: loadingMaterias, error: errorMaterias } = useFetch(`${API_BASE_URL}/materias`);
@@ -27,36 +33,68 @@ export const GestionHorario = () => {
   const { data: aulas, loading: loadingAulas, error: errorAulas } = useFetch(`${API_BASE_URL}/aulas`);
   const { data: horariosData, loading: loadingHorarios, error: errorHorarios, refetch: refetchHorarios } = useFetch(`${API_BASE_URL}/horarios`);
 
-  // Actualizar horarios al obtener los datos iniciales
+  // Actualizar horarios desde la data obtenida
   useEffect(() => {
     if (horariosData) {
       setHorarios(horariosData);
     }
   }, [horariosData]);
 
+  // Para estudiantes, la sección viene de su información
+  const role = localStorage.getItem('role');
+  const estudianteId = localStorage.getItem('id_estudiante');
+
+  useEffect(() => {
+    const obtenerDatosIniciales = async () => {
+      try {
+        if (role === 'admin' || role === 'superadmin') {
+          // Ya se obtiene la lista de secciones mediante useFetch
+        }
+        if (role === 'estudiante' && estudianteId) {
+          const responseEstudiante = await fetch(`${API_BASE_URL}/estudiantes/${estudianteId}`);
+          const dataEstudiante = await responseEstudiante.json();
+          // Puedes usar la sección del estudiante para filtrar
+          setSeccionSeleccionada(dataEstudiante.seccion?.id_Seccion || '');
+        }
+      } catch (error) {
+        console.error('Error al obtener datos iniciales:', error);
+      }
+    };
+    obtenerDatosIniciales();
+  }, [role, estudianteId]);
+
+  // Reiniciar paginación cuando cambia el filtro de sección
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [seccionSeleccionada]);
+
+  // Filtro: si se selecciona una sección, se muestran solo esos horarios; si no, todos
+  const horariosFiltrados = useMemo(() => {
+    return seccionSeleccionada
+      ? horarios.filter(h => h.seccion?.id_Seccion === Number(seccionSeleccionada))
+      : horarios;
+  }, [seccionSeleccionada, horarios]);
+
   const toggleFormulario = () => {
     setFormularioAbierto(!formularioAbierto);
-    setHorarioEdit(null); // Resetear el horarioEdit al abrir o cerrar el formulario
+    setHorarioEdit(null);
   };
 
   const handleSubmitSuccess = (nuevoHorario) => {
     setHorarios((prevHorarios) => [...prevHorarios, nuevoHorario]);
-
-    // SweetAlert2 para éxito de registro
     Swal.fire({
       icon: 'success',
       title: 'Horario registrado exitosamente.',
       confirmButtonColor: '#3085d6',
       confirmButtonText: 'OK',
     });
-
-    refetchHorarios(); // Refrescar la lista de horarios
-    setFormularioAbierto(false); // Cerrar el formulario después de crear
+    refetchHorarios();
+    setFormularioAbierto(false);
   };
 
   const handleEditHorario = (horario) => {
     setFormularioAbierto(true);
-    setHorarioEdit(horario); // Establecer el horario a editar
+    setHorarioEdit(horario);
   };
 
   const handleUpdateHorario = (horarioActualizado) => {
@@ -65,37 +103,32 @@ export const GestionHorario = () => {
         horario.id_Horario === horarioActualizado.id_Horario ? horarioActualizado : horario
       )
     );
-
-    // SweetAlert2 para éxito de actualización
     Swal.fire({
       icon: 'success',
       title: 'Horario actualizado exitosamente.',
       confirmButtonColor: '#3085d6',
       confirmButtonText: 'OK',
     });
-
     setHorarioEdit(null);
-    setFormularioAbierto(false); // Cerrar el formulario después de actualizar
+    setFormularioAbierto(false);
     refetchHorarios();
   };
 
-  // Manejar estados de carga y errores de manera simplificada
+  // Estados de carga y error
   const isLoading = [loadingGrados, loadingSecciones, loadingMaterias, loadingProfesores, loadingAulas, loadingHorarios].some(Boolean);
   const hasError = [errorGrados, errorSecciones, errorMaterias, errorProfesores, errorAulas, errorHorarios].some(Boolean);
 
-  // Función para formatear la hora de 24 horas a 12 horas con AM/PM
   const formatearHora = (hora24) => {
-    if (!hora24) return "N/A"; // Si la hora no está disponible, retornar "N/A"
+    if (!hora24) return "N/A";
     const [hora, minuto] = hora24.split(':');
     let horaNum = parseInt(hora, 10);
     const ampm = horaNum >= 12 ? 'PM' : 'AM';
-    horaNum = horaNum % 12 || 12; // Convertir 0 a 12
+    horaNum = horaNum % 12 || 12;
     return `${horaNum}:${minuto} ${ampm}`;
   };
 
-  // Función para generar el PDF
   const exportarPdf = () => {
-    if (horarios.length === 0) {
+    if (horariosFiltrados.length === 0) {
       Swal.fire({
         icon: 'info',
         title: 'No hay horarios para exportar.',
@@ -103,19 +136,13 @@ export const GestionHorario = () => {
       });
       return;
     }
-
     const doc = new jsPDF();
-
-    // Título
     doc.setFontSize(16);
     doc.text('Gestión de Horarios', 14, 22);
 
-    // Definir las columnas
     const tableColumn = ['ID', 'Grado', 'Sección', 'Materia', 'Profesor', 'Aula', 'Día', 'Hora Inicio', 'Hora Fin'];
     const tableRows = [];
-
-    // Agregar filas
-    horarios.forEach((horario) => {
+    horariosFiltrados.forEach((horario) => {
       const grado = horario.seccion?.gradoId || 'N/A';
       const seccion = horario.seccion?.nombre_Seccion || 'N/A';
       const materia = horario.materia?.nombre_Materia || 'N/A';
@@ -123,7 +150,6 @@ export const GestionHorario = () => {
         ? `${horario.profesor.nombre_Profesor} ${horario.profesor.apellido1_Profesor} ${horario.profesor.apellido2_Profesor}`
         : 'N/A';
       const aula = horario.aula?.nombre_Aula || 'N/A';
-
       tableRows.push([
         horario.id_Horario,
         grado,
@@ -137,7 +163,6 @@ export const GestionHorario = () => {
       ]);
     });
 
-    // Agregar la tabla al PDF
     doc.autoTable({
       head: [tableColumn],
       body: tableRows,
@@ -147,67 +172,113 @@ export const GestionHorario = () => {
       theme: 'striped',
       margin: { top: 20 },
     });
-
-    // Guardar el PDF
-    doc.save('Gestion_Horarios.pdf');
+    doc.save(`Gestion_Horarios.pdf`);
   };
 
+  // Paginación basada en horarios filtrados
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentHorarios = horariosFiltrados.slice(indexOfFirstItem, indexOfLastItem);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold mb-6">Gestión de Horarios</h1>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-5xl mx-auto px-4">
+        <h1 className="text-4xl font-extrabold text-center text-gray-900 mb-8">Gestión de Horarios</h1>
 
-      {/* Botones para abrir/cerrar formulario y exportar PDF */}
-      <div className="flex items-center mb-6 space-x-4">
-        <ToggleButton
-          label={formularioAbierto ? 'Cerrar Formulario' : 'Crear Horario'}
-          isSelected={formularioAbierto}
-          onClick={toggleFormulario}
-          color="green"
-        />
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-          onClick={exportarPdf}
-          disabled={horarios.length === 0 || isLoading}
-          title={horarios.length === 0 ? "No hay horarios para exportar" : "Exportar todos los horarios como PDF"}
-        >
-          Exportar Todos los Horarios como PDF
-        </button>
+        {/* Filtro por Sección (solo para admin/superadmin) */}
+        {(role === 'admin' || role === 'superadmin') && secciones && (
+          <div className="mb-6">
+            <label className="block text-lg font-medium text-gray-700 mb-2">
+              Seleccionar Sección
+            </label>
+            <select
+              value={seccionSeleccionada}
+              onChange={(e) => setSeccionSeleccionada(e.target.value)}
+              className="border p-2 rounded-lg w-full"
+            >
+              <option value="">Todas las secciones</option>
+              {secciones.map((sec) => (
+                <option key={sec.id_Seccion} value={sec.id_Seccion}>
+                  {sec.nombre_Seccion}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+          <ToggleButton
+            label={formularioAbierto ? 'Cerrar Formulario' : 'Crear Horario'}
+            isSelected={formularioAbierto}
+            onClick={toggleFormulario}
+            color="green"
+          />
+          <button
+            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition"
+            onClick={exportarPdf}
+            disabled={horariosFiltrados.length === 0 || isLoading}
+            title={horariosFiltrados.length === 0 ? "No hay horarios para exportar" : "Exportar todos los horarios como PDF"}
+          >
+            Exportar Todos los Horarios como PDF
+          </button>
+        </div>
+
+        {isLoading && <LoadingIndicator />}
+        {hasError && (
+          <ErrorMessage message="Hubo un problema al cargar los datos. Por favor, intenta nuevamente." />
+        )}
+
+        {!isLoading && !hasError && (
+          <>
+            {formularioAbierto ? (
+              <div className="mb-8">
+                <FormularioHorarioEstudiante
+                  onSubmitSuccess={horarioEdit ? handleUpdateHorario : handleSubmitSuccess}
+                  onCancel={() => setFormularioAbierto(false)}
+                  initialData={horarioEdit}
+                  grados={grados}
+                  materias={materias}
+                  profesores={profesores}
+                  aulas={aulas}
+                />
+              </div>
+            ) : (
+              materias && profesores && aulas && (
+                <>
+                  <div className="bg-white shadow-lg rounded-md p-6">
+                    <ListaHorarios
+                      horarios={currentHorarios}
+                      onEditHorario={handleEditHorario}
+                      setHorarios={setHorarios}
+                      materias={materias}
+                      profesores={profesores}
+                      aulas={aulas}
+                      secciones={secciones}
+                    />
+                  </div>
+                  <div className="flex flex-wrap justify-center mt-6">
+                    {Array.from({ length: Math.ceil(horariosFiltrados.length / itemsPerPage) }, (_, index) => (
+                      <button
+                        key={index + 1}
+                        onClick={() => paginate(index + 1)}
+                        className={`mx-2 my-1 px-4 py-2 rounded-md transition ${
+                          currentPage === index + 1
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        {index + 1}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )
+            )}
+          </>
+        )}
       </div>
-
-      {/* Manejar estados de carga y errores */}
-      {isLoading && <LoadingIndicator />}
-      {hasError && (
-        <ErrorMessage message="Hubo un problema al cargar los datos. Por favor, intenta nuevamente." />
-      )}
-
-      {/* Mostrar el formulario o la lista, pero no ambos */}
-      {!isLoading && !hasError && (
-        <>
-          {formularioAbierto ? (
-            <FormularioHorarioEstudiante
-              onSubmitSuccess={horarioEdit ? handleUpdateHorario : handleSubmitSuccess}
-              onCancel={() => setFormularioAbierto(false)}
-              initialData={horarioEdit}
-              grados={grados}
-              materias={materias}
-              profesores={profesores}
-              aulas={aulas}
-            />
-          ) : (
-            materias && profesores && aulas && (
-              <ListaHorarios
-                horarios={horarios}
-                onEditHorario={handleEditHorario} // Pasar la función de edición
-                setHorarios={setHorarios}
-                materias={materias}
-                profesores={profesores}
-                aulas={aulas}
-                secciones={secciones}
-              />
-            )
-          )}
-        </>
-      )}
     </div>
   );
 };
