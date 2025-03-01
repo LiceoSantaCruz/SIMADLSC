@@ -13,6 +13,22 @@ const API_BASE_URL =
     ? 'https://simadlsc-backend-production.up.railway.app'
     : 'http://localhost:3000';
 
+// Definición de los horarios de lecciones
+const lessonTimes = {
+  "1°": { start: "07:00", end: "07:40" },
+  "2°": { start: "07:40", end: "08:20" },
+  "3°": { start: "08:25", end: "09:05" },
+  "4°": { start: "09:05", end: "09:45" },
+  "5°": { start: "10:00", end: "10:40" },
+  "6°": { start: "10:40", end: "11:20" },
+  "7°": { start: "12:00", end: "12:40" },
+  "8°": { start: "12:40", end: "13:20" },
+  "9°": { start: "13:25", end: "14:05" },
+  "10°": { start: "14:05", end: "14:45" },
+  "11°": { start: "15:00", end: "15:40" },
+  "12°": { start: "15:40", end: "16:20" },
+};
+
 export const HorarioEstu = () => {
   const [nombreEstudiante, setNombreEstudiante] = useState('');
   const [apellidosEstudiante, setApellidosEstudiante] = useState('');
@@ -30,21 +46,20 @@ export const HorarioEstu = () => {
     const obtenerDatosIniciales = async () => {
       try {
         setCargando(true);
-
         if (role === 'admin' || role === 'superadmin') {
           const responseSecciones = await axios.get(`${API_BASE_URL}/secciones`);
           setSecciones(responseSecciones.data);
         }
-
         if (role === 'estudiante' && estudianteId) {
           const responseEstudiante = await axios.get(`${API_BASE_URL}/estudiantes/${estudianteId}`);
           const dataEstudiante = responseEstudiante.data;
           setNombreEstudiante(dataEstudiante.nombre_Estudiante);
-          setApellidosEstudiante(`${dataEstudiante.apellido1_Estudiante} ${dataEstudiante.apellido2_Estudiante}`);
+          setApellidosEstudiante(
+            `${dataEstudiante.apellido1_Estudiante} ${dataEstudiante.apellido2_Estudiante}`
+          );
           setSeccion(dataEstudiante.seccion?.nombre_Seccion || 'Sin Sección');
           setSeccionSeleccionada(dataEstudiante.seccion.id_Seccion);
         }
-
         setCargando(false);
       } catch (error) {
         console.error('Error al obtener los datos iniciales:', error);
@@ -52,18 +67,21 @@ export const HorarioEstu = () => {
         setCargando(false);
       }
     };
-
     obtenerDatosIniciales();
   }, [role, estudianteId]);
 
   useEffect(() => {
     const obtenerHorarios = async () => {
       if (!seccionSeleccionada) return;
-
       try {
         setCargando(true);
-        const responseHorarios = await axios.get(`${API_BASE_URL}/horarios/seccion/${seccionSeleccionada}`);
-        const horariosOrdenados = responseHorarios.data.sort((a, b) => a.hora_inicio_Horario.localeCompare(b.hora_inicio_Horario));
+        const responseHorarios = await axios.get(
+          `${API_BASE_URL}/horarios/seccion/${seccionSeleccionada}`
+        );
+        // Ordenar por hora de inicio
+        const horariosOrdenados = responseHorarios.data.sort((a, b) =>
+          a.hora_inicio_Horario.localeCompare(b.hora_inicio_Horario)
+        );
         setHorarios(horariosOrdenados);
         setCargando(false);
       } catch (error) {
@@ -72,10 +90,10 @@ export const HorarioEstu = () => {
         setCargando(false);
       }
     };
-
     obtenerHorarios();
   }, [seccionSeleccionada]);
 
+  // Función para convertir de formato 24h a 12h
   const convertirHora12 = (hora24) => {
     const [hora, minuto] = hora24.split(':');
     let horaNum = parseInt(hora, 10);
@@ -87,23 +105,31 @@ export const HorarioEstu = () => {
   if (error) {
     return <div className="text-red-500">{error}</div>;
   }
-
   if (cargando) {
     return <div>Cargando datos...</div>;
   }
 
-  const horasUnicas = [...new Set(horarios.map(horario => `${convertirHora12(horario.hora_inicio_Horario)} - ${convertirHora12(horario.hora_fin_Horario)}`))];
+  // Ordenamos las lecciones y definimos los días
+  const lessons = Object.keys(lessonTimes).sort((a, b) => parseInt(a) - parseInt(b));
   const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
-  const obtenerHorario = (dia, hora) => {
-    return horarios.find(h => h.dia_semana_Horario === dia && `${convertirHora12(h.hora_inicio_Horario)} - ${convertirHora12(h.hora_fin_Horario)}` === hora);
+  // Función para obtener el horario según el día y la lección
+  const obtenerHorario = (dia, lesson) => {
+    const lessonStart = lessonTimes[lesson].start;
+    return horarios.find(
+      (h) =>
+        h.dia_semana_Horario === dia &&
+        h.hora_inicio_Horario.substring(0, 5) === lessonStart
+    );
   };
 
   const mostrarDetalles = (horario) => {
     if (horario) {
       MySwal.fire({
-        title: `Detalles de la clase`,
-        html: `<b>Aula:</b> ${horario.aula?.nombre_Aula || 'N/A'}<br><b>Profesor:</b> ${horario.profesor?.nombre_Profesor || 'N/A'} ${horario.profesor?.apellido1_Profesor || 'N/A'} ${horario.profesor?.apellido2_Profesor || 'N/A'}`,
+        title: 'Detalles de la clase',
+        html: `<b>Aula:</b> ${horario.aula?.nombre_Aula || 'N/A'}<br/><b>Profesor:</b> ${
+          horario.profesor?.nombre_Profesor || 'N/A'
+        } ${horario.profesor?.apellido1_Profesor || 'N/A'} ${horario.profesor?.apellido2_Profesor || 'N/A'}`,
         icon: 'info',
         confirmButtonText: 'Cerrar',
       });
@@ -114,20 +140,27 @@ export const HorarioEstu = () => {
     const doc = new jsPDF();
     doc.text(`Horario de ${nombreEstudiante} ${apellidosEstudiante} - Sección ${seccion}`, 10, 10);
 
-    const tableColumn = ['Hora', ...dias];
-    const tableRows = [];
-
-    horasUnicas.forEach((hora) => {
-      const fila = [hora];
-      dias.forEach((dia) => {
-        const horario = obtenerHorario(dia, hora);
-        fila.push(horario ? horario.materia?.nombre_Materia || '-' : '-');
+    // La cabecera ahora es: la primera columna "Día" y luego cada lección con su rango horario
+    const tableColumns = [
+      'Día',
+      ...lessons.map(
+        (lesson) =>
+          `${lesson}\n${convertirHora12(lessonTimes[lesson].start)} - ${convertirHora12(
+            lessonTimes[lesson].end
+          )}`
+      ),
+    ];
+    const tableRows = dias.map((dia) => {
+      const row = [dia];
+      lessons.forEach((lesson) => {
+        const horario = obtenerHorario(dia, lesson);
+        row.push(horario ? horario.materia?.nombre_Materia || '-' : '-');
       });
-      tableRows.push(fila);
+      return row;
     });
 
     doc.autoTable({
-      head: [tableColumn],
+      head: [tableColumns],
       body: tableRows,
       startY: 20,
     });
@@ -178,21 +211,30 @@ export const HorarioEstu = () => {
             <table className="min-w-full table-auto bg-gray-50 shadow-sm rounded-lg">
               <thead className="bg-gray-200 text-gray-700">
                 <tr>
-                  <th className="px-4 py-2 text-left">Hora</th>
-                  {dias.map((dia, index) => (
-                    <th key={index} className="px-4 py-2 text-left">{dia}</th>
+                  {/* Primera celda: Días */}
+                  <th className="px-4 py-2 text-left">Día</th>
+                  {/* Ahora cada columna es una lección con su rango horario */}
+                  {lessons.map((lesson, i) => (
+                    <th key={i} className="px-4 py-2 text-center">
+                      <div>{lesson}</div>
+                      <div className="text-sm text-gray-500">
+                        {`${convertirHora12(lessonTimes[lesson].start)} - ${convertirHora12(
+                          lessonTimes[lesson].end
+                        )}`}
+                      </div>
+                    </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {horasUnicas.map((hora, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="px-4 py-2">{hora}</td>
-                    {dias.map((dia) => {
-                      const horario = obtenerHorario(dia, hora);
+                {dias.map((dia, i) => (
+                  <tr key={i} className="border-b">
+                    <td className="px-4 py-2 font-bold">{dia}</td>
+                    {lessons.map((lesson) => {
+                      const horario = obtenerHorario(dia, lesson);
                       return (
                         <td
-                          key={dia}
+                          key={lesson}
                           className="px-4 py-2 text-center cursor-pointer hover:bg-blue-100"
                           onClick={() => mostrarDetalles(horario)}
                         >
