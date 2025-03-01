@@ -216,199 +216,201 @@ const FormularioHorarioEstudiante = ({
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-      <h2 className="text-2xl font-bold mb-4">
-        {isEditing ? 'Editar Horario de Estudiante' : 'Crear Horario de Estudiante'}
-      </h2>
+    <div className="min-h-screen bg-gray-100 p-4 sm:p-6">
+      <div className="max-w-xl mx-auto">
+        <h2 className="text-2xl font-bold mb-4">
+          {isEditing ? 'Editar Horario de Estudiante' : 'Crear Horario de Estudiante'}
+        </h2>
 
-      {errorGeneral && <p className="text-red-500 mb-4">{errorGeneral}</p>}
+        {errorGeneral && <p className="text-red-500 mb-4">{errorGeneral}</p>}
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        {/* Grado */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Grado</label>
-          <select
-            className={`border p-2 rounded-lg w-full ${errors.gradoId ? 'border-red-500' : ''}`}
-            {...register('gradoId')}
-          >
-            <option value="">Seleccione un grado</option>
-            {grados.map((grado) => (
-              <option key={grado.id_grado} value={grado.id_grado}>
-                {grado.nivel}
-              </option>
-            ))}
-          </select>
-          {errors.gradoId && <p className="text-red-500">{errors.gradoId.message}</p>}
-        </div>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          {/* Grado */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Grado</label>
+            <select
+              className={`border p-2 rounded-lg w-full ${errors.gradoId ? 'border-red-500' : ''}`}
+              {...register('gradoId')}
+            >
+              <option value="">Seleccione un grado</option>
+              {grados.map((grado) => (
+                <option key={grado.id_grado} value={grado.id_grado}>
+                  {grado.nivel}
+                </option>
+              ))}
+            </select>
+            {errors.gradoId && <p className="text-red-500">{errors.gradoId.message}</p>}
+          </div>
 
-        {/* Sección */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Sección</label>
-          <select
-            className={`border p-2 rounded-lg w-full ${errors.seccionId ? 'border-red-500' : ''}`}
-            {...register('seccionId')}
-            disabled={!gradoSeleccionado}
-          >
-            <option value="">Seleccione una sección</option>
-            {seccionesDisponibles.map((seccion) => (
-              <option key={seccion.id_Seccion} value={seccion.id_Seccion}>
-                {seccion.nombre_Seccion}
-              </option>
-            ))}
-          </select>
-          {errors.seccionId && <p className="text-red-500">{errors.seccionId.message}</p>}
-        </div>
+          {/* Sección */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Sección</label>
+            <select
+              className={`border p-2 rounded-lg w-full ${errors.seccionId ? 'border-red-500' : ''}`}
+              {...register('seccionId')}
+              disabled={!gradoSeleccionado}
+            >
+              <option value="">Seleccione una sección</option>
+              {seccionesDisponibles.map((seccion) => (
+                <option key={seccion.id_Seccion} value={seccion.id_Seccion}>
+                  {seccion.nombre_Seccion}
+                </option>
+              ))}
+            </select>
+            {errors.seccionId && <p className="text-red-500">{errors.seccionId.message}</p>}
+          </div>
 
-        {/* Materia */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Materia</label>
-          <select
-            className={`border p-2 rounded-lg w-full ${errors.materiaId ? 'border-red-500' : ''}`}
-            {...register('materiaId')}
-          >
-            <option value="">Seleccione una materia</option>
-            {materias.map((materia) => (
-              <option key={materia.id_Materia} value={materia.id_Materia}>
-                {materia.nombre_Materia}
-              </option>
-            ))}
-          </select>
-          {errors.materiaId && <p className="text-red-500">{errors.materiaId.message}</p>}
-        </div>
+          {/* Materia */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Materia</label>
+            <select
+              className={`border p-2 rounded-lg w-full ${errors.materiaId ? 'border-red-500' : ''}`}
+              {...register('materiaId')}
+            >
+              <option value="">Seleccione una materia</option>
+              {materias.map((materia) => (
+                <option key={materia.id_Materia} value={materia.id_Materia}>
+                  {materia.nombre_Materia}
+                </option>
+              ))}
+            </select>
+            {errors.materiaId && <p className="text-red-500">{errors.materiaId.message}</p>}
+          </div>
 
-        {/* Profesor */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Profesor</label>
-          <select
-            className={`border p-2 rounded-lg w-full ${errors.profesorId ? 'border-red-500' : ''}`}
-            {...register('profesorId')}
-          >
-            <option value="">Seleccione un profesor</option>
-            {profesores.map((profesor) => (
-              <option key={profesor.id_Profesor} value={profesor.id_Profesor}>
-                {profesor.nombre_Profesor} {profesor.apellido1_Profesor} {profesor.apellido2_Profesor}
-              </option>
-            ))}
-          </select>
-          {errors.profesorId && <p className="text-red-500">{errors.profesorId.message}</p>}
-        </div>
+          {/* Profesor */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Profesor</label>
+            <select
+              className={`border p-2 rounded-lg w-full ${errors.profesorId ? 'border-red-500' : ''}`}
+              {...register('profesorId')}
+            >
+              <option value="">Seleccione un profesor</option>
+              {profesores.map((profesor) => (
+                <option key={profesor.id_Profesor} value={profesor.id_Profesor}>
+                  {profesor.nombre_Profesor} {profesor.apellido1_Profesor} {profesor.apellido2_Profesor}
+                </option>
+              ))}
+            </select>
+            {errors.profesorId && <p className="text-red-500">{errors.profesorId.message}</p>}
+          </div>
 
-        {/* Aula */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Aula</label>
-          <select
-            className={`border p-2 rounded-lg w-full ${errors.aulaId ? 'border-red-500' : ''}`}
-            {...register('aulaId')}
-          >
-            <option value="">Seleccione un aula</option>
-            {aulas.map((aula) => (
-              <option key={aula.id_aula} value={aula.id_aula}>
-                {aula.nombre_Aula}
-              </option>
-            ))}
-          </select>
-          {errors.aulaId && <p className="text-red-500">{errors.aulaId.message}</p>}
-        </div>
+          {/* Aula */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Aula</label>
+            <select
+              className={`border p-2 rounded-lg w-full ${errors.aulaId ? 'border-red-500' : ''}`}
+              {...register('aulaId')}
+            >
+              <option value="">Seleccione un aula</option>
+              {aulas.map((aula) => (
+                <option key={aula.id_aula} value={aula.id_aula}>
+                  {aula.nombre_Aula}
+                </option>
+              ))}
+            </select>
+            {errors.aulaId && <p className="text-red-500">{errors.aulaId.message}</p>}
+          </div>
 
-        {/* Día de la Semana */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Día de la Semana</label>
-          <select
-            className={`border p-2 rounded-lg w-full ${errors.dia_semana_Horario ? 'border-red-500' : ''}`}
-            {...register('dia_semana_Horario')}
-          >
-            <option value="">Seleccione un día</option>
-            <option value="Lunes">Lunes</option>
-            <option value="Martes">Martes</option>
-            <option value="Miércoles">Miércoles</option>
-            <option value="Jueves">Jueves</option>
-            <option value="Viernes">Viernes</option>
-          </select>
-          {errors.dia_semana_Horario && <p className="text-red-500">{errors.dia_semana_Horario.message}</p>}
-        </div>
+          {/* Día de la Semana */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Día de la Semana</label>
+            <select
+              className={`border p-2 rounded-lg w-full ${errors.dia_semana_Horario ? 'border-red-500' : ''}`}
+              {...register('dia_semana_Horario')}
+            >
+              <option value="">Seleccione un día</option>
+              <option value="Lunes">Lunes</option>
+              <option value="Martes">Martes</option>
+              <option value="Miércoles">Miércoles</option>
+              <option value="Jueves">Jueves</option>
+              <option value="Viernes">Viernes</option>
+            </select>
+            {errors.dia_semana_Horario && <p className="text-red-500">{errors.dia_semana_Horario.message}</p>}
+          </div>
 
-        {/* SECCIÓN DE LECCIONES DINÁMICAS */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-2">Lecciones</label>
-          {fields.map((field, index) => (
-            <div key={field.id} className="border p-4 mb-4 rounded relative">
-              <label className="block text-gray-700">Lección #{index + 1}</label>
-              <select
-                className="border p-2 rounded-lg w-full mt-1"
-                {...register(`lessons.${index}.lessonKey`)}
-                onChange={(e) => handleLessonChange(e.target.value, index)}
-              >
-                <option value="">Seleccione una lección</option>
-                {Object.keys(lessonTimes).map((key) => (
-                  <option key={key} value={key}>
-                    {key} Lección
-                  </option>
-                ))}
-              </select>
-
-              {/* Campos ocultos o visibles para las horas */}
-              <input
-                type="hidden"
-                {...register(`lessons.${index}.hora_inicio_Horario`)}
-              />
-              <input
-                type="hidden"
-                {...register(`lessons.${index}.hora_fin_Horario`)}
-              />
-
-              {/* Botón para eliminar esta lección si hay más de una */}
-              {fields.length > 1 && (
-                <button
-                  type="button"
-                  className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                  onClick={() => remove(index)}
+          {/* SECCIÓN DE LECCIONES DINÁMICAS */}
+          <div className="mb-4">
+            <label className="block text-gray-700 font-semibold mb-2">Lecciones</label>
+            {fields.map((field, index) => (
+              <div key={field.id} className="border p-4 mb-4 rounded relative">
+                <label className="block text-gray-700">Lección #{index + 1}</label>
+                <select
+                  className="border p-2 rounded-lg w-full mt-1"
+                  {...register(`lessons.${index}.lessonKey`)}
+                  onChange={(e) => handleLessonChange(e.target.value, index)}
                 >
-                  Eliminar
-                </button>
-              )}
-            </div>
-          ))}
+                  <option value="">Seleccione una lección</option>
+                  {Object.keys(lessonTimes).map((key) => (
+                    <option key={key} value={key}>
+                      {key} Lección
+                    </option>
+                  ))}
+                </select>
 
-          {/* Botón para agregar otra lección */}
-          <button
-            type="button"
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-            onClick={() =>
-              append({
-                lessonKey: '',
-                hora_inicio_Horario: '',
-                hora_fin_Horario: '',
-              })
-            }
-          >
-            Agregar otra lección
-          </button>
-        </div>
+                {/* Campos ocultos para las horas */}
+                <input
+                  type="hidden"
+                  {...register(`lessons.${index}.hora_inicio_Horario`)}
+                />
+                <input
+                  type="hidden"
+                  {...register(`lessons.${index}.hora_fin_Horario`)}
+                />
 
-        {/* Botones de acción */}
-        <div className="flex justify-end mt-6">
-          <button
-            type="button"
-            className="bg-gray-500 text-white px-4 py-2 rounded mr-2 hover:bg-gray-600"
-            onClick={() => {
-              reset();
-              setErrorGeneral('');
-              if (onCancel) onCancel();
-            }}
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className={`bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ${
-              isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Guardando...' : isEditing ? 'Guardar Cambios' : 'Registrar Horario(s)'}
-          </button>
-        </div>
-      </form>
+                {/* Botón para eliminar esta lección si hay más de una */}
+                {fields.length > 1 && (
+                  <button
+                    type="button"
+                    className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                    onClick={() => remove(index)}
+                  >
+                    Eliminar
+                  </button>
+                )}
+              </div>
+            ))}
+
+            {/* Botón para agregar otra lección */}
+            <button
+              type="button"
+              className="bg-green-500 text-white px-4 py-2 rounded w-full hover:bg-green-600"
+              onClick={() =>
+                append({
+                  lessonKey: '',
+                  hora_inicio_Horario: '',
+                  hora_fin_Horario: '',
+                })
+              }
+            >
+              Agregar otra lección
+            </button>
+          </div>
+
+          {/* Botones de acción */}
+          <div className="flex flex-col sm:flex-row justify-end mt-6 space-y-2 sm:space-y-0 sm:space-x-2">
+            <button
+              type="button"
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 w-full sm:w-auto"
+              onClick={() => {
+                reset();
+                setErrorGeneral('');
+                if (onCancel) onCancel();
+              }}
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className={`bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full sm:w-auto ${
+                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Guardando...' : isEditing ? 'Guardar Cambios' : 'Registrar Horario(s)'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

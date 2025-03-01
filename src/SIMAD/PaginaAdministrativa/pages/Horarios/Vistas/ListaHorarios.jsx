@@ -129,11 +129,6 @@ const ListaHorarios = ({
     }));
   };
 
-  // Función para manejar el cambio de sección en el <select>
-  const handleSeccionChange = (e) => {
-    setSelectedSeccionId(e.target.value);
-  };
-
   // ================
   //  LÓGICA DE FILTRO
   // ================
@@ -175,26 +170,7 @@ const ListaHorarios = ({
     <div>
       <h2 className="text-2xl font-semibold mb-4">Lista de Horarios</h2>
 
-      {/* Filtro por Sección */}
-      {secciones && secciones.length > 0 && (
-        <div className="mb-4">
-          <label className="mr-2 font-semibold">
-            Filtrar por Sección:
-          </label>
-          <select
-            value={selectedSeccionId}
-            onChange={handleSeccionChange}
-            className="border p-2 rounded-lg"
-          >
-            <option value="">-- Todas --</option>
-            {secciones.map((sec) => (
-              <option key={sec.id_Seccion} value={sec.id_Seccion}>
-                {sec.nombre_Seccion}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+      
 
       {horariosFiltrados.length === 0 ? (
         <p>No hay horarios con la sección seleccionada.</p>
