@@ -223,8 +223,8 @@ export const AsistenciaEst = () => {
           </div>
           <div className="col-span-2">
             <label className="block mb-2">Seleccionar Lecciones:</label>
-            <div className="grid grid-cols-5 gap-2">
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((leccion) => (
+            <div className="grid grid-cols-6 gap-2">
+              {Array.from({ length: 12 }, (_, i) => i + 1).map((leccion) => (
                 <label key={leccion} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -240,7 +240,7 @@ export const AsistenciaEst = () => {
             <p className="mt-2 text-gray-600">
               Seleccionadas:{" "}
               {formData.lecciones.length > 0
-                ? formData.lecciones.sort().join("/")
+                ? formData.lecciones.sort((a, b) => a - b).join("/")
                 : "Ninguna"}
             </p>
           </div>
