@@ -24,6 +24,10 @@ export const GestionAsistencia = () => {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [asistenciaIdToDelete, setAsistenciaIdToDelete] = useState(null);
 
+  // Paginación: 20 items por página, máximo 100 registros.
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+
   useEffect(() => {
     const fetchAsistencias = async () => {
       try {
@@ -103,6 +107,13 @@ export const GestionAsistencia = () => {
     setNoResultsVisible(false);
   };
 
+  // Cálculo de paginación: se limita el total de asistencias a 100.
+  const totalItems = Math.min(asistencias.length, 100);
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const paginatedAsistencias = asistencias.slice(indexOfFirst, indexOfLast);
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Gestión de Asistencias</h1>
@@ -180,7 +191,7 @@ export const GestionAsistencia = () => {
         </button>
       </div>
 
-      {asistencias.length > 0 ? (
+      {paginatedAsistencias.length > 0 ? (
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
             <tr>
@@ -195,7 +206,7 @@ export const GestionAsistencia = () => {
             </tr>
           </thead>
           <tbody>
-            {asistencias.map((asistencia) => (
+            {paginatedAsistencias.map((asistencia) => (
               <tr key={asistencia.asistencia_id} className="text-center">
                 <td className="border px-4 py-2">
                   {asistencia.id_Estudiante.nombre_Estudiante}{" "}
@@ -240,6 +251,27 @@ export const GestionAsistencia = () => {
       ) : (
         <p>No se encontraron asistencias.</p>
       )}
+
+      {/* Controles de paginación */}
+      <div className="flex justify-center items-center gap-4 mt-4">
+        <button
+          onClick={() => currentPage > 1 && setCurrentPage((prev) => prev - 1)}
+          disabled={currentPage === 1}
+          className="bg-gray-300 px-4 py-2 rounded-md disabled:opacity-50"
+        >
+          Anterior
+        </button>
+        <span>
+          Página {currentPage} de {totalPages}
+        </span>
+        <button
+          onClick={() => currentPage < totalPages && setCurrentPage((prev) => prev + 1)}
+          disabled={currentPage === totalPages}
+          className="bg-gray-300 px-4 py-2 rounded-md disabled:opacity-50"
+        >
+          Siguiente
+        </button>
+      </div>
 
       {modalVisible && asistenciaSeleccionada && (
         <EditarAsistenciaModal
