@@ -1,10 +1,16 @@
-import {  useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDatosIniciales } from "./Hook/useDatosIniciales";
-import { actualizarAsistencia, eliminarAsistencia, obtenerGestionAsistencias, obtenerTodasLasAsistencias } from "./Services/GestionAsistenciaService";
+import {
+  actualizarAsistencia,
+  eliminarAsistencia,
+  obtenerGestionAsistencias,
+  obtenerTodasLasAsistencias,
+} from "./Services/GestionAsistenciaService";
 import { usePeriodos } from "./Hook/usePeriodos";
 import EditarAsistenciaModal from "./components/EditarAsistenciaModal";
 import NoResultsModal from "./components/NoResultsModal";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModal ";
+
 export const GestionAsistencia = () => {
   const { materias, grados, secciones } = useDatosIniciales();
   const { periodos } = usePeriodos();
@@ -94,7 +100,9 @@ export const GestionAsistencia = () => {
     try {
       await eliminarAsistencia(asistenciaIdToDelete);
       setAsistencias(
-        asistencias.filter((asistencia) => asistencia.asistencia_id !== asistenciaIdToDelete)
+        asistencias.filter(
+          (asistencia) => asistencia.asistencia_id !== asistenciaIdToDelete
+        )
       );
       setDeleteModalVisible(false);
       setAsistenciaIdToDelete(null);
@@ -208,21 +216,22 @@ export const GestionAsistencia = () => {
           <tbody>
             {paginatedAsistencias.map((asistencia) => (
               <tr key={asistencia.asistencia_id} className="text-center">
+                {/* USAMOS OPTIONAL CHAINING PARA EVITAR EL ERROR */}
                 <td className="border px-4 py-2">
-                  {asistencia.id_Estudiante.nombre_Estudiante}{" "}
-                  {asistencia.id_Estudiante.apellido1_Estudiante}{" "}
-                  {asistencia.id_Estudiante.apellido2_Estudiante}
+                  {asistencia.id_Estudiante?.nombre_Estudiante || "Sin nombre"}{" "}
+                  {asistencia.id_Estudiante?.apellido1_Estudiante || ""}{" "}
+                  {asistencia.id_Estudiante?.apellido2_Estudiante || ""}
                 </td>
                 <td className="border px-4 py-2">{asistencia.fecha}</td>
                 <td className="border px-4 py-2">
-                  {asistencia.id_Profesor.nombre_Profesor}{" "}
-                  {asistencia.id_Profesor.apellido1_Profesor}
+                  {asistencia.id_Profesor?.nombre_Profesor || "Sin profesor"}{" "}
+                  {asistencia.id_Profesor?.apellido1_Profesor || ""}
                 </td>
                 <td className="border px-4 py-2">
-                  {asistencia.id_Materia.nombre_Materia}
+                  {asistencia.id_Materia?.nombre_Materia || "Sin materia"}
                 </td>
                 <td className="border px-4 py-2">
-                  {asistencia.id_Seccion.nombre_Seccion}
+                  {asistencia.id_Seccion?.nombre_Seccion || "Sin sección"}
                 </td>
                 <td className="border px-4 py-2">{asistencia.estado}</td>
                 <td className="border px-4 py-2">
@@ -265,7 +274,9 @@ export const GestionAsistencia = () => {
           Página {currentPage} de {totalPages}
         </span>
         <button
-          onClick={() => currentPage < totalPages && setCurrentPage((prev) => prev + 1)}
+          onClick={() =>
+            currentPage < totalPages && setCurrentPage((prev) => prev + 1)
+          }
           disabled={currentPage === totalPages}
           className="bg-gray-300 px-4 py-2 rounded-md disabled:opacity-50"
         >
