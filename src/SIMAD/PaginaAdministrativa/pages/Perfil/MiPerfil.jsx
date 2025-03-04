@@ -40,7 +40,8 @@ export const MiPerfil = () => {
     <div className="min-h-screen bg-gray-100 flex flex-col items-center">
       {/* Portada */}
       <div className="w-full relative">
-        <img
+        {/* Cambiar el p de abajo por img */}
+        <p
           src={coverImage}
           alt="Portada del perfil"
           className="w-full h-48 object-cover"
