@@ -32,10 +32,13 @@ export const AsistenciaEst = () => {
   const { estudiantes, setEstudiantes, loading: loadingEstudiantes } = useEstudiantesPorSeccion(formData.id_Seccion);
   const { handleCrearAsistencias, loading, error } = useCrearAsistencia();
 
-  // Validar si el día seleccionado es sábado o domingo
-  const isWeekend = (date) => {
-    const day = new Date(date).getDay();
-    return day === 0 || day === 6; // Domingo (0) y sábado (6)
+  // Validar si el día seleccionado es sábado o domingo en hora local de Centroamérica
+  const isWeekend = (dateStr) => {
+    if (!dateStr) return false;
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // Se crea en hora local
+    const dayOfWeek = date.getDay(); // 0 domingo, 6 sábado
+    return dayOfWeek === 0 || dayOfWeek === 6;
   };
 
   const handleChange = (e) => {
@@ -43,7 +46,6 @@ export const AsistenciaEst = () => {
 
     if (name === "fecha") {
       if (isWeekend(value)) {
-        // Mostrar modal de error si es fin de semana
         setShowErrorModal(true);
         setFormData((prevData) => ({ ...prevData, fecha: "" })); // Limpiar el campo de fecha
         return;
@@ -223,8 +225,8 @@ export const AsistenciaEst = () => {
           </div>
           <div className="col-span-2">
             <label className="block mb-2">Seleccionar Lecciones:</label>
-            <div className="grid grid-cols-5 gap-2">
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((leccion) => (
+            <div className="grid grid-cols-6 gap-2">
+              {Array.from({ length: 12 }, (_, i) => i + 1).map((leccion) => (
                 <label key={leccion} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -240,7 +242,7 @@ export const AsistenciaEst = () => {
             <p className="mt-2 text-gray-600">
               Seleccionadas:{" "}
               {formData.lecciones.length > 0
-                ? formData.lecciones.sort().join("/")
+                ? formData.lecciones.sort((a, b) => a - b).join("/")
                 : "Ninguna"}
             </p>
           </div>

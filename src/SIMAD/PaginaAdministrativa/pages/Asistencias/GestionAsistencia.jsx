@@ -1,10 +1,16 @@
-import {  useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDatosIniciales } from "./Hook/useDatosIniciales";
-import { actualizarAsistencia, eliminarAsistencia, obtenerGestionAsistencias, obtenerTodasLasAsistencias } from "./Services/GestionAsistenciaService";
+import {
+  actualizarAsistencia,
+  eliminarAsistencia,
+  obtenerGestionAsistencias,
+  obtenerTodasLasAsistencias,
+} from "./Services/GestionAsistenciaService";
 import { usePeriodos } from "./Hook/usePeriodos";
 import EditarAsistenciaModal from "./components/EditarAsistenciaModal";
 import NoResultsModal from "./components/NoResultsModal";
-import ConfirmDeleteModal from "./components/ConfirmDeleteModal ";
+import ConfirmDeleteModal from "./components/ConfirmDeleteModal";
+
 export const GestionAsistencia = () => {
   const { materias, grados, secciones } = useDatosIniciales();
   const { periodos } = usePeriodos();
@@ -23,6 +29,10 @@ export const GestionAsistencia = () => {
   const [noResultsVisible, setNoResultsVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [asistenciaIdToDelete, setAsistenciaIdToDelete] = useState(null);
+
+  // Paginación: 20 items por página, máximo 100 registros.
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   useEffect(() => {
     const fetchAsistencias = async () => {
@@ -89,8 +99,10 @@ export const GestionAsistencia = () => {
   const confirmEliminar = async () => {
     try {
       await eliminarAsistencia(asistenciaIdToDelete);
-      setAsistencias(
-        asistencias.filter((asistencia) => asistencia.asistencia_id !== asistenciaIdToDelete)
+      setAsistencias((prevAsistencias) =>
+        prevAsistencias.filter(
+          (asistencia) => asistencia.asistencia_id !== asistenciaIdToDelete
+        )
       );
       setDeleteModalVisible(false);
       setAsistenciaIdToDelete(null);
@@ -102,6 +114,13 @@ export const GestionAsistencia = () => {
   const handleCloseModal = () => {
     setNoResultsVisible(false);
   };
+
+  // Cálculo de paginación: se limita el total de asistencias a 100.
+  const totalItems = Math.min(asistencias.length, 100);
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const paginatedAsistencias = asistencias.slice(indexOfFirst, indexOfLast);
 
   return (
     <div className="p-6">
@@ -180,7 +199,7 @@ export const GestionAsistencia = () => {
         </button>
       </div>
 
-      {asistencias.length > 0 ? (
+      {paginatedAsistencias.length > 0 ? (
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
             <tr>
@@ -195,23 +214,24 @@ export const GestionAsistencia = () => {
             </tr>
           </thead>
           <tbody>
-            {asistencias.map((asistencia) => (
+            {paginatedAsistencias.map((asistencia) => (
               <tr key={asistencia.asistencia_id} className="text-center">
+                {/* USAMOS OPTIONAL CHAINING PARA EVITAR EL ERROR */}
                 <td className="border px-4 py-2">
-                  {asistencia.id_Estudiante.nombre_Estudiante}{" "}
-                  {asistencia.id_Estudiante.apellido1_Estudiante}{" "}
-                  {asistencia.id_Estudiante.apellido2_Estudiante}
+                  {asistencia.id_Estudiante?.nombre_Estudiante || "Sin nombre"}{" "}
+                  {asistencia.id_Estudiante?.apellido1_Estudiante || ""}{" "}
+                  {asistencia.id_Estudiante?.apellido2_Estudiante || ""}
                 </td>
                 <td className="border px-4 py-2">{asistencia.fecha}</td>
                 <td className="border px-4 py-2">
-                  {asistencia.id_Profesor.nombre_Profesor}{" "}
-                  {asistencia.id_Profesor.apellido1_Profesor}
+                  {asistencia.id_Profesor?.nombre_Profesor || "Sin profesor"}{" "}
+                  {asistencia.id_Profesor?.apellido1_Profesor || ""}
                 </td>
                 <td className="border px-4 py-2">
-                  {asistencia.id_Materia.nombre_Materia}
+                  {asistencia.id_Materia?.nombre_Materia || "Sin materia"}
                 </td>
                 <td className="border px-4 py-2">
-                  {asistencia.id_Seccion.nombre_Seccion}
+                  {asistencia.id_Seccion?.nombre_Seccion || "Sin sección"}
                 </td>
                 <td className="border px-4 py-2">{asistencia.estado}</td>
                 <td className="border px-4 py-2">
@@ -241,6 +261,29 @@ export const GestionAsistencia = () => {
         <p>No se encontraron asistencias.</p>
       )}
 
+      {/* Controles de paginación */}
+      <div className="flex justify-center items-center gap-4 mt-4">
+        <button
+          onClick={() => currentPage > 1 && setCurrentPage((prev) => prev - 1)}
+          disabled={currentPage === 1}
+          className="bg-gray-300 px-4 py-2 rounded-md disabled:opacity-50"
+        >
+          Anterior
+        </button>
+        <span>
+          Página {currentPage} de {totalPages}
+        </span>
+        <button
+          onClick={() =>
+            currentPage < totalPages && setCurrentPage((prev) => prev + 1)
+          }
+          disabled={currentPage === totalPages}
+          className="bg-gray-300 px-4 py-2 rounded-md disabled:opacity-50"
+        >
+          Siguiente
+        </button>
+      </div>
+
       {modalVisible && asistenciaSeleccionada && (
         <EditarAsistenciaModal
           asistencia={asistenciaSeleccionada}
@@ -258,9 +301,11 @@ export const GestionAsistencia = () => {
 
       {deleteModalVisible && (
         <ConfirmDeleteModal
+          isOpen={deleteModalVisible} // <-- Pasamos isOpen
+          title="Confirmar Eliminación" // <-- Opcional, si quieres mostrar un título
           message="¿Estás seguro de que deseas eliminar esta asistencia?"
           onConfirm={confirmEliminar}
-          onCancel={() => setDeleteModalVisible(false)}
+          onClose={() => setDeleteModalVisible(false)}
         />
       )}
     </div>

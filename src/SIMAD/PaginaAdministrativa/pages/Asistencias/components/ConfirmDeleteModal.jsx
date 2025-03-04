@@ -1,11 +1,18 @@
-
-const ConfirmDeleteModal = ({ isOpen, onClose, onConfirm, title, message }) => {
+const ConfirmDeleteModal = ({ 
+  isOpen, 
+  onClose, 
+  onConfirm, 
+  title, 
+  message 
+}) => {
+  // Si quieres mantener la verificación, revisa la prop `isOpen`
   if (!isOpen) return null;
-  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-10">
       <div className="bg-white p-6 rounded shadow-lg">
-        <h3 className="text-xl font-semibold mb-4">{title}</h3>
+        {/* Si 'title' es opcional, puedes manejarlo con '|| "Confirmar"' */}
+        <h3 className="text-xl font-semibold mb-4">{title || "Confirmar"}</h3>
         <p className="mb-4">{message}</p>
         <div className="flex justify-end gap-2">
           <button 
