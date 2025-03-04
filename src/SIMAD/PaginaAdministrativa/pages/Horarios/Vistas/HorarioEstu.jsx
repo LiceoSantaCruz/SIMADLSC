@@ -13,7 +13,6 @@ const API_BASE_URL =
     ? 'https://simadlsc-backend-production.up.railway.app'
     : 'http://localhost:3000';
 
-// Definición de los horarios de lecciones
 const lessonTimes = {
   "1": { start: "07:00", end: "07:40" },
   "2": { start: "07:40", end: "08:20" },
@@ -98,7 +97,6 @@ export const HorarioEstu = () => {
     obtenerHorarios();
   }, [seccionSeleccionada]);
 
-  // Función para convertir de formato 24h a 12h
   const convertirHora12 = (hora24) => {
     const [hora, minuto] = hora24.split(':');
     let horaNum = parseInt(hora, 10);
@@ -114,7 +112,7 @@ export const HorarioEstu = () => {
     return <div>Cargando datos...</div>;
   }
 
-  // Ordenamos las lecciones según la hora de inicio y fin
+  // Ordenar las lecciones según la hora de inicio
   const lessons = Object.entries(lessonTimes)
     .sort(([, a], [, b]) => a.start.localeCompare(b.start))
     .map(([key]) => key);
@@ -141,9 +139,7 @@ export const HorarioEstu = () => {
     'Informatica': 'bg-blue-300',
     'Emprendedurismo': 'bg-amber-300',
   };
-  
 
-  // Función para obtener el horario según el día y la lección
   const obtenerHorario = (dia, lesson) => {
     const lessonStart = lessonTimes[lesson].start;
     return horarios.find(
@@ -167,10 +163,22 @@ export const HorarioEstu = () => {
   };
 
   const exportarPdf = () => {
-    const doc = new jsPDF();
-    doc.text(`Horario de ${nombreEstudiante} ${apellidosEstudiante} - Sección ${seccion}`, 10, 10);
+    const doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'pt',
+      format: 'a4',
+    });
 
-    // Cabecera: "Día" y cada lección con su rango horario
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    const title = `Horario de ${nombreEstudiante} ${apellidosEstudiante} - Sección ${seccion}`;
+    doc.setFontSize(12);
+    const titleWidth = doc.getTextWidth(title);
+    const titleX = (pageWidth - titleWidth) / 2;
+    doc.text(title, titleX, margin);
+
     const tableColumns = [
       'Día',
       ...lessons.map(
@@ -180,6 +188,7 @@ export const HorarioEstu = () => {
           )}`
       ),
     ];
+
     const tableRows = dias.map((dia) => {
       const row = [dia];
       lessons.forEach((lesson) => {
@@ -192,8 +201,34 @@ export const HorarioEstu = () => {
     doc.autoTable({
       head: [tableColumns],
       body: tableRows,
-      startY: 20,
+      startY: margin + 20,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [100, 100, 100],
+        textColor: 255,
+        halign: 'center',
+        fontSize: 8,
+        cellPadding: 3,
+      },
+      bodyStyles: {
+        halign: 'center',
+        fontSize: 8,
+        cellPadding: 3,
+      },
+      styles: { fontSize: 8, cellPadding: 3 },
     });
+
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.text(
+        `Página ${i} de ${pageCount}`,
+        pageWidth - margin,
+        pageHeight - 10,
+        { align: 'right' }
+      );
+    }
 
     doc.save(`Horario_${nombreEstudiante}_${apellidosEstudiante}.pdf`);
   };
@@ -202,7 +237,7 @@ export const HorarioEstu = () => {
     <div className="min-h-screen bg-gray-100 p-6">
       {role !== 'admin' && role !== 'superadmin' && (
         <>
-          <h1 className="text-3xl font-bold mb-4">Sección: {seccion}</h1>
+          <h1 className="text-3xl font-bold mb-2">Sección: {seccion}</h1>
           <h2 className="text-2xl font-bold mb-6">
             Hola, {nombreEstudiante} {apellidosEstudiante}! Bienvenido al horario.
           </h2>
@@ -211,7 +246,7 @@ export const HorarioEstu = () => {
 
       {(role === 'admin' || role === 'superadmin') && (
         <div className="mb-4">
-          <label className="block text-lg font-medium text-gray-700">
+          <label className="block text-lg font-medium text-gray-700 mb-2">
             Seleccionar Sección
           </label>
           <select
@@ -238,16 +273,16 @@ export const HorarioEstu = () => {
             Exportar Horario como PDF
           </button>
 
-          <div className="bg-white p-6 rounded-lg shadow-md overflow-auto">
+          <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
             <h2 className="text-2xl font-bold mb-4">Tu Horario</h2>
             <table className="min-w-full table-auto">
-              <thead className="bg-gray-200 text-gray-700">
+              <thead className="bg-gray-200 text-gray-700 sticky top-0">
                 <tr>
-                  <th className="px-4 py-2 text-left">Día</th>
+                  <th className="px-2 py-2 text-left text-xs">Día</th>
                   {lessons.map((lesson, i) => (
-                    <th key={i} className="px-4 py-2 text-center">
+                    <th key={i} className="px-2 py-2 text-center text-xs">
                       <div>{lesson}</div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-xs text-gray-500">
                         {`${convertirHora12(lessonTimes[lesson].start)} - ${convertirHora12(
                           lessonTimes[lesson].end
                         )}`}
@@ -256,10 +291,10 @@ export const HorarioEstu = () => {
                   ))}
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-xs">
                 {dias.map((dia, i) => (
                   <tr key={i} className="border-b">
-                    <td className="px-4 py-2 font-bold">{dia}</td>
+                    <td className="px-2 py-2 font-bold">{dia}</td>
                     {lessons.map((lesson) => {
                       const horario = obtenerHorario(dia, lesson);
                       const subjectColorClass =
@@ -271,7 +306,7 @@ export const HorarioEstu = () => {
                       return (
                         <td
                           key={lesson}
-                          className={`px-4 py-2 text-center cursor-pointer hover:bg-blue-100 ${subjectColorClass}`}
+                          className={`px-2 py-2 text-center cursor-pointer hover:bg-blue-100 ${subjectColorClass}`}
                           onClick={() => mostrarDetalles(horario)}
                         >
                           {horario ? horario.materia?.nombre_Materia || '-' : '-'}

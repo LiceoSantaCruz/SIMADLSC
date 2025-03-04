@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import jsPDF from 'jspdf';
@@ -12,6 +13,7 @@ const API_BASE_URL =
     ? 'https://simadlsc-backend-production.up.railway.app'
     : 'http://localhost:3000';
 
+// Definición de los horarios de lecciones
 const lessonTimes = {
   "1": { start: "07:00", end: "07:40" },
   "2": { start: "07:40", end: "08:20" },
@@ -43,10 +45,10 @@ export const HorarioProf = () => {
   const role = localStorage.getItem('role');
   const idProfesorLocal = localStorage.getItem('id_profesor');
 
-  // Definimos los días de la semana
+  // Días de la semana
   const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
-  // Función para convertir de 24h a 12h
+  // Función para convertir 24h a 12h
   const convertirHora12 = (hora24) => {
     const [hora, minuto] = hora24.split(':');
     let horaNum = parseInt(hora, 10);
@@ -55,6 +57,7 @@ export const HorarioProf = () => {
     return `${horaNum}:${minuto} ${ampm}`;
   };
 
+  // Obtener lista de profesores para admin/superadmin
   useEffect(() => {
     const obtenerProfesores = async () => {
       try {
@@ -74,12 +77,12 @@ export const HorarioProf = () => {
         setError('Error al cargar la lista de profesores.');
       }
     };
-
     if (role === 'admin' || role === 'superadmin') {
       obtenerProfesores();
     }
   }, [role]);
 
+  // Obtener datos y horarios del profesor seleccionado (o del profesor logueado)
   useEffect(() => {
     const obtenerDatosProfesorYHorario = async () => {
       try {
@@ -87,44 +90,36 @@ export const HorarioProf = () => {
         if (role === 'profesor') profesorId = idProfesorLocal;
         if (!profesorId) return;
 
-        const profesorResponse = await fetch(
-          `${API_BASE_URL}/profesores/${profesorId}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-          }
-        );
+        // Datos del profesor
+        const profesorResponse = await fetch(`${API_BASE_URL}/profesores/${profesorId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
         if (!profesorResponse.ok)
           throw new Error('Error al obtener los datos del profesor.');
         const profesorData = await profesorResponse.json();
         setNombreProfesor(profesorData.nombre_Profesor);
-        setApellidosProfesor(
-          `${profesorData.apellido1_Profesor} ${profesorData.apellido2_Profesor}`
-        );
+        setApellidosProfesor(`${profesorData.apellido1_Profesor} ${profesorData.apellido2_Profesor}`);
 
-        const horariosResponse = await fetch(
-          `${API_BASE_URL}/horarios/profesor/${profesorId}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-          }
-        );
+        // Horarios del profesor
+        const horariosResponse = await fetch(`${API_BASE_URL}/horarios/profesor/${profesorId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
         if (!horariosResponse.ok)
           throw new Error('Error al obtener los horarios del profesor.');
         const horariosData = await horariosResponse.json();
         if (Array.isArray(horariosData)) {
-          // Ordenar por hora de inicio y, en caso de igualdad, por hora de fin
+          // Ordenamos por hora de inicio y, si son iguales, por hora de fin
           const horariosOrdenados = horariosData.sort((a, b) => {
             const startComparison = a.hora_inicio_Horario.localeCompare(b.hora_inicio_Horario);
-            return startComparison !== 0
-              ? startComparison
-              : a.hora_fin_Horario.localeCompare(b.hora_fin_Horario);
+            return startComparison !== 0 ? startComparison : a.hora_fin_Horario.localeCompare(b.hora_fin_Horario);
           });
           setHorarios(horariosOrdenados);
         } else {
@@ -135,16 +130,15 @@ export const HorarioProf = () => {
         setError('Error de conexión con el servidor o credenciales inválidas.');
       }
     };
-
     obtenerDatosProfesorYHorario();
   }, [idProfesorSeleccionado, role, idProfesorLocal]);
 
-  // Ordenar lecciones por la hora de inicio usando lessonTimes
+  // Ordenar las lecciones según la hora de inicio usando lessonTimes
   const lessons = Object.keys(lessonTimes).sort((a, b) =>
     lessonTimes[a].start.localeCompare(lessonTimes[b].start)
   );
 
-  // Obtenemos el horario para un día y una lección específica comparando la hora de inicio
+  // Función para obtener el horario de un día y lección específica
   const obtenerHorarioPorDiaYLeccion = (dia, lessonKey) => {
     const lessonStart = lessonTimes[lessonKey].start;
     return horarios.find(
@@ -154,10 +148,11 @@ export const HorarioProf = () => {
     );
   };
 
+  // Mostrar detalles con SweetAlert
   const mostrarDetalles = (horario) => {
     if (horario) {
       MySwal.fire({
-        title: `Detalles de la clase`,
+        title: 'Detalles de la clase',
         html: `<b>Asignatura:</b> ${horario.materia?.nombre_Materia || 'N/A'}<br>
                <b>Aula:</b> ${horario.aula?.nombre_Aula || 'N/A'}<br>
                <b>Sección:</b> ${horario.seccion?.nombre_Seccion || 'N/A'}`,
@@ -167,16 +162,29 @@ export const HorarioProf = () => {
     }
   };
 
-  // Función para exportar a PDF (se ordena por inicio y fin)
+  // Función para exportar a PDF con mejoras (orientación landscape, fuente reducida)
   const exportarPdf = () => {
-    const doc = new jsPDF();
-    doc.text(`Horario de ${nombreProfesor} ${apellidosProfesor}`, 10, 10);
+    const doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'pt',
+      format: 'a4',
+    });
 
-    // Encabezado: primera columna "Día" y luego cada columna es una lección con su rango
-    const tableColumn = [
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    const title = `Horario de ${nombreProfesor} ${apellidosProfesor}`;
+    doc.setFontSize(12);
+    const titleWidth = doc.getTextWidth(title);
+    const titleX = (pageWidth - titleWidth) / 2;
+    doc.text(title, titleX, margin);
+
+    const tableColumns = [
       'Día',
-      ...lessons.map((lesson) =>
-        `${lesson}\n${convertirHora12(lessonTimes[lesson].start)} - ${convertirHora12(lessonTimes[lesson].end)}`
+      ...lessons.map(
+        (lesson) =>
+          `${lesson}\n${convertirHora12(lessonTimes[lesson].start)} - ${convertirHora12(lessonTimes[lesson].end)}`
       ),
     ];
 
@@ -194,21 +202,44 @@ export const HorarioProf = () => {
     });
 
     doc.autoTable({
-      head: [tableColumn],
+      head: [tableColumns],
       body: tableRows,
-      startY: 20,
-      // En este ejemplo se usa el tema por defecto, pero se puede ajustar
+      startY: margin + 20,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [100, 100, 100],
+        textColor: 255,
+        halign: 'center',
+        fontSize: 8,
+        cellPadding: 3,
+      },
+      bodyStyles: {
+        halign: 'center',
+        fontSize: 8,
+        cellPadding: 3,
+      },
+      styles: { fontSize: 8, cellPadding: 3 },
     });
+
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.text(
+        `Página ${i} de ${pageCount}`,
+        pageWidth - margin,
+        pageHeight - 10,
+        { align: 'right' }
+      );
+    }
+
     doc.save(`Horario_${nombreProfesor}_${apellidosProfesor}.pdf`);
   };
 
-  if (error) {
-    return <div className="text-red-500">{error}</div>;
-  }
-
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      {role === 'admin' || role === 'superadmin' ? (
+      {/* Si es admin/superadmin, mostrar selector de profesor */}
+      {(role === 'admin' || role === 'superadmin') && (
         <div className="bg-white p-4 rounded-lg shadow-lg mb-6">
           <h1 className="text-2xl font-bold text-gray-800">Selecciona un Profesor</h1>
           <select
@@ -224,7 +255,7 @@ export const HorarioProf = () => {
             ))}
           </select>
         </div>
-      ) : null}
+      )}
 
       <button
         className="bg-green-500 text-white px-4 py-2 rounded-lg mb-4 hover:bg-green-600"
@@ -234,60 +265,62 @@ export const HorarioProf = () => {
         Exportar Horario como PDF
       </button>
 
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-4">
-          {role === 'profesor'
-            ? `Horario de ${nombreProfesor} ${apellidosProfesor}`
-            : 'Horarios de todos los profesores'}
-        </h2>
-        {horarios.length > 0 ? (
-          <table className="min-w-full table-auto bg-gray-50 shadow-sm rounded-lg">
-            <thead className="bg-gray-200 text-gray-700">
+      {/* Vista principal del horario */}
+      {horarios.length > 0 ? (
+        <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+          <h2 className="text-2xl font-bold mb-4">
+            {role === 'profesor'
+              ? `Horario de ${nombreProfesor} ${apellidosProfesor}`
+              : 'Horarios de todos los profesores'}
+          </h2>
+          <table className="min-w-full table-auto">
+            <thead className="bg-gray-200 text-gray-700 sticky top-0">
               <tr>
-                <th className="px-4 py-2 text-left">Día</th>
-                {Object.keys(lessonTimes)
-                  .sort((a, b) => lessonTimes[a].start.localeCompare(lessonTimes[b].start))
-                  .map((lesson, index) => (
-                    <th key={index} className="px-4 py-2 text-center">
-                      <div>{lesson}</div>
-                      <div className="text-sm text-gray-500">
-                        {`${convertirHora12(lessonTimes[lesson].start)} - ${convertirHora12(lessonTimes[lesson].end)}`}
-                      </div>
-                    </th>
-                  ))}
+                <th className="px-2 py-2 text-left text-xs">Día</th>
+                {lessons.map((lesson, i) => (
+                  <th key={i} className="px-2 py-2 text-center text-xs">
+                    <div>{lesson}</div>
+                    <div className="text-xs text-gray-500">
+                      {`${convertirHora12(lessonTimes[lesson].start)} - ${convertirHora12(
+                        lessonTimes[lesson].end
+                      )}`}
+                    </div>
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody>
-              {diasSemana.map((dia, index) => (
-                <tr key={index} className="border-b">
-                  <td className="px-4 py-2 font-bold">{dia}</td>
-                  {Object.keys(lessonTimes)
-                    .sort((a, b) => lessonTimes[a].start.localeCompare(lessonTimes[b].start))
-                    .map((lesson, idx) => {
-                      const horario = obtenerHorarioPorDiaYLeccion(dia, lesson);
-                      return (
-                        <td key={idx} className="px-4 py-2 text-center">
-                          {horario ? (
-                            <button
-                              onClick={() => mostrarDetalles(horario)}
-                              className="text-blue-500 underline"
-                            >
-                              {horario.seccion?.nombre_Seccion || 'Ver detalles'}
-                            </button>
-                          ) : (
-                            '-'
-                          )}
-                        </td>
-                      );
-                    })}
+            <tbody className="text-xs">
+              {diasSemana.map((dia, i) => (
+                <tr key={i} className="border-b">
+                  <td className="px-2 py-2 font-bold">{dia}</td>
+                  {lessons.map((lesson) => {
+                    const horario = obtenerHorarioPorDiaYLeccion(dia, lesson);
+                    return (
+                      <td
+                        key={lesson}
+                        className="px-2 py-2 text-center cursor-pointer hover:bg-blue-100"
+                        onClick={() => mostrarDetalles(horario)}
+                      >
+                        {horario ? (
+                          <button className="text-blue-500 underline">
+                            {horario.seccion?.nombre_Seccion || 'Ver detalles'}
+                          </button>
+                        ) : (
+                          '-'
+                        )}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>
           </table>
-        ) : (
-          <div className="text-center p-4">No hay horarios para mostrar.</div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="bg-white p-6 rounded-lg shadow-md text-center">
+          <p className="text-lg">No hay horarios para mostrar.</p>
+        </div>
+      )}
     </div>
   );
 };
