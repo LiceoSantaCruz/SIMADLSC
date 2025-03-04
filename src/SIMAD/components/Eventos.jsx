@@ -33,10 +33,9 @@ export const Eventos = () => {
 
   return (
     <div>
-      <section className="py-16 bg-gradient-to-b from-gray-100 to-blue-50" data-aos="fade-up">
-        {/* Fondo degradado claro para un toque moderno */}
-        <div className="container mx-auto text-center">
-          <h3 className="text-4xl font-bold mb-8 text-blue-900">
+      <section className="py-12 md:py-16 bg-gradient-to-b from-gray-100 to-blue-50" data-aos="fade-up">
+        <div className="container mx-auto px-4 text-center">
+          <h3 className="text-3xl md:text-4xl font-bold mb-8 text-blue-900">
             Eventos anuales
           </h3>
           <Slider {...sliderSettings}>
@@ -44,22 +43,19 @@ export const Eventos = () => {
             <div className="p-4">
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
                 <div
-                  style={{
-                    backgroundImage: "url('/images/IMG_6505.JPG')",
-                    height: "180px", 
-                  }}
-                  className="bg-center bg-cover rounded-t-lg relative"
+                  style={{ backgroundImage: "url('/images/IMG_6505.JPG')" }}
+                  className="bg-center bg-cover rounded-t-lg relative h-40 md:h-44 lg:h-48"
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
                 </div>
-                <div className="bg-white p-6 h-56 flex flex-col justify-between rounded-b-lg relative">
+                <div className="bg-white p-4 md:p-6 h-48 flex flex-col justify-between rounded-b-lg">
                   <div>
-                    <h4 className="text-xl font-bold text-red-600">
+                    <h4 className="text-lg md:text-xl font-bold text-red-600">
                       Semana de la guanacastequidad
                     </h4>
-                    <p className="text-gray-700 mt-2">
-Únete a nosotros en esta tradicional semana para honrar la rica cultura y herencia de Guanacasteca. Disfruta de actividades llenas de historia, música y gastronomía que reflejan el espíritu único de nuestra región.
-¡No te lo pierdas!                     </p>
+                    <p className="text-gray-700 mt-2 text-sm md:text-base">
+                      Únete a nosotros en esta tradicional semana para honrar la rica cultura y herencia de Guanacasteca. Disfruta de actividades llenas de historia, música y gastronomía que reflejan el espíritu único de nuestra región. ¡No te lo pierdas!
+                    </p>
                   </div>
                 </div>
               </div>
@@ -68,24 +64,19 @@ export const Eventos = () => {
             <div className="p-4">
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
                 <div
-                  style={{
-                    backgroundImage: "url('/images/IMG_0675.JPG')",
-                    height: "180px",
-                  }}
-                  className="bg-center bg-cover rounded-t-lg relative"
+                  style={{ backgroundImage: "url('/images/IMG_0675.JPG')" }}
+                  className="bg-center bg-cover rounded-t-lg relative h-40 md:h-44 lg:h-48"
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
                 </div>
-                <div className="bg-white p-6 h-56 flex flex-col justify-between rounded-b-lg relative">
+                <div className="bg-white p-4 md:p-6 h-48 flex flex-col justify-between rounded-b-lg">
                   <div>
-                    <h4 className="text-xl font-bold text-red-600">
-                    Gran bingo millonario Liceo Santa Cruz
+                    <h4 className="text-lg md:text-xl font-bold text-red-600">
+                      Gran bingo millonario Liceo Santa Cruz
                     </h4>
-                    <p className="text-gray-700 mt-2">
-                    
-¡No te pierdas el Gran bingo millonario anual del Liceo Santa Cruz!
-
-Únete a nosotros para una dia de diversión y grandes premios. Este evento anual une a nuestra comunidad para apoyar a nuestros estudiantes. ¡No faltes a esta querida tradición!                    </p>
+                    <p className="text-gray-700 mt-2 text-sm md:text-base">
+                      ¡No te pierdas el Gran bingo millonario anual del Liceo Santa Cruz! Únete a nosotros para una jornada de diversión y grandes premios. Este evento une a nuestra comunidad para apoyar a nuestros estudiantes. ¡No faltes!
+                    </p>
                   </div>
                 </div>
               </div>
@@ -94,22 +85,19 @@ export const Eventos = () => {
             <div className="p-4">
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
                 <div
-                  style={{
-                    backgroundImage: "url('/images/IMG_8001.JPG')",
-                    height: "180px",
-                  }}
-                  className="bg-center bg-cover rounded-t-lg relative"
+                  style={{ backgroundImage: "url('/images/IMG_8001.JPG')" }}
+                  className="bg-center bg-cover rounded-t-lg relative h-40 md:h-44 lg:h-48"
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
                 </div>
-                <div className="bg-white p-6 h-56 flex flex-col justify-between rounded-b-lg relative">
+                <div className="bg-white p-4 md:p-6 h-48 flex flex-col justify-between rounded-b-lg">
                   <div>
-                    <h4 className="text-xl font-bold text-red-600">
-                     Festival estudiantil de las artes (FEA)
+                    <h4 className="text-lg md:text-xl font-bold text-red-600">
+                      Festival estudiantil de las artes (FEA)
                     </h4>
-                    <p className="text-gray-700 mt-2">
-                    Cada año, celebramos el increíble talento de nuestros estudiantes en este evento. Disfruta de una semana repleta de arte, música, danza y muchas otras expresiones creativas.
-¡Únete y sé testigo del talento artístico que florece en nuestros estudiantes!                    </p>
+                    <p className="text-gray-700 mt-2 text-sm md:text-base">
+                      Cada año, celebramos el increíble talento de nuestros estudiantes en este evento. Disfruta de una semana repleta de arte, música, danza y otras expresiones creativas. ¡Sé testigo del talento artístico que florece en ellos!
+                    </p>
                   </div>
                 </div>
               </div>
@@ -118,21 +106,18 @@ export const Eventos = () => {
             <div className="p-4">
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
                 <div
-                  style={{
-                    backgroundImage: "url('/images/IMG_9317.JPG')",
-                    height: "180px",
-                  }}
-                  className="bg-center bg-cover rounded-t-lg relative"
+                  style={{ backgroundImage: "url('/images/IMG_9317.JPG')" }}
+                  className="bg-center bg-cover rounded-t-lg relative h-40 md:h-44 lg:h-48"
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
                 </div>
-                <div className="bg-white p-6 h-56 flex flex-col justify-between rounded-b-lg relative">
+                <div className="bg-white p-4 md:p-6 h-48 flex flex-col justify-between rounded-b-lg">
                   <div>
-                    <h4 className="text-xl font-bold text-red-600">
+                    <h4 className="text-lg md:text-xl font-bold text-red-600">
                       Torneos deportivos regionales y nacionales
                     </h4>
-                    <p className="text-gray-700 mt-2">
-                    Cada año, los talentosos estudiantes del Liceo Santa Cruz participan con entusiasmo en diversas disciplinas deportivas como volleyball, baloncesto, fútbol 11 y futsala, entre otras. Estos torneos no solo destacan el espíritu competitivo de nuestros estudiantes, sino también su compañerismo y dedicación.
+                    <p className="text-gray-700 mt-2 text-sm md:text-base">
+                      Cada año, nuestros talentosos estudiantes participan en diversas disciplinas deportivas como volleyball, baloncesto, fútbol 11 y futsala. Estos torneos destacan tanto su espíritu competitivo como su compañerismo y dedicación.
                     </p>
                   </div>
                 </div>
@@ -142,21 +127,18 @@ export const Eventos = () => {
             <div className="p-4">
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
                 <div
-                  style={{
-                    backgroundImage: "url('/images/IMG_1767.JPG')",
-                    height: "180px",
-                  }}
-                  className="bg-center bg-cover rounded-t-lg relative"
+                  style={{ backgroundImage: "url('/images/IMG_1767.JPG')" }}
+                  className="bg-center bg-cover rounded-t-lg relative h-40 md:h-44 lg:h-48"
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
                 </div>
-                <div className="bg-white p-6 h-56 flex flex-col justify-between rounded-b-lg relative">
+                <div className="bg-white p-4 md:p-6 h-48 flex flex-col justify-between rounded-b-lg">
                   <div>
-                    <h4 className="text-xl font-bold text-red-600">
+                    <h4 className="text-lg md:text-xl font-bold text-red-600">
                       Talleres y ferias
                     </h4>
-                    <p className="text-gray-700 mt-2">
-                    Cada año, nuestros estudiantes se sumergen en diversas actividades como talleres robótica, feria de emprendedurismo, olimpiadas de biología ferias científicas, entre otras. Estos eventos proporcionan oportunidades únicas para el aprendizaje y el desarrollo de habilidades, fomentando la creatividad y el espíritu innovador en nuestros jóvenes.
+                    <p className="text-gray-700 mt-2 text-sm md:text-base">
+                      Nuestros estudiantes participan en talleres de robótica, ferias de emprendedurismo, olimpiadas de biología y ferias científicas, entre otros. Estos eventos fomentan el aprendizaje, la creatividad y el espíritu innovador.
                     </p>
                   </div>
                 </div>

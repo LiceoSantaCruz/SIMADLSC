@@ -90,7 +90,7 @@ const GestionUsuarios = () => {
   const handleSaveUser = async (updatedData) => {
     await editUser(selectedUser.id_usuario, updatedData, token);
     setModalOpen(false);
-    fetchUsers(); // Refresca la lista
+    fetchUsers(); 
   };
 
   if (loading) {
