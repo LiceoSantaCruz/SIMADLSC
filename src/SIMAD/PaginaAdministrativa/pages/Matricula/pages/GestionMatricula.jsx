@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useGestionMatriculas } from "../Hooks/useGestionMatriculas";
-import ConfirmDeleteModal from "../../Asistencias/components/ConfirmDeleteModal ";
+import ConfirmDeleteModal from "../../Asistencias/components/ConfirmDeleteModal";
 
 export default function GestionMatricula() {
   const {

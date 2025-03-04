@@ -9,7 +9,7 @@ import {
 import { usePeriodos } from "./Hook/usePeriodos";
 import EditarAsistenciaModal from "./components/EditarAsistenciaModal";
 import NoResultsModal from "./components/NoResultsModal";
-import ConfirmDeleteModal from "./components/ConfirmDeleteModal ";
+import ConfirmDeleteModal from "./components/ConfirmDeleteModal";
 
 export const GestionAsistencia = () => {
   const { materias, grados, secciones } = useDatosIniciales();
@@ -99,8 +99,8 @@ export const GestionAsistencia = () => {
   const confirmEliminar = async () => {
     try {
       await eliminarAsistencia(asistenciaIdToDelete);
-      setAsistencias(
-        asistencias.filter(
+      setAsistencias((prevAsistencias) =>
+        prevAsistencias.filter(
           (asistencia) => asistencia.asistencia_id !== asistenciaIdToDelete
         )
       );
@@ -301,9 +301,11 @@ export const GestionAsistencia = () => {
 
       {deleteModalVisible && (
         <ConfirmDeleteModal
+          isOpen={deleteModalVisible} // <-- Pasamos isOpen
+          title="Confirmar Eliminación" // <-- Opcional, si quieres mostrar un título
           message="¿Estás seguro de que deseas eliminar esta asistencia?"
           onConfirm={confirmEliminar}
-          onCancel={() => setDeleteModalVisible(false)}
+          onClose={() => setDeleteModalVisible(false)}
         />
       )}
     </div>
