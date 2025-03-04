@@ -523,17 +523,7 @@ const FormularioHorarioEstudiante = ({
 
           {/* BOTONES DE ACCIÓN */}
           <div className="flex flex-col sm:flex-row justify-end mt-6 space-y-2 sm:space-y-0 sm:space-x-2">
-            <button
-              type="button"
-              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 w-full sm:w-auto"
-              onClick={() => {
-                reset();
-                setErrorGeneral('');
-                if (onCancel) onCancel();
-              }}
-            >
-              Cancelar
-            </button>
+           
             <button
               type="submit"
               className={`bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full sm:w-auto ${
@@ -547,6 +537,19 @@ const FormularioHorarioEstudiante = ({
                 ? 'Guardar Cambios'
                 : 'Registrar Horario(s)'}
             </button>
+
+            <button
+              type="button"
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 w-full sm:w-auto"
+              onClick={() => {
+                reset();
+                setErrorGeneral('');
+                if (onCancel) onCancel();
+              }}
+            >
+              Cancelar
+            </button>
+             
           </div>
         </form>
       </div>
