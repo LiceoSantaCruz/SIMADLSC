@@ -12,20 +12,24 @@ const API_BASE_URL =
     ? 'https://simadlsc-backend-production.up.railway.app'
     : 'http://localhost:3000';
 
-// Objeto de lecciones con hora fija
 const lessonTimes = {
-  "1°": { start: "07:00", end: "07:40" },
-  "2°": { start: "07:40", end: "08:20" },
-  "3°": { start: "08:25", end: "09:05" },
-  "4°": { start: "09:05", end: "09:45" },
-  "5°": { start: "10:00", end: "10:40" },
-  "6°": { start: "10:40", end: "11:20" },
-  "7°": { start: "12:00", end: "12:40" },
-  "8°": { start: "12:40", end: "13:20" },
-  "9°": { start: "13:25", end: "14:05" },
-  "10°": { start: "14:05", end: "14:45" },
-  "11°": { start: "15:00", end: "15:40" },
-  "12°": { start: "15:40", end: "16:20" },
+  "1": { start: "07:00", end: "07:40" },
+  "2": { start: "07:40", end: "08:20" },
+  "Recreo 1 ": { start: "08:20", end: "08:30" },
+  "3": { start: "08:30", end: "09:10" },
+  "4": { start: "09:10", end: "09:50" },
+  "Recreo 2 ": { start: "09:50", end: "10:00" },
+  "5": { start: "10:00", end: "10:40" },
+  "6": { start: "10:40", end: "11:20" },
+  "Almuerzo": { start: "11:20", end: "12:00" },
+  "7": { start: "12:00", end: "12:40" },
+  "8": { start: "12:40", end: "13:20" },
+  "Recreo 3 ": { start: "13:20", end: "13:25" },
+  "9": { start: "13:25", end: "14:05" },
+  "10": { start: "14:05", end: "14:45" },
+  "Recreo 4": { start: "14:45", end: "14:55" },
+  "11": { start: "14:55", end: "15:35" },
+  "12": { start: "15:35", end: "16:15" },
 };
 
 export const HorarioProf = () => {
@@ -115,28 +119,34 @@ export const HorarioProf = () => {
           throw new Error('Error al obtener los horarios del profesor.');
         const horariosData = await horariosResponse.json();
         if (Array.isArray(horariosData)) {
-          // Ordenamos los horarios por hora de inicio
-          const horariosOrdenados = horariosData.sort((a, b) =>
-            a.hora_inicio_Horario.localeCompare(b.hora_inicio_Horario)
-          );
+          // Ordenar por hora de inicio y, en caso de igualdad, por hora de fin
+          const horariosOrdenados = horariosData.sort((a, b) => {
+            const startComparison = a.hora_inicio_Horario.localeCompare(b.hora_inicio_Horario);
+            return startComparison !== 0
+              ? startComparison
+              : a.hora_fin_Horario.localeCompare(b.hora_fin_Horario);
+          });
           setHorarios(horariosOrdenados);
         } else {
           setHorarios([]);
         }
       } catch (error) {
         console.error('Error al obtener datos:', error);
-        setError(
-          'Error de conexión con el servidor o credenciales inválidas.'
-        );
+        setError('Error de conexión con el servidor o credenciales inválidas.');
       }
     };
 
     obtenerDatosProfesorYHorario();
   }, [idProfesorSeleccionado, role, idProfesorLocal]);
 
+  // Ordenar lecciones por la hora de inicio usando lessonTimes
+  const lessons = Object.keys(lessonTimes).sort((a, b) =>
+    lessonTimes[a].start.localeCompare(lessonTimes[b].start)
+  );
+
   // Obtenemos el horario para un día y una lección específica comparando la hora de inicio
   const obtenerHorarioPorDiaYLeccion = (dia, lessonKey) => {
-    const lessonStart = lessonTimes[lessonKey].start; // "07:00", "07:40", etc.
+    const lessonStart = lessonTimes[lessonKey].start;
     return horarios.find(
       (horario) =>
         horario.dia_semana_Horario === dia &&
@@ -157,12 +167,12 @@ export const HorarioProf = () => {
     }
   };
 
+  // Función para exportar a PDF (se ordena por inicio y fin)
   const exportarPdf = () => {
     const doc = new jsPDF();
     doc.text(`Horario de ${nombreProfesor} ${apellidosProfesor}`, 10, 10);
 
-    // Encabezado: primera columna "Día" y luego cada columna es una lección (número y rango)
-    const lessons = Object.keys(lessonTimes).sort((a, b) => parseInt(a) - parseInt(b));
+    // Encabezado: primera columna "Día" y luego cada columna es una lección con su rango
     const tableColumn = [
       'Día',
       ...lessons.map((lesson) =>
@@ -187,6 +197,7 @@ export const HorarioProf = () => {
       head: [tableColumn],
       body: tableRows,
       startY: 20,
+      // En este ejemplo se usa el tema por defecto, pero se puede ajustar
     });
     doc.save(`Horario_${nombreProfesor}_${apellidosProfesor}.pdf`);
   };
@@ -235,7 +246,7 @@ export const HorarioProf = () => {
               <tr>
                 <th className="px-4 py-2 text-left">Día</th>
                 {Object.keys(lessonTimes)
-                  .sort((a, b) => parseInt(a) - parseInt(b))
+                  .sort((a, b) => lessonTimes[a].start.localeCompare(lessonTimes[b].start))
                   .map((lesson, index) => (
                     <th key={index} className="px-4 py-2 text-center">
                       <div>{lesson}</div>
@@ -251,7 +262,7 @@ export const HorarioProf = () => {
                 <tr key={index} className="border-b">
                   <td className="px-4 py-2 font-bold">{dia}</td>
                   {Object.keys(lessonTimes)
-                    .sort((a, b) => parseInt(a) - parseInt(b))
+                    .sort((a, b) => lessonTimes[a].start.localeCompare(lessonTimes[b].start))
                     .map((lesson, idx) => {
                       const horario = obtenerHorarioPorDiaYLeccion(dia, lesson);
                       return (

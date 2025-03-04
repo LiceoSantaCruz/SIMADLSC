@@ -15,18 +15,23 @@ const API_BASE_URL =
 
 // Definición de los horarios de lecciones
 const lessonTimes = {
-  "1°": { start: "07:00", end: "07:40" },
-  "2°": { start: "07:40", end: "08:20" },
-  "3°": { start: "08:25", end: "09:05" },
-  "4°": { start: "09:05", end: "09:45" },
-  "5°": { start: "10:00", end: "10:40" },
-  "6°": { start: "10:40", end: "11:20" },
-  "7°": { start: "12:00", end: "12:40" },
-  "8°": { start: "12:40", end: "13:20" },
-  "9°": { start: "13:25", end: "14:05" },
-  "10°": { start: "14:05", end: "14:45" },
-  "11°": { start: "15:00", end: "15:40" },
-  "12°": { start: "15:40", end: "16:20" },
+  "1": { start: "07:00", end: "07:40" },
+  "2": { start: "07:40", end: "08:20" },
+  "Recreo 1 ": { start: "08:20", end: "08:30" },
+  "3": { start: "08:30", end: "09:10" },
+  "4": { start: "09:10", end: "09:50" },
+  "Recreo 2 ": { start: "09:50", end: "10:00" },
+  "5": { start: "10:00", end: "10:40" },
+  "6": { start: "10:40", end: "11:20" },
+  "Almuerzo": { start: "11:20", end: "12:00" },
+  "7": { start: "12:00", end: "12:40" },
+  "8": { start: "12:40", end: "13:20" },
+  "Recreo 3 ": { start: "13:20", end: "13:25" },
+  "9": { start: "13:25", end: "14:05" },
+  "10": { start: "14:05", end: "14:45" },
+  "Recreo 4": { start: "14:45", end: "14:55" },
+  "11": { start: "14:55", end: "15:35" },
+  "12": { start: "15:35", end: "16:15" },
 };
 
 export const HorarioEstu = () => {
@@ -78,7 +83,7 @@ export const HorarioEstu = () => {
         const responseHorarios = await axios.get(
           `${API_BASE_URL}/horarios/seccion/${seccionSeleccionada}`
         );
-        // Ordenar por hora de inicio
+        // Ordenar los horarios por hora de inicio
         const horariosOrdenados = responseHorarios.data.sort((a, b) =>
           a.hora_inicio_Horario.localeCompare(b.hora_inicio_Horario)
         );
@@ -109,9 +114,34 @@ export const HorarioEstu = () => {
     return <div>Cargando datos...</div>;
   }
 
-  // Ordenamos las lecciones y definimos los días
-  const lessons = Object.keys(lessonTimes).sort((a, b) => parseInt(a) - parseInt(b));
+  // Ordenamos las lecciones según la hora de inicio y fin
+  const lessons = Object.entries(lessonTimes)
+    .sort(([, a], [, b]) => a.start.localeCompare(b.start))
+    .map(([key]) => key);
+
   const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+
+  const subjectColors = {
+    'Religion': 'bg-indigo-200',
+    'Español': 'bg-yellow-200',
+    'Estudios sociales': 'bg-purple-200',
+    'Matematica': 'bg-blue-200',
+    'Ingles': 'bg-pink-200',
+    'Ciencias': 'bg-green-200',
+    'Quimica': 'bg-teal-200',
+    'Biologia': 'bg-lime-200',
+    'Fisica matematica': 'bg-orange-200',
+    'Educacion fisica': 'bg-rose-200',
+    'Educacion para el hogar': 'bg-cyan-200',
+    'Psicologia': 'bg-fuchsia-200',
+    'Turismo': 'bg-violet-200',
+    'Frances': 'bg-emerald-200',
+    'Artes plasticas': 'bg-red-200',
+    'Musica': 'bg-indigo-300',
+    'Informatica': 'bg-blue-300',
+    'Emprendedurismo': 'bg-amber-300',
+  };
+  
 
   // Función para obtener el horario según el día y la lección
   const obtenerHorario = (dia, lesson) => {
@@ -140,7 +170,7 @@ export const HorarioEstu = () => {
     const doc = new jsPDF();
     doc.text(`Horario de ${nombreEstudiante} ${apellidosEstudiante} - Sección ${seccion}`, 10, 10);
 
-    // La cabecera ahora es: la primera columna "Día" y luego cada lección con su rango horario
+    // Cabecera: "Día" y cada lección con su rango horario
     const tableColumns = [
       'Día',
       ...lessons.map(
@@ -179,9 +209,11 @@ export const HorarioEstu = () => {
         </>
       )}
 
-      {role === 'admin' || role === 'superadmin' ? (
+      {(role === 'admin' || role === 'superadmin') && (
         <div className="mb-4">
-          <label className="block text-lg font-medium text-gray-700">Seleccionar Sección</label>
+          <label className="block text-lg font-medium text-gray-700">
+            Seleccionar Sección
+          </label>
           <select
             value={seccionSeleccionada}
             onChange={(e) => setSeccionSeleccionada(e.target.value)}
@@ -195,7 +227,7 @@ export const HorarioEstu = () => {
             ))}
           </select>
         </div>
-      ) : null}
+      )}
 
       {horarios.length > 0 ? (
         <>
@@ -206,14 +238,12 @@ export const HorarioEstu = () => {
             Exportar Horario como PDF
           </button>
 
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="bg-white p-6 rounded-lg shadow-md overflow-auto">
             <h2 className="text-2xl font-bold mb-4">Tu Horario</h2>
-            <table className="min-w-full table-auto bg-gray-50 shadow-sm rounded-lg">
+            <table className="min-w-full table-auto">
               <thead className="bg-gray-200 text-gray-700">
                 <tr>
-                  {/* Primera celda: Días */}
                   <th className="px-4 py-2 text-left">Día</th>
-                  {/* Ahora cada columna es una lección con su rango horario */}
                   {lessons.map((lesson, i) => (
                     <th key={i} className="px-4 py-2 text-center">
                       <div>{lesson}</div>
@@ -232,10 +262,16 @@ export const HorarioEstu = () => {
                     <td className="px-4 py-2 font-bold">{dia}</td>
                     {lessons.map((lesson) => {
                       const horario = obtenerHorario(dia, lesson);
+                      const subjectColorClass =
+                        horario &&
+                        horario.materia &&
+                        subjectColors[horario.materia.nombre_Materia]
+                          ? subjectColors[horario.materia.nombre_Materia]
+                          : 'bg-white';
                       return (
                         <td
                           key={lesson}
-                          className="px-4 py-2 text-center cursor-pointer hover:bg-blue-100"
+                          className={`px-4 py-2 text-center cursor-pointer hover:bg-blue-100 ${subjectColorClass}`}
                           onClick={() => mostrarDetalles(horario)}
                         >
                           {horario ? horario.materia?.nombre_Materia || '-' : '-'}

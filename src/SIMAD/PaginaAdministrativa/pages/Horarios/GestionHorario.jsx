@@ -188,7 +188,7 @@ export const GestionHorario = () => {
         <h1 className="text-4xl font-extrabold text-center text-gray-900 mb-8">Gestión de Horarios</h1>
 
         {/* Filtro por Sección (solo para admin/superadmin) */}
-        {(role === 'admin' || role === 'superadmin') && secciones && (
+        {(role === 'admin' || role === 'superadmin')  && !formularioAbierto && secciones && (
           <div className="mb-6">
             <label className="block text-lg font-medium text-gray-700 mb-2">
               Seleccionar Sección

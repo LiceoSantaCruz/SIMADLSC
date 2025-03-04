@@ -14,19 +14,20 @@ const API_BASE_URL =
     : 'http://localhost:3000';
 
 // Mapeo de lecciones a horarios (formato HH:mm)
+// Definición de los horarios de lecciones
 const lessonTimes = {
-  "1°": { start: "07:00", end: "07:40" },
-  "2°": { start: "07:40", end: "08:20" },
-  "3°": { start: "08:25", end: "09:05" },
-  "4°": { start: "09:05", end: "09:45" },
-  "5°": { start: "10:00", end: "10:40" },
-  "6°": { start: "10:40", end: "11:20" },
-  "7°": { start: "12:00", end: "12:40" },
-  "8°": { start: "12:40", end: "13:20" },
-  "9°": { start: "13:25", end: "14:05" },
-  "10°": { start: "14:05", end: "14:45" },
-  "11°": { start: "15:00", end: "15:40" },
-  "12°": { start: "15:40", end: "16:20" },
+  "1": { start: "07:00", end: "07:40" },
+  "2": { start: "07:40", end: "08:20" },
+  "3": { start: "08:30", end: "09:10" },
+  "4": { start: "09:10", end: "09:50" },
+  "5": { start: "10:00", end: "10:40" },
+  "6": { start: "10:40", end: "11:20" },
+  "7": { start: "12:00", end: "12:40" },
+  "8": { start: "12:40", end: "13:20" },
+  "9": { start: "13:25", end: "14:05" },
+  "10": { start: "14:05", end: "14:45" },
+  "11": { start: "14:55", end: "15:35" },
+  "12": { start: "15:35", end: "16:15" },
 };
 
 const FormularioHorarioEstudiante = ({
@@ -40,7 +41,9 @@ const FormularioHorarioEstudiante = ({
 }) => {
   const isEditing = !!initialData;
 
-  // Iniciamos React Hook Form
+  // ---------------------
+  // REACT HOOK FORM
+  // ---------------------
   const {
     register,
     handleSubmit,
@@ -59,7 +62,6 @@ const FormularioHorarioEstudiante = ({
       profesorId: '',
       dia_semana_Horario: '',
       aulaId: '',
-      // Array para manejar varias lecciones en un mismo formulario
       lessons: [
         {
           lessonKey: '',
@@ -70,7 +72,7 @@ const FormularioHorarioEstudiante = ({
     },
   });
 
-  // Manejar array de "lessons"
+  // Manejar array dinámico de "lessons"
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'lessons',
@@ -78,9 +80,15 @@ const FormularioHorarioEstudiante = ({
 
   const [errorGeneral, setErrorGeneral] = useState('');
   const gradoSeleccionado = watch('gradoId');
+  const diaSeleccionado = watch('dia_semana_Horario');
+  const seccionSeleccionada = watch('seccionId');
+
+  // Secciones disponibles según el grado
   const [seccionesDisponibles, setSeccionesDisponibles] = useState([]);
 
-  // Obtener secciones según grado
+  // ---------------------
+  // 1. Cargar secciones según grado
+  // ---------------------
   useEffect(() => {
     const fetchSecciones = async () => {
       if (gradoSeleccionado) {
@@ -95,11 +103,12 @@ const FormularioHorarioEstudiante = ({
         setSeccionesDisponibles([]);
       }
     };
-
     fetchSecciones();
   }, [gradoSeleccionado]);
 
-  // Si estás en edición, rellena los campos principales
+  // ---------------------
+  // 2. Si estás en edición, rellena campos
+  // ---------------------
   useEffect(() => {
     if (initialData) {
       setValue('gradoId', initialData.gradoId || '');
@@ -108,12 +117,99 @@ const FormularioHorarioEstudiante = ({
       setValue('profesorId', initialData.profesorId || '');
       setValue('dia_semana_Horario', initialData.dia_semana_Horario || '');
       setValue('aulaId', initialData.aulaId || '');
-      // Si tu backend retorna un array de lecciones, podrías setear:
       // setValue('lessons', initialData.lessons || []);
     }
   }, [initialData, setValue]);
 
-  // onSubmit
+  // ---------------------
+  // 3. Verificar lecciones ocupadas en DB
+  // ---------------------
+  const [occupiedLessons, setOccupiedLessons] = useState([]);
+  
+  useEffect(() => {
+    // Cuando cambia el día o la sección, buscamos horarios existentes en esa sección
+    // y filtramos los que coincidan con el día seleccionado.
+    const fetchHorariosSeccion = async () => {
+      if (diaSeleccionado && seccionSeleccionada) {
+        try {
+          const resp = await axios.get(`${API_BASE_URL}/horarios/seccion/${seccionSeleccionada}`);
+          // Filtrar solo los del día seleccionado
+          const sameDay = resp.data.filter(
+            (item) => item.dia_semana_Horario === diaSeleccionado
+          );
+          // Convertir horarios en "lessonKeys" ocupados
+          const used = [];
+          sameDay.forEach((item) => {
+            // item.hora_inicio_Horario e item.hora_fin_Horario están en "HH:MM:SS"
+            const startHHmm = item.hora_inicio_Horario.substring(0, 5);
+            const endHHmm = item.hora_fin_Horario.substring(0, 5);
+
+            // Buscar en lessonTimes cuál key coincide
+            const foundKey = Object.entries(lessonTimes).find(
+              ([, val]) => val.start === startHHmm && val.end === endHHmm
+            );
+            if (foundKey) used.push(foundKey[0]);
+          });
+          setOccupiedLessons(used);
+        } catch (error) {
+          console.error('Error al obtener horarios de la seccion:', error);
+        }
+      } else {
+        // Si no hay día o sección, no hay nada que filtrar
+        setOccupiedLessons([]);
+      }
+    };
+
+    fetchHorariosSeccion();
+  }, [diaSeleccionado, seccionSeleccionada]);
+
+  // ---------------------
+  // 4. Función para obtener las lecciones disponibles
+  // ---------------------
+  const getAvailableLessons = (index) => {
+    // Todas las lecciones definidas en lessonTimes
+    let allKeys = Object.keys(lessonTimes);
+
+    // (a) Eliminar las que ya estén ocupadas en la DB (occupiedLessons)
+    allKeys = allKeys.filter((k) => !occupiedLessons.includes(k));
+
+    // (b) Eliminar las que el usuario ya haya seleccionado en otro field
+    const selectedLessons = watch('lessons').map((l) => l.lessonKey).filter(Boolean);
+    const currentValue = selectedLessons[index]; // la lección actual (si ya está seleccionada)
+    const selectedOthers = selectedLessons.filter((_, i) => i !== index);
+
+    allKeys = allKeys.filter((k) => !selectedOthers.includes(k));
+
+    // (c) Permitir que el valor actual se muestre aunque esté filtrado (por ejemplo, si está editando)
+    if (
+      currentValue &&
+      !occupiedLessons.includes(currentValue) && // no está ocupada en la DB
+      !selectedOthers.includes(currentValue) &&  // no está seleccionada en otro field
+      !allKeys.includes(currentValue)
+    ) {
+      allKeys.push(currentValue);
+    }
+
+    return allKeys;
+  };
+
+  // ---------------------
+  // 5. Cuando el usuario selecciona una "lessonKey"
+  //    asignamos automáticamente hora_inicio y hora_fin
+  // ---------------------
+  const handleLessonChange = (lessonKey, index) => {
+    if (lessonTimes[lessonKey]) {
+      setValue(`lessons.${index}.hora_inicio_Horario`, lessonTimes[lessonKey].start);
+      setValue(`lessons.${index}.hora_fin_Horario`, lessonTimes[lessonKey].end);
+    } else {
+      setValue(`lessons.${index}.hora_inicio_Horario`, '');
+      setValue(`lessons.${index}.hora_fin_Horario`, '');
+    }
+  };
+
+  // ---------------------
+  // 6. onSubmit: Crear o editar horarios
+  // ---------------------
   const onSubmit = async (formData) => {
     try {
       setErrorGeneral('');
@@ -128,7 +224,7 @@ const FormularioHorarioEstudiante = ({
         lessons,
       } = formData;
 
-      // Datos "base" que se comparten
+      // Datos comunes
       const commonData = {
         gradoId: Number(gradoId),
         seccionId: Number(seccionId),
@@ -140,8 +236,7 @@ const FormularioHorarioEstudiante = ({
 
       // --- MODO EDICIÓN ---
       if (isEditing && initialData?.id_Horario) {
-        // Supongamos que solo editas UNA lección (por ejemplo, la primera).
-        // Ajusta esta lógica según tu API si quieres algo distinto.
+        // Supongamos que solo editas UNA lección (por ejemplo, la primera del array).
         const [firstLesson] = lessons;
         const updateData = {
           ...commonData,
@@ -160,10 +255,10 @@ const FormularioHorarioEstudiante = ({
       }
 
       // --- MODO CREACIÓN ---
-      // Haremos un POST por cada lección
       const createdHorarios = [];
+      const createdLessonKeys = [];
+
       for (const lesson of lessons) {
-        // Solo creamos si "lessonKey" no está vacío
         if (lesson.lessonKey) {
           const newHorarioData = {
             ...commonData,
@@ -173,30 +268,62 @@ const FormularioHorarioEstudiante = ({
 
           const resp = await axios.post(`${API_BASE_URL}/horarios/estudiante`, newHorarioData);
           createdHorarios.push(resp.data);
+          createdLessonKeys.push(lesson.lessonKey);
         }
       }
 
-      Swal.fire('Éxito', 'Se crearon los horarios exitosamente.', 'success');
-      reset();
+      // Mensaje de éxito con las lecciones creadas
+      if (createdLessonKeys.length > 0) {
+        Swal.fire(
+          'Éxito',
+          `Se crearon los horarios exitosamente para las lecciones: ${createdLessonKeys.join(', ')}`,
+          'success'
+        );
+      } else {
+        Swal.fire('Info', 'No se creó ningún horario (no se seleccionaron lecciones).', 'info');
+      }
+
+      // Quitar las lecciones ya creadas del formulario
+      const newFields = watch('lessons').filter((l) => !createdLessonKeys.includes(l.lessonKey));
+      reset(
+        {
+          ...formData,
+          lessons: newFields,
+        },
+        {
+          keepDefaultValues: true,
+        }
+      );
+
       if (onSubmitSuccess) onSubmitSuccess(createdHorarios);
     } catch (error) {
       console.error('Error al guardar el horario de estudiante:', error);
 
       if (error.response && error.response.data) {
-        const { errors: backendErrors, message: backendMessage, error: backendError } = error.response.data;
+        const {
+          errors: backendErrors,
+          message: backendMessage,
+          error: backendError,
+        } = error.response.data;
 
+        // Manejo de validaciones del backend
         if (backendErrors && typeof backendErrors === 'object') {
           Object.keys(backendErrors).forEach((field) => {
             setError(field, { type: 'server', message: backendErrors[field] });
           });
         }
 
-        const message = backendMessage || backendError || 'Hubo un problema al guardar el horario.';
+        const message =
+          backendMessage || backendError || 'Hubo un problema al guardar el horario.';
         if (message) {
           setErrorGeneral(message);
         }
 
-        Swal.fire('Error', 'Hubo un problema al guardar el horario. Revisa los errores en el formulario.', 'error');
+        Swal.fire(
+          'Error',
+          'Hubo un problema al guardar el horario. Revisa los errores en el formulario.',
+          'error'
+        );
       } else {
         setErrorGeneral('Hubo un problema inesperado al guardar el horario.');
         Swal.fire('Error', 'Hubo un problema al guardar el horario.', 'error');
@@ -204,17 +331,9 @@ const FormularioHorarioEstudiante = ({
     }
   };
 
-  // Cada vez que el usuario seleccione una "lección" (e.g., "1°"), establecemos las horas
-  const handleLessonChange = (lessonKey, index) => {
-    if (lessonTimes[lessonKey]) {
-      setValue(`lessons.${index}.hora_inicio_Horario`, lessonTimes[lessonKey].start);
-      setValue(`lessons.${index}.hora_fin_Horario`, lessonTimes[lessonKey].end);
-    } else {
-      setValue(`lessons.${index}.hora_inicio_Horario`, '');
-      setValue(`lessons.${index}.hora_fin_Horario`, '');
-    }
-  };
-
+  // ---------------------
+  // RENDER
+  // ---------------------
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-6">
       <div className="max-w-xl mx-auto">
@@ -229,7 +348,9 @@ const FormularioHorarioEstudiante = ({
           <div className="mb-4">
             <label className="block text-gray-700">Grado</label>
             <select
-              className={`border p-2 rounded-lg w-full ${errors.gradoId ? 'border-red-500' : ''}`}
+              className={`border p-2 rounded-lg w-full ${
+                errors.gradoId ? 'border-red-500' : ''
+              }`}
               {...register('gradoId')}
             >
               <option value="">Seleccione un grado</option>
@@ -246,7 +367,9 @@ const FormularioHorarioEstudiante = ({
           <div className="mb-4">
             <label className="block text-gray-700">Sección</label>
             <select
-              className={`border p-2 rounded-lg w-full ${errors.seccionId ? 'border-red-500' : ''}`}
+              className={`border p-2 rounded-lg w-full ${
+                errors.seccionId ? 'border-red-500' : ''
+              }`}
               {...register('seccionId')}
               disabled={!gradoSeleccionado}
             >
@@ -264,7 +387,9 @@ const FormularioHorarioEstudiante = ({
           <div className="mb-4">
             <label className="block text-gray-700">Materia</label>
             <select
-              className={`border p-2 rounded-lg w-full ${errors.materiaId ? 'border-red-500' : ''}`}
+              className={`border p-2 rounded-lg w-full ${
+                errors.materiaId ? 'border-red-500' : ''
+              }`}
               {...register('materiaId')}
             >
               <option value="">Seleccione una materia</option>
@@ -281,7 +406,9 @@ const FormularioHorarioEstudiante = ({
           <div className="mb-4">
             <label className="block text-gray-700">Profesor</label>
             <select
-              className={`border p-2 rounded-lg w-full ${errors.profesorId ? 'border-red-500' : ''}`}
+              className={`border p-2 rounded-lg w-full ${
+                errors.profesorId ? 'border-red-500' : ''
+              }`}
               {...register('profesorId')}
             >
               <option value="">Seleccione un profesor</option>
@@ -298,7 +425,9 @@ const FormularioHorarioEstudiante = ({
           <div className="mb-4">
             <label className="block text-gray-700">Aula</label>
             <select
-              className={`border p-2 rounded-lg w-full ${errors.aulaId ? 'border-red-500' : ''}`}
+              className={`border p-2 rounded-lg w-full ${
+                errors.aulaId ? 'border-red-500' : ''
+              }`}
               {...register('aulaId')}
             >
               <option value="">Seleccione un aula</option>
@@ -315,7 +444,9 @@ const FormularioHorarioEstudiante = ({
           <div className="mb-4">
             <label className="block text-gray-700">Día de la Semana</label>
             <select
-              className={`border p-2 rounded-lg w-full ${errors.dia_semana_Horario ? 'border-red-500' : ''}`}
+              className={`border p-2 rounded-lg w-full ${
+                errors.dia_semana_Horario ? 'border-red-500' : ''
+              }`}
               {...register('dia_semana_Horario')}
             >
               <option value="">Seleccione un día</option>
@@ -325,22 +456,26 @@ const FormularioHorarioEstudiante = ({
               <option value="Jueves">Jueves</option>
               <option value="Viernes">Viernes</option>
             </select>
-            {errors.dia_semana_Horario && <p className="text-red-500">{errors.dia_semana_Horario.message}</p>}
+            {errors.dia_semana_Horario && (
+              <p className="text-red-500">{errors.dia_semana_Horario.message}</p>
+            )}
           </div>
 
-          {/* SECCIÓN DE LECCIONES DINÁMICAS */}
+          {/* LECCIONES DINÁMICAS */}
           <div className="mb-4">
             <label className="block text-gray-700 font-semibold mb-2">Lecciones</label>
             {fields.map((field, index) => (
               <div key={field.id} className="border p-4 mb-4 rounded relative">
-                <label className="block text-gray-700">Lección #{index + 1}</label>
+                <label className="block text-gray-700">
+                  Lección #{index + 1}
+                </label>
                 <select
                   className="border p-2 rounded-lg w-full mt-1"
                   {...register(`lessons.${index}.lessonKey`)}
                   onChange={(e) => handleLessonChange(e.target.value, index)}
                 >
                   <option value="">Seleccione una lección</option>
-                  {Object.keys(lessonTimes).map((key) => (
+                  {getAvailableLessons(index).map((key) => (
                     <option key={key} value={key}>
                       {key} Lección
                     </option>
@@ -386,7 +521,7 @@ const FormularioHorarioEstudiante = ({
             </button>
           </div>
 
-          {/* Botones de acción */}
+          {/* BOTONES DE ACCIÓN */}
           <div className="flex flex-col sm:flex-row justify-end mt-6 space-y-2 sm:space-y-0 sm:space-x-2">
             <button
               type="button"
@@ -406,7 +541,11 @@ const FormularioHorarioEstudiante = ({
               }`}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Guardando...' : isEditing ? 'Guardar Cambios' : 'Registrar Horario(s)'}
+              {isSubmitting
+                ? 'Guardando...'
+                : isEditing
+                ? 'Guardar Cambios'
+                : 'Registrar Horario(s)'}
             </button>
           </div>
         </form>
