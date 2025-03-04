@@ -518,13 +518,6 @@ export const FormularioMatricula = () => {
 
             <div className="flex justify-center space-x-4 mt-6">
               <button
-                type="button"
-                onClick={() => setPage(1)}
-                className="bg-gray-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-gray-600"
-              >
-                Anterior
-              </button>
-              <button
                 type="submit"
                 disabled={isSubmitting}
                 className="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-600"
@@ -537,6 +530,13 @@ export const FormularioMatricula = () => {
                 className="bg-green-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-green-600"
               >
                 Descargar PDF
+              </button>
+              <button
+                type="button"
+                onClick={() => setPage(1)}
+                className="bg-gray-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-gray-600"
+              >
+                Anterior
               </button>
             </div>
           </>
