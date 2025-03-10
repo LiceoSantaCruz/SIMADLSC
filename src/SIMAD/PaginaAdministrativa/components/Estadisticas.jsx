@@ -1,71 +1,74 @@
+import { useEffect, useState } from "react";
+import EstudiantesService from "../Estudiantes/Service/EstudiantesService";
+import { Users, Mars, Venus } from "lucide-react";
+import CountUp from "react-countup";
 
 export const Estadisticas = () => {
+  const [estudiantes, setEstudiantes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchEstudiantes = async () => {
+      try {
+        const data = await EstudiantesService.getEstudiantes();
+        setEstudiantes(data);
+      } catch (err) {
+        setError("Error al obtener los estudiantes");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEstudiantes();
+  }, []);
+
+  if (loading) return <p className="text-center text-blue-600">Cargando estadísticas...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
+
+  // **Cálculos de estadísticas**
+  const totalEstudiantes = estudiantes.length;
+  const totalHombres = estudiantes.filter(est => est.sexo === "Masculino").length;
+  const totalMujeres = estudiantes.filter(est => est.sexo === "Femenino").length;
+
+  const porcentajeHombres = ((totalHombres / totalEstudiantes) * 100).toFixed(1);
+  const porcentajeMujeres = ((totalMujeres / totalEstudiantes) * 100).toFixed(1);
+
   return (
-    <div className="p-4">
-            <h2 className="text-2xl font-bold mb-4">Estadísticas del Colegio</h2>
-            <div className="grid grid-cols-3 gap-4">
-                <div className="p-4 border rounded shadow-sm">
-                    <h3 className="text-xl font-semibold">Total Estudiantes</h3>
-                    <p className="text-4xl">1000</p>
-                </div>
-                <div className="p-4 border rounded shadow-sm">
-                    <h3 className="text-xl font-semibold">Hombres</h3>
-                    <p className="text-4xl">480</p>
-                    <p className="text-sm text-gray-500">48.0% del total</p>
-                </div>
-                <div className="p-4 border rounded shadow-sm">
-                    <h3 className="text-xl font-semibold">Mujeres</h3>
-                    <p className="text-4xl">520</p>
-                    <p className="text-sm text-gray-500">52.0% del total</p>
-                </div>
-            </div>
-
-            <h2 className="text-2xl font-bold mt-8 mb-4">Estadísticas Adicionales</h2>
-            <div className="p-4 border rounded shadow-sm">
-                <table className="min-w-full text-left">
-                    <thead className="border-b">
-                        <tr>
-                            <th className="px-4 py-2">Categoría</th>
-                            <th className="px-4 py-2">Hombres</th>
-                            <th className="px-4 py-2">Mujeres</th>
-                            <th className="px-4 py-2">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr className="border-b">
-                            <td className="px-4 py-2">Becados</td>
-                            <td className="px-4 py-2">45</td>
-                            <td className="px-4 py-2">55</td>
-                            <td className="px-4 py-2">100</td>
-                        </tr>
-                        <tr className="border-b">
-                            <td className="px-4 py-2">Actividades Extracurriculares</td>
-                            <td className="px-4 py-2">200</td>
-                            <td className="px-4 py-2">250</td>
-                            <td className="px-4 py-2">450</td>
-                        </tr>
-                        <tr>
-                            <td className="px-4 py-2">Transporte Escolar</td>
-                            <td className="px-4 py-2">150</td>
-                            <td className="px-4 py-2">180</td>
-                            <td className="px-4 py-2">330</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mt-4">
-                <div className="p-4 border rounded shadow-sm">
-                    <h3 className="text-xl font-semibold">Promedio de Notas</h3>
-                    <p className="text-3xl">8.5 / 10</p>
-                    <p className="text-sm text-gray-500">Hombres: 8.3 | Mujeres: 8.7</p>
-                </div>
-                <div className="p-4 border rounded shadow-sm">
-                    <h3 className="text-xl font-semibold">Tasa de Asistencia</h3>
-                    <p className="text-3xl">95%</p>
-                    <p className="text-sm text-gray-500">Hombres: 94% | Mujeres: 96%</p>
-                </div>
-            </div>
+    <div className="p-12 bg-gradient-to-r from-blue-50 to-pink-50 min-h-full ">
+      <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">📊 Estadísticas del Colegio</h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        {/* Total de Estudiantes */}
+        <div className="p-6 border border-gray-200 rounded-xl shadow-md bg-white flex flex-col items-center">
+          <Users className="text-gray-700 w-12 h-12 mb-2" />
+          <h3 className="text-xl font-semibold text-gray-700">Total Estudiantes</h3>
+          <p className="text-5xl font-bold text-gray-900">
+            <CountUp end={totalEstudiantes} duration={2.5} />
+          </p>
         </div>
-  )
-}
+
+        {/* Hombres */}
+        <div className="p-6 border border-blue-300 rounded-xl shadow-md bg-white flex flex-col items-center">
+          <Mars className="text-blue-500 w-12 h-12 mb-2" />
+          <h3 className="text-xl font-semibold text-blue-500">Hombres</h3>
+          <p className="text-5xl font-bold text-blue-600">
+            <CountUp end={totalHombres} duration={2.5} />
+          </p>
+          <p className="text-sm text-gray-500">{porcentajeHombres}% del total</p>
+        </div>
+
+        {/* Mujeres */}
+        <div className="p-6 border border-pink-300 rounded-xl shadow-md bg-white flex flex-col items-center">
+          <Venus className="text-pink-500 w-12 h-12 mb-2" />
+          <h3 className="text-xl font-semibold text-pink-500">Mujeres</h3>
+          <p className="text-5xl font-bold text-pink-600">
+            <CountUp end={totalMujeres} duration={2.5} />
+          </p>
+          <p className="text-sm text-gray-500">{porcentajeMujeres}% del total</p>
+        </div>
+      </div>
+    </div>
+  );
+};
