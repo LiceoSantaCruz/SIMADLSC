@@ -18,7 +18,9 @@ import CrearUsuario from '../pages/Usuarios/CrearUsuario';
 import { MiPerfil } from '../pages/Perfil/MiPerfil';
 import CrearEventos from '../pages/Eventos/CrearEventos';
 import Eventos from '../pages/Eventos/Eventos';
+import DetalleEstudiante from '../Estudiantes/pages/DetalleEstudiante';
 import UserEventos from '../pages/Eventos/UserEventos';
+import BusquedaEstudiantes from '../Estudiantes/pages/BusquedaEstudiantes';
 import EventosEdit from '../pages/Eventos/EventosEdit';
 import GestionMatriculas from '../pages/Matricula/pages/GestionMatricula';
  
@@ -74,6 +76,13 @@ export const AdminRoutes = () => {
               <Route path="/horario-profesores" element={<HorarioProf />} />
             </>
           )}
+          {(role === 'admin' || role === 'superadmin' || role === 'profesor' || role === 'estudiante') && (
+            <>
+              <Route path="/busqueda-estudiantes" element={<BusquedaEstudiantes />} />
+              <Route path="/detalle-estudiante/:id" element={<DetalleEstudiante />} />
+            </>
+          )}
+          
           
         {/* Rutas para matrícula, según el rol */}
         {(role === 'admin' || role === 'superadmin') && (

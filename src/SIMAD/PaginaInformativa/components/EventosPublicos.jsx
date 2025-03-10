@@ -1,12 +1,11 @@
 // src/components/EventosPublicos.jsx
-
 import { useEffect, useState } from 'react';
 import UseFetchEventos from '../../PaginaAdministrativa/pages/Eventos/Hook/UseFetchEventos';
 import Swal from 'sweetalert2';
 import '@sweetalert2/theme-bulma/bulma.css';
 
 const EventosPublicos = () => {
-  const { data: eventos, loading, error } = UseFetchEventos(); 
+  const { data: eventos, loading, error } = UseFetchEventos();
   const [publicEvents, setPublicEvents] = useState([]);
   // Estados para la paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -14,13 +13,19 @@ const EventosPublicos = () => {
 
   useEffect(() => {
     if (eventos) {
+      // Filtrar eventos públicos aprobados
       const filteredPublicEvents = eventos.filter(
         (evento) =>
           evento.estadoEvento?.nombre.toLowerCase() === 'aprobado' &&
           evento.dirigidoA?.nombre.toLowerCase() === 'todo publico'
       );
-      setPublicEvents(filteredPublicEvents);
-      // Reiniciamos la página actual cuando se carga la data
+      // Ordenar por fecha y hora de inicio (ascendente)
+      const sortedPublicEvents = filteredPublicEvents.sort((a, b) => {
+        const dateTimeA = new Date(`${a.fecha_Evento}T${a.hora_inicio_Evento}`);
+        const dateTimeB = new Date(`${b.fecha_Evento}T${b.hora_inicio_Evento}`);
+        return dateTimeA - dateTimeB;
+      });
+      setPublicEvents(sortedPublicEvents);
       setCurrentPage(1);
     }
   }, [eventos]);
@@ -75,7 +80,7 @@ const EventosPublicos = () => {
     );
   }
 
-  // Paginación: Calculamos el subconjunto de eventos a mostrar
+  // Paginación: Calculamos el subconjunto actual de eventos
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   const currentEvents = publicEvents.slice(indexOfFirstEvent, indexOfLastEvent);
@@ -89,7 +94,7 @@ const EventosPublicos = () => {
           Eventos para todo público
         </h1>
         <p className="text-center text-xs sm:text-sm text-gray-600 mb-6 sm:mb-10">
-          Haga click a cada evento para ver más información.
+          Haz click en cada evento para ver más información.
         </p>
         {publicEvents.length === 0 ? (
           <p className="text-center text-gray-600">No hay eventos públicos disponibles.</p>
@@ -126,7 +131,7 @@ const EventosPublicos = () => {
                 </div>
               ))}
             </div>
-            {/* Controles de paginación en tonos azules */}
+            {/* Paginación en tonos azules */}
             {totalPages > 1 && (
               <div className="flex justify-center mt-4 sm:mt-8">
                 {Array.from({ length: totalPages }, (_, index) => (

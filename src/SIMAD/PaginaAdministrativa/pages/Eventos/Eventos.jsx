@@ -1,5 +1,4 @@
 // src/components/Eventos.jsx
-
 import { useEffect, useState } from 'react';
 import UseFetchEventos from './Hook/UseFetchEventos';
 import Swal from 'sweetalert2';
@@ -15,11 +14,18 @@ const Eventos = () => {
 
   useEffect(() => {
     if (eventos) {
+      // Filtrar solo los eventos aprobados
       const filteredApprovedEvents = eventos.filter(
         (evento) =>
           evento.estadoEvento?.nombre.toLowerCase() === 'aprobado'
       );
-      setApprovedEvents(filteredApprovedEvents);
+      // Ordenar eventos por fecha y hora de inicio (próximos primero)
+      const sortedApprovedEvents = filteredApprovedEvents.sort((a, b) => {
+        const dateTimeA = new Date(`${a.fecha_Evento}T${a.hora_inicio_Evento}`);
+        const dateTimeB = new Date(`${b.fecha_Evento}T${b.hora_inicio_Evento}`);
+        return dateTimeA - dateTimeB;
+      });
+      setApprovedEvents(sortedApprovedEvents);
       setCurrentPage(1);
     }
   }, [eventos]);
@@ -81,7 +87,7 @@ const Eventos = () => {
     );
   }
 
-  // Paginación: calcular los índices y la porción actual
+  // Paginación: calcular la porción de eventos actual
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   const currentEvents = approvedEvents.slice(indexOfFirstEvent, indexOfLastEvent);
@@ -128,17 +134,15 @@ const Eventos = () => {
             ))}
           </ul>
 
-          {/* Controles de paginación en tonos azules */}
+          {/* Paginación en tonos azules */}
           {totalPages > 1 && (
             <div className="flex justify-center mt-4">
               {Array.from({ length: totalPages }, (_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentPage(index + 1)}
-                  className={`mx-1 px-3 py-1 rounded transition text-sm ${
-                    currentPage === index + 1
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-blue-100 text-blue-800'
+                  className={`mx-1 px-3 py-1 rounded text-sm transition ${
+                    currentPage === index + 1 ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-800'
                   }`}
                 >
                   {index + 1}
