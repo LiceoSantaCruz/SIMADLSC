@@ -25,6 +25,8 @@ import UserEventos from '../pages/Eventos/UserEventos';
 import BusquedaEstudiantes from '../Estudiantes/pages/BusquedaEstudiantes';
 import EventosEdit from '../pages/Eventos/EventosEdit';
 import GestionMatriculas from '../pages/Matricula/pages/GestionMatricula';
+import CrearSeccion from '../pages/Secciones/pages/CrearSeccion';
+import AsignaSeccionPage from '../pages/Matricula/pages/AsignaSeccionPage';
  
 export const AdminRoutes = () => {
   const [role, setRole] = useState(localStorage.getItem('role'));
