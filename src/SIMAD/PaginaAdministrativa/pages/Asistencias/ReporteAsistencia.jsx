@@ -90,6 +90,7 @@ export const ReporteAsistencia = () => {
     }
   };
 
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Encabezado */}
@@ -179,7 +180,6 @@ export const ReporteAsistencia = () => {
           </div>
         </form>
       </div>
-
       {/* Resultados */}
       {asistencias.length > 0 && (
         <>
@@ -197,6 +197,9 @@ export const ReporteAsistencia = () => {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Fecha
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Lecciones
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Estado
@@ -217,6 +220,13 @@ export const ReporteAsistencia = () => {
                   <tr key={asistencia.asistencia_id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {new Date(asistencia.fecha).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {Array.isArray(asistencia.lecciones)
+                        ? asistencia.lecciones.join(", ")
+                        : typeof asistencia.lecciones === "string"
+                        ? asistencia.lecciones.split(",").join(", ")
+                        : "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {traducirEstado(asistencia.estado)}

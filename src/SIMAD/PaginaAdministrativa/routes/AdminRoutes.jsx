@@ -18,11 +18,15 @@ import CrearUsuario from '../pages/Usuarios/CrearUsuario';
 import { MiPerfil } from '../pages/Perfil/MiPerfil';
 import CrearEventos from '../pages/Eventos/CrearEventos';
 import Eventos from '../pages/Eventos/Eventos';
+import ListaEstudiantes from '../pages/Secciones/pages/ListaEstudiantes';
+import Secciones from '../pages/Secciones/pages/Secciones';
 import DetalleEstudiante from '../Estudiantes/pages/DetalleEstudiante';
 import UserEventos from '../pages/Eventos/UserEventos';
 import BusquedaEstudiantes from '../Estudiantes/pages/BusquedaEstudiantes';
 import EventosEdit from '../pages/Eventos/EventosEdit';
 import GestionMatriculas from '../pages/Matricula/pages/GestionMatricula';
+import CrearSeccion from '../pages/Secciones/pages/CrearSeccion';
+import AsignaSeccionPage from '../pages/Matricula/pages/AsignaSeccionPage';
  
 export const AdminRoutes = () => {
   const [role, setRole] = useState(localStorage.getItem('role'));
@@ -76,10 +80,23 @@ export const AdminRoutes = () => {
               <Route path="/horario-profesores" element={<HorarioProf />} />
             </>
           )}
-          {(role === 'admin' || role === 'superadmin' || role === 'profesor' || role === 'estudiante') && (
+
+           {/* Rutas para Busqueda de estudiantes, según el rol */}
+          {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
             <>
               <Route path="/busqueda-estudiantes" element={<BusquedaEstudiantes />} />
               <Route path="/detalle-estudiante/:id" element={<DetalleEstudiante />} />
+            </>
+          )}
+          
+
+            {/* Rutas para Busqueda de estudiantes, según el rol */}
+            {(role === 'admin' || role === 'superadmin' ) && (
+            <>
+              <Route path="/Secciones" element={<Secciones />} />
+              <Route path="/lista-estudiantes/:seccionId" element={<ListaEstudiantes />} />
+              <Route path="/crear-seccion" element={<CrearSeccion />} />
+
             </>
           )}
           
@@ -91,6 +108,7 @@ export const AdminRoutes = () => {
             <Route path="/gestion-matricula" element={<GestionMatriculas />} />
             {/* <Route path="/matricula-ordinaria" element={<MatriculaOrdinaria />} /> */}
             <Route path="/matricula-extraordinaria" element={<MatriculaExtraordinaria />} /> 
+            <Route path="/asignar-seccion" element={<AsignaSeccionPage />} /> 
           </>
         )}
         {role === 'Estudiante' && (
