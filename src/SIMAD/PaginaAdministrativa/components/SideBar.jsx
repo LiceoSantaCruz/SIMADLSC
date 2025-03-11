@@ -132,28 +132,30 @@ export const SideBar = () => {
                         </div>
                     )}
 
-                {/* Matrícula: Visible para admin, superadmin y estudiantes */}
-                {(role === 'admin' || role === 'superadmin' || role === 'estudiante') && (
-                    <div>
-                        <div onClick={() => toggleSection('matricula')} className="cursor-pointer flex items-center space-x-2 py-2">
-                            <FaClipboardList />
-                            <span>Matrícula</span>
-                        </div>
-                        {openSections.matricula && (
-                            <div className="ml-6">
-                                <Link to="/formulario-matricula" className="block py-1 hover:text-gray-400">Formulario matrícula</Link>
-                                {(role === 'admin' || role === 'superadmin') && (
-                                    <>
-                                        <Link to="/gestion-matricula" className="block py-1 hover:text-gray-400">Gestión matrícula</Link>
-                                        <Link to="/matricula-ordinaria" className="block py-1 hover:text-gray-400">Matrícula ordinaria</Link>
-                                        <Link to="/matricula-extraordinaria" className="block py-1 hover:text-gray-400">Matrícula extraordinaria</Link>
-                                        <Link to="/asignar-seccion" className="block py-1 hover:text-gray-400">Asignar sección</Link>
-                                    </>
-                                )}
+                    {/* Matrícula: Para admin, superadmin y estudiante */}
+                    {(role === 'admin' || role === 'superadmin' || role === 'estudiante') && (
+                        <div>
+                            <div onClick={() => toggleSection('matricula')} className="cursor-pointer flex items-center space-x-2 py-2 hover:bg-gray-200 rounded-md px-2 transition">
+                                <FaClipboardList className="text-purple-400" />
+                                <span>Matrícula</span>
+
+
                             </div>
-                        )}
-                    </div>
-                )}
+                            {openSections.matricula && (
+                                <div className="ml-6 text-white">
+                                    <Link to="/formulario-matricula" className="block py-1 text-sm hover:text-purple-500">Formulario matrícula</Link>
+                                    {(role === 'admin' || role === 'superadmin') && (
+                                        <>
+                                            <Link to="/gestion-matricula" className="block py-1 text-sm hover:text-purple-500">Gestión matrícula</Link>
+                                            <Link to="/matricula-ordinaria" className="block py-1 text-sm hover:text-purple-500">Matrícula ordinaria</Link>
+                                            <Link to="/matricula-extraordinaria" className="block py-1 text-sm hover:text-purple-500">Matrícula extraordinaria</Link>
+                                            <Link to="/asignar-seccion" className="block py-1 text-sm hover:text-purple-500">Asignar sección</Link>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Secciones: Para admin, superadmin y profesor */}
                     {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
