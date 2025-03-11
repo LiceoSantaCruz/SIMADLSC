@@ -15,7 +15,9 @@ const EstudiantesService = {
   // Obtener lista de estudiantes con búsqueda simple
   getEstudiantes: async (search = '') => {
     try {
-      const response = await axiosInstance.get(`/estudiantes?search=${encodeURIComponent(search)}`);
+      const response = await axiosInstance.get(
+        `/estudiantes?search=${encodeURIComponent(search)}`
+      );
       return response.data;
     } catch (error) {
       console.error('Error al obtener estudiantes:', error);
@@ -23,7 +25,18 @@ const EstudiantesService = {
     }
   },
 
-  // Filtrar estudiantes solo por nombre, apellido y cédula
+  // Obtener solo estudiantes de una sección específica
+  getEstudiantesPorSeccion: async (id) => {
+    try {
+      const response = await axiosInstance.get(`/estudiantes/seccion/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener estudiantes por sección:', error);
+      throw error;
+    }
+  },
+
+  // Filtrar estudiantes por nombre, apellido y cédula
   findByFilters: async (filters = {}) => {
     try {
       const queryParams = new URLSearchParams();
@@ -36,7 +49,9 @@ const EstudiantesService = {
       if (filters.apellido && filters.apellido.trim()) {
         queryParams.append('apellido', filters.apellido.trim());
       }
-      const response = await axiosInstance.get(`/estudiantes?${queryParams.toString()}`);
+      const response = await axiosInstance.get(
+        `/estudiantes?${queryParams.toString()}`
+      );
       return response.data;
     } catch (error) {
       console.error('Error al filtrar estudiantes:', error);
