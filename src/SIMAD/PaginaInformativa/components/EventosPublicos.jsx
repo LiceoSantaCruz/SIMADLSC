@@ -13,7 +13,7 @@ const EventosPublicos = () => {
 
   useEffect(() => {
     if (eventos) {
-      // Filtrar eventos públicos aprobados
+      // Filtrar eventos públicos aprobados y dirigidos a "todo publico"
       const filteredPublicEvents = eventos.filter(
         (evento) =>
           evento.estadoEvento?.nombre.toLowerCase() === 'aprobado' &&
@@ -40,7 +40,7 @@ const EventosPublicos = () => {
     return `${hours}:${minutes}`;
   };
 
-  // Función para mostrar detalles del evento en un popup
+  // Función para mostrar detalles del evento en un popup (sin mostrar el estado)
   const handleEventoClick = (evento) => {
     Swal.fire({
       title: `<strong>${evento.nombre_Evento}</strong>`,
@@ -51,7 +51,6 @@ const EventosPublicos = () => {
           <p><strong>Hora de Inicio:</strong> ${formatTime(evento.hora_inicio_Evento)}</p>
           <p><strong>Hora de Fin:</strong> ${formatTime(evento.hora_fin_Evento)}</p>
           <p><strong>Dirigido A:</strong> ${evento.dirigidoA?.nombre || 'No especificado'}</p>
-          <p><strong>Estado:</strong> ${evento.estadoEvento?.nombre || 'No especificado'}</p>
           <p><strong>Tipo de Evento:</strong> ${evento.tipoEvento?.nombre || 'No especificado'}</p>
           <p><strong>Ubicación:</strong> ${evento.ubicacion?.nombre || 'No especificado'}</p>
         </div>
@@ -120,9 +119,6 @@ const EventosPublicos = () => {
                   <div className="mt-4 flex flex-wrap gap-2">
                     <span className="bg-blue-100 text-blue-800 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
                       {evento.tipoEvento?.nombre || 'No especificado'}
-                    </span>
-                    <span className="bg-green-100 text-green-800 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
-                      {evento.estadoEvento?.nombre || 'No especificado'}
                     </span>
                     <span className="bg-yellow-100 text-yellow-800 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
                       {evento.ubicacion?.nombre || 'No especificado'}
