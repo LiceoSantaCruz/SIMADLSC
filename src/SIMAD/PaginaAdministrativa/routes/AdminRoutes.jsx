@@ -25,7 +25,6 @@ import UserEventos from '../pages/Eventos/UserEventos';
 import BusquedaEstudiantes from '../Estudiantes/pages/BusquedaEstudiantes';
 import EventosEdit from '../pages/Eventos/EventosEdit';
 import GestionMatriculas from '../pages/Matricula/pages/GestionMatricula';
-import CrearSeccion from '../pages/Secciones/pages/CrearSeccion';
  
 export const AdminRoutes = () => {
   const [role, setRole] = useState(localStorage.getItem('role'));
@@ -107,6 +106,7 @@ export const AdminRoutes = () => {
             <Route path="/gestion-matricula" element={<GestionMatriculas />} />
             {/* <Route path="/matricula-ordinaria" element={<MatriculaOrdinaria />} /> */}
             <Route path="/matricula-extraordinaria" element={<MatriculaExtraordinaria />} /> 
+            <Route path="/asignar-seccion" element={<AsignaSeccionPage />} /> 
           </>
         )}
         {role === 'Estudiante' && (
