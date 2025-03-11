@@ -86,7 +86,7 @@ const EventosPublicos = () => {
   const totalPages = Math.ceil(publicEvents.length / eventsPerPage);
 
   return (
-    <div className="min-h-screen p-4 sm:p-8 bg-gradient-to-r from-blue-50 to-gray-200">
+    <div className="min-h-full p-4 sm:p-8 bg-gradient-to-r from-blue-50 to-gray-200">
       <div className="container mx-auto">
         {/* Título */}
         <h1 className="text-3xl sm:text-4xl font-bold text-center text-blue-900 mb-4 sm:mb-8">
