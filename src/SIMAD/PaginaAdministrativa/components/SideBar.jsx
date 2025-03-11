@@ -196,7 +196,7 @@ export const SideBar = () => {
                         <span className="text-lg">Perfil</span>
                     </div>
                     <div className="ml-6 text-white">
-                        <Link to="/mi-perfil" className="py-1 block text-sm hover:text-gray-500 flex items-center space-x-1">
+                        <Link to="/mi-perfil" className="py-1 display: block; text-sm hover:text-gray-500 display: flex; items-center space-x-1">
                             <FaUserCircle size={14} />
                             <span>Ver mi perfil</span>
                         </Link>
