@@ -31,6 +31,15 @@ const exampleSectionNames = {
   decimo: '10-1',
 };
 
+// Objeto para definir el orden de los niveles (de menor a mayor)
+const levelOrder = {
+  setimo: 7,
+  octavo: 8,
+  noveno: 9,
+  decimo: 10,
+  undecimo: 11,
+};
+
 const Secciones = () => {
   const { secciones, loading, error, fetchSecciones } = UseFetchSecciones();
   const [nivelFilter, setNivelFilter] = useState('');
@@ -43,7 +52,7 @@ const Secciones = () => {
 
   // Estado para la paginación
   const [currentPage, setCurrentPage] = useState(1);
-  const sectionsPerPage = 15; // Ahora se muestran 15 secciones por página
+  const sectionsPerPage = 15; // 15 secciones por página
 
   // Cargar niveles desde el backend
   useEffect(() => {
@@ -84,11 +93,24 @@ const Secciones = () => {
       )
     : secciones;
 
+  // Ordenar las secciones primero por nivel y luego por el número de la sección
+  const sortedSecciones = [...filteredSecciones].sort((a, b) => {
+    const nivelA = levelOrder[normalizeText(a.grado.nivel)] || 100;
+    const nivelB = levelOrder[normalizeText(b.grado.nivel)] || 100;
+    if (nivelA !== nivelB) return nivelA - nivelB;
+    // Extraer el número de la sección (parte después del guión)
+    const numA = parseInt(a.nombre_Seccion.split('-')[1], 10);
+    const numB = parseInt(b.nombre_Seccion.split('-')[1], 10);
+    if (numA !== numB) return numA - numB;
+    // Si son iguales, se ordena alfabéticamente (opcional)
+    return a.nombre_Seccion.localeCompare(b.nombre_Seccion);
+  });
+
   // Paginación
   const indexOfLastSection = currentPage * sectionsPerPage;
   const indexOfFirstSection = indexOfLastSection - sectionsPerPage;
-  const currentSecciones = filteredSecciones.slice(indexOfFirstSection, indexOfLastSection);
-  const totalPages = Math.ceil(filteredSecciones.length / sectionsPerPage);
+  const currentSecciones = sortedSecciones.slice(indexOfFirstSection, indexOfLastSection);
+  const totalPages = Math.ceil(sortedSecciones.length / sectionsPerPage);
 
   // Handler para eliminar una sección
   const handleDelete = async (idSeccion) => {
@@ -317,7 +339,7 @@ const Secciones = () => {
           </select>
         </div>
 
-        {filteredSecciones.length === 0 ? (
+        {sortedSecciones.length === 0 ? (
           <p className="text-center text-gray-600">No hay secciones disponibles.</p>
         ) : (
           <>
