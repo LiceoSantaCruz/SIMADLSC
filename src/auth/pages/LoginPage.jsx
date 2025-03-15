@@ -75,9 +75,8 @@ export default function LoginPage() {
       const idProfesor = data.payload?.id_Profesor; // Cambia esta línea
       const idEstudiante = data.payload?.id_Estudiante; // Cambia esta línea
       const userData = data.user_data; // Verifica si esto es correcto
-      const idMateria = data.id_Materia; // Verifica si esto es correcto
-
-      
+      const materia = data.payload?.materia; 
+            
       // Verificar si existe un rol
       if (!role) {
         MySwal.fire({
@@ -96,7 +95,10 @@ export default function LoginPage() {
           localStorage.setItem("id_profesor", idProfesor);
         }
         if (idEstudiante) {
-          localStorage.setItem("id_estudiante", idEstudiante);
+        localStorage.setItem("id_estudiante", idEstudiante);
+      }
+          if (materia) { 
+          localStorage.setItem("materia", materia);
         }
         if (idMateria) {
           localStorage.setItem("id_materia", idMateria);

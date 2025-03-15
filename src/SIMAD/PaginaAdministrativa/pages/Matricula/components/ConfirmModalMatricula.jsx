@@ -6,17 +6,17 @@ export function ConfirmModal({ isOpen, onClose, onConfirm, title, message }) {
           <h3 className="text-xl font-semibold mb-4">{title}</h3>
           <p className="mb-4">{message}</p>
           <div className="flex justify-end gap-2">
+              <button
+                onClick={onConfirm}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                Confirmar
+              </button>
             <button
               onClick={onClose}
               className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
             >
               Cancelar
-            </button>
-            <button
-              onClick={onConfirm}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Confirmar
             </button>
           </div>
         </div>

@@ -12,7 +12,7 @@ export const AuthService = {
         },
         body: JSON.stringify({ token, contraseña_Usuario }),
       });
-
+      
       if (!response.ok) {
         const errorData = await response.json();
         const error = new Error(errorData.message || 'Error en la solicitud');
