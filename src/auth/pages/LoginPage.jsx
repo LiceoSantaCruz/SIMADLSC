@@ -33,8 +33,6 @@ export default function LoginPage() {
       localStorage.removeItem("id_Estudiante");
       localStorage.removeItem("id_Profesor");
       localStorage.removeItem("userData");
-      localStorage.removeItem("id_Materia");
-
 
       const API_URL = import.meta.env.VITE_API_URL;
 
@@ -69,14 +67,15 @@ export default function LoginPage() {
       }
 
       const data = await response.json();
+      
       // Extraer los datos relevantes de la respuesta
       const role = data.role; // Asegúrate de que esto sea correcto
       const token = data.access_token; // Asegúrate de que esto sea correcto
       const idProfesor = data.payload?.id_Profesor; // Cambia esta línea
       const idEstudiante = data.payload?.id_Estudiante; // Cambia esta línea
       const userData = data.user_data; // Verifica si esto es correcto
-      const materia = data.payload?.materia; 
-            
+      
+      
       // Verificar si existe un rol
       if (!role) {
         MySwal.fire({
@@ -95,19 +94,12 @@ export default function LoginPage() {
           localStorage.setItem("id_profesor", idProfesor);
         }
         if (idEstudiante) {
-        localStorage.setItem("id_estudiante", idEstudiante);
-      }
-          if (materia) { 
-          localStorage.setItem("materia", materia);
-        }
-        if (idMateria) {
-          localStorage.setItem("id_materia", idMateria);
+          localStorage.setItem("id_estudiante", idEstudiante);
         }
         localStorage.setItem("user_data", JSON.stringify(userData));
       } catch (error) {
         console.error("Error al guardar en localStorage:", error);
       }
-
 
       // Mostrar mensaje de éxito
       MySwal.fire({
@@ -144,7 +136,6 @@ export default function LoginPage() {
   const ForgotPassword = () => {
     navigate("/auth/forgot-password");
   };
-
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-blue-400 to-blue-600 px-4 py-12 sm:px-6 lg:px-8">
