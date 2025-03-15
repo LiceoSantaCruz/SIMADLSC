@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import PropTypes from 'prop-types';
 import FormularioHorarioEstudiante from '../Formularios/FormularioHorarioEstudiante';
+import PropTypes from 'prop-types';
 
 // URL base de la API
 const API_BASE_URL =
@@ -10,10 +10,7 @@ const API_BASE_URL =
     ? 'https://simadlsc-backend-production.up.railway.app'
     : 'http://localhost:3000';
 
-/**
- * Función utilitaria para formatear hora de 24h a 12h con AM/PM.
- * Ej: "13:05" -> "1:05 PM"
- */
+// Función utilitaria para formatear hora de 24 horas a 12 horas con AM/PM
 const formatearHora12 = (hora24) => {
   const [hora, minutos] = hora24.split(':').map(Number);
   const periodo = hora >= 12 ? 'PM' : 'AM';
@@ -23,42 +20,19 @@ const formatearHora12 = (hora24) => {
 
 // Mapeo para ordenar los días de la semana
 const ordenDias = {
-  Lunes: 1,
-  Martes: 2,
-  Miércoles: 3,
-  Jueves: 4,
-  Viernes: 5,
+  'Lunes': 1,
+  'Martes': 2,
+  'Miércoles': 3,
+  'Jueves': 4,
+  'Viernes': 5,
 };
 
-const ListaHorarios = ({
-  horarios,
-  setHorarios,
-  materias,
-  profesores,
-  aulas,
-  secciones,
-}) => {
-  // ==================
-  //   ESTADOS LOCALES
-  // ==================
-
-  // 1) Modal para editar
+const ListaHorarios = ({ horarios, onEditHorario, setHorarios, materias, profesores, aulas, secciones }) => {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [horarioSeleccionado, setHorarioSeleccionado] = useState(null);
+  const [detallesAbiertos, setDetallesAbiertos] = useState({}); // Para manejar detalles por fila
 
-  // 2) "Ver más" (detalles)
-  const [detallesAbiertos, setDetallesAbiertos] = useState({});
-
-  // 3) Estado para la sección seleccionada (filtro)
-  const [selectedSeccionId, setSelectedSeccionId] = useState('');
-
-  // ======================
-  //   FUNCIONES PRINCIPALES
-  // ======================
-
-  /**
-   * Eliminar un horario
-   */
+  // Función para eliminar un horario
   const eliminarHorario = async (id) => {
     const confirmacion = await Swal.fire({
       title: '¿Estás seguro?',
@@ -74,8 +48,7 @@ const ListaHorarios = ({
     if (confirmacion.isConfirmed) {
       try {
         await axios.delete(`${API_BASE_URL}/horarios/${id}`);
-        setHorarios((prev) => prev.filter((h) => h.id_Horario !== id));
-
+        setHorarios(horarios.filter((horario) => horario.id_Horario !== id));
         Swal.fire('¡Eliminado!', 'El horario ha sido eliminado exitosamente.', 'success');
       } catch (err) {
         console.error('Error al eliminar horario:', err);
@@ -84,13 +57,11 @@ const ListaHorarios = ({
     }
   };
 
-  /**
-   * Abrir modal de edición: se obtiene el horario por ID desde el backend
-   */
+  // Función para abrir el modal de edición
   const abrirModalEditar = async (horarioId) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/horarios/${horarioId}`);
-      setHorarioSeleccionado(response.data); // Guardamos el objeto completo
+      setHorarioSeleccionado(response.data);
       setModalAbierto(true);
     } catch (error) {
       console.error('Error al obtener el horario:', error);
@@ -98,82 +69,55 @@ const ListaHorarios = ({
     }
   };
 
-  /**
-   * Cerrar el modal de edición
-   */
+  // Función para cerrar el modal
   const cerrarModal = () => {
     setHorarioSeleccionado(null);
     setModalAbierto(false);
   };
 
-  /**
-   * Actualizar el horario en la lista luego de editar
-   */
+  // Función para actualizar el horario en la lista después de editar
   const actualizarHorarioEnLista = (horarioEditado) => {
-    setHorarios((prevHorarios) =>
-      prevHorarios.map((h) =>
-        h.id_Horario === horarioEditado.id_Horario ? horarioEditado : h
+    setHorarios(
+      horarios.map((horario) =>
+        horario.id_Horario === horarioEditado.id_Horario ? horarioEditado : horario
       )
     );
     Swal.fire('Actualizado', 'El horario ha sido actualizado exitosamente.', 'success');
     cerrarModal();
   };
 
-  /**
-   * Abrir/cerrar los detalles de cada fila
-   */
-  const toggleDetalles = (idHorario) => {
-    setDetallesAbiertos((prev) => ({
-      ...prev,
-      [idHorario]: !prev[idHorario],
+  // Función para abrir y cerrar los detalles por fila
+  const toggleDetalles = (id) => {
+    setDetallesAbiertos((prevState) => ({
+      ...prevState,
+      [id]: !prevState[id],
     }));
   };
 
-  // ================
-  //  LÓGICA DE FILTRO
-  // ================
-
-  // 1) Ordenar los horarios por día y hora de inicio (useMemo para rendimiento)
-  const horariosOrdenados = useMemo(() => {
-    return [...horarios].sort((a, b) => {
-      const ordenA = ordenDias[a.dia_semana_Horario] || 99;
-      const ordenB = ordenDias[b.dia_semana_Horario] || 99;
-
-      if (ordenA !== ordenB) {
-        return ordenA - ordenB;
-      }
-      return a.hora_inicio_Horario.localeCompare(b.hora_inicio_Horario);
-    });
-  }, [horarios]);
-
-  // 2) Filtrar por la sección seleccionada (selectedSeccionId)
-  const horariosFiltrados = useMemo(() => {
-    if (!selectedSeccionId) {
-      return horariosOrdenados;
-    }
-    return horariosOrdenados.filter((horario) => {
-      // Ajusta según cómo venga la data de tu backend (p.e., horario.seccionId en lugar de horario.seccion?.id_Seccion).
-      return horario.seccion?.id_Seccion === Number(selectedSeccionId);
-    });
-  }, [selectedSeccionId, horariosOrdenados]);
-
-  // ================
-  //     RENDERIZADO
-  // ================
-
-  // Si no hay horarios, mostrar un mensaje.
+  // Manejo del caso en que no hay horarios
   if (!horarios) {
     return <p>No hay horarios disponibles.</p>;
   }
 
+  // Ordenar los horarios de lunes a viernes usando useMemo para optimizar el rendimiento
+  const horariosOrdenados = useMemo(() => {
+    return [...horarios].sort((a, b) => {
+      const ordenA = ordenDias[a.dia_semana_Horario] || 8; // Asignar un valor alto si no está en el mapeo
+      const ordenB = ordenDias[b.dia_semana_Horario] || 8;
+      if (ordenA !== ordenB) {
+        return ordenA - ordenB;
+      } else {
+        // Si están en el mismo día, ordenar por hora de inicio
+        return a.hora_inicio_Horario.localeCompare(b.hora_inicio_Horario);
+      }
+    });
+  }, [horarios]);
+
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-4">Lista de Horarios</h2>
-
-      
-
-      {horariosFiltrados.length === 0 ? (
-        <p>No hay horarios con la sección seleccionada.</p>
+      {horariosOrdenados.length === 0 ? (
+        <p>No hay horarios creados.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white shadow-md rounded-lg">
@@ -187,41 +131,40 @@ const ListaHorarios = ({
               </tr>
             </thead>
             <tbody>
-              {horariosFiltrados.map((horario) => (
+              {horariosOrdenados.map((horario) => (
                 <React.Fragment key={horario.id_Horario}>
                   <tr className="text-center">
-                    <td className="py-2 px-4 border-b">
-                      {horario.seccion?.nombre_Seccion || 'N/A'}
-                    </td>
+                    <td className="py-2 px-4 border-b">{horario.seccion?.nombre_Seccion || 'N/A'}</td>
                     <td className="py-2 px-4 border-b">
                       {horario.profesor
                         ? `${horario.profesor.nombre_Profesor} ${horario.profesor.apellido1_Profesor} ${horario.profesor.apellido2_Profesor}`
                         : 'N/A'}
                     </td>
-                    <td className="py-2 px-4 border-b">
-                      {horario.materia?.nombre_Materia || 'N/A'}
-                    </td>
-                    <td className="py-2 px-4 border-b">
-                      {horario.dia_semana_Horario}
-                    </td>
+                    <td className="py-2 px-4 border-b">{horario.materia?.nombre_Materia || 'N/A'}</td>
+                    <td className="py-2 px-4 border-b">{horario.dia_semana_Horario}</td>
                     <td className="py-2 px-4 border-b flex justify-center space-x-2">
-                      {/* Botón Editar: abre modal con datos */}
                       <button
                         className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
-                        onClick={() => abrirModalEditar(horario.id_Horario)}
+                        onClick={() => {
+                          if (modalAbierto) {
+                            Swal.fire(
+                              'Edición en curso',
+                              'Ya tienes una lección en edición. Cierra la edición actual para continuar.',
+                              'info'
+                            );
+                            return;
+                          }
+                          onEditHorario(horario);
+                        }}
                       >
                         Editar
                       </button>
-
-                      {/* Botón Eliminar */}
                       <button
                         className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
                         onClick={() => eliminarHorario(horario.id_Horario)}
                       >
                         Eliminar
                       </button>
-
-                      {/* Botón Ver Más / Ocultar */}
                       <button
                         className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
                         onClick={() => toggleDetalles(horario.id_Horario)}
@@ -230,26 +173,22 @@ const ListaHorarios = ({
                       </button>
                     </td>
                   </tr>
-
-                  {/* Fila de detalles adicional */}
+                  {/* Fila de detalles */}
                   {detallesAbiertos[horario.id_Horario] && (
                     <tr className="bg-gray-100">
                       <td colSpan="5" className="py-2 px-4">
                         <div className="flex flex-col md:flex-row md:space-x-6">
                           <div className="mb-2 md:mb-0">
                             <p>
-                              <strong>Hora de Inicio:</strong>{' '}
-                              {formatearHora12(horario.hora_inicio_Horario)}
+                              <strong>Hora de Inicio:</strong> {formatearHora12(horario.hora_inicio_Horario)}
                             </p>
                             <p>
-                              <strong>Hora de Fin:</strong>{' '}
-                              {formatearHora12(horario.hora_fin_Horario)}
+                              <strong>Hora de Fin:</strong> {formatearHora12(horario.hora_fin_Horario)}
                             </p>
                           </div>
                           <div>
                             <p>
-                              <strong>Aula:</strong>{' '}
-                              {horario.aula?.nombre_Aula || 'N/A'}
+                              <strong>Aula:</strong> {horario.aula?.nombre_Aula || 'N/A'}
                             </p>
                           </div>
                         </div>
@@ -263,7 +202,7 @@ const ListaHorarios = ({
         </div>
       )}
 
-      {/* MODAL para editar horario */}
+      {/* Modal para editar horario */}
       {modalAbierto && horarioSeleccionado && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
@@ -273,14 +212,12 @@ const ListaHorarios = ({
             className="bg-white p-6 rounded-lg w-11/12 md:w-1/2 lg:w-1/3 overflow-y-auto max-h-full relative"
             onClick={(e) => e.stopPropagation()} // Evita cerrar el modal al hacer clic dentro
           >
-            {/* Botón para cerrar */}
             <button
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
               onClick={cerrarModal}
             >
               &times;
             </button>
-
             <FormularioHorarioEstudiante
               onSubmitSuccess={actualizarHorarioEnLista}
               onCancel={cerrarModal}
@@ -299,6 +236,7 @@ const ListaHorarios = ({
 
 ListaHorarios.propTypes = {
   horarios: PropTypes.array.isRequired,
+  onEditHorario: PropTypes.func.isRequired,
   setHorarios: PropTypes.func.isRequired,
   materias: PropTypes.array.isRequired,
   profesores: PropTypes.array.isRequired,
