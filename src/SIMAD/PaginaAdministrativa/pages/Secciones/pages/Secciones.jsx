@@ -6,12 +6,30 @@ import EstudiantesService from '../../../Estudiantes/Service/EstudiantesService'
 import Swal from 'sweetalert2';
 import '@sweetalert2/theme-bulma/bulma.css';
 
-// Función auxiliar para normalizar (minúsculas y quitar acentos)
+// Función para normalizar el texto (convierte a minúsculas y elimina acentos)
 const normalizeText = (text) =>
   text
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
+
+// Patrones permitidos para cada nivel (CLAVES normalizadas: sin acentos y en minúsculas)
+const allowedPatterns = {
+  setimo: /^7-\d+$/,
+  octavo: /^8-\d+$/,
+  undecimo: /^11-\d+$/,
+  noveno: /^9-\d+$/,
+  decimo: /^10-\d+$/,
+};
+
+// Ejemplos para cada nivel (CLAVES normalizadas)
+const exampleSectionNames = {
+  setimo: '7-1',
+  octavo: '8-1',
+  undecimo: '11-1',
+  noveno: '9-1',
+  decimo: '10-1',
+};
 
 const Secciones = () => {
   const { secciones, loading, error, fetchSecciones } = UseFetchSecciones();
@@ -23,17 +41,11 @@ const Secciones = () => {
   const [newSectionName, setNewSectionName] = useState('');
   const [newSectionGradeId, setNewSectionGradeId] = useState('');
 
-  // Definición de patrones permitidos para cada nivel (con claves normalizadas)
-  const allowedPatterns = {
-    'setimo': /^7-\d+$/,
-    'octavo': /^8-\d+$/,
-    'undecimo': /^11-\d+$/,
-    'noveno': /^9-\d+$/,
-    'décimo': /^10-\d+$/,
-    // Puedes agregar otros niveles si es necesario
-  };
+  // Estado para la paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const sectionsPerPage = 15; // Ahora se muestran 15 secciones por página
 
-  // Traer niveles desde backend
+  // Cargar niveles desde el backend
   useEffect(() => {
     const fetchLevels = async () => {
       try {
@@ -46,7 +58,23 @@ const Secciones = () => {
     fetchLevels();
   }, []);
 
-  // Filtrar secciones según el nivel (usando sec.grado.nivel)
+  // Calcular el ejemplo de sección según el nivel seleccionado
+  const getExampleSectionName = () => {
+    if (newSectionGradeId) {
+      const selectedLevel = levels.find(
+        (level) => level.id_grado === Number(newSectionGradeId)
+      );
+      if (selectedLevel) {
+        const normalizedNivel = normalizeText(selectedLevel.nivel);
+        return exampleSectionNames[normalizedNivel] || '';
+      }
+    }
+    return '';
+  };
+
+  const exampleSectionName = getExampleSectionName();
+
+  // Filtrar secciones según el nivel seleccionado
   const filteredSecciones = nivelFilter
     ? secciones.filter(
         (sec) =>
@@ -56,6 +84,12 @@ const Secciones = () => {
       )
     : secciones;
 
+  // Paginación
+  const indexOfLastSection = currentPage * sectionsPerPage;
+  const indexOfFirstSection = indexOfLastSection - sectionsPerPage;
+  const currentSecciones = filteredSecciones.slice(indexOfFirstSection, indexOfLastSection);
+  const totalPages = Math.ceil(filteredSecciones.length / sectionsPerPage);
+
   // Handler para eliminar una sección
   const handleDelete = async (idSeccion) => {
     try {
@@ -64,14 +98,14 @@ const Secciones = () => {
         Swal.fire({
           icon: 'warning',
           title: 'No se puede eliminar',
-          text: 'No es posible eliminar la sección porque tiene estudiantes asignados.',
+          text: 'La sección tiene estudiantes asignados.',
           confirmButtonColor: '#2563EB',
         });
         return;
       }
       const result = await Swal.fire({
         title: '¿Estás seguro?',
-        text: 'Esta acción eliminará la sección.',
+        text: 'Se eliminará la sección.',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#2563EB',
@@ -83,7 +117,7 @@ const Secciones = () => {
         Swal.fire({
           icon: 'success',
           title: 'Eliminado',
-          text: 'La sección ha sido eliminada.',
+          text: 'La sección se eliminó correctamente.',
           confirmButtonColor: '#2563EB',
         });
         fetchSecciones();
@@ -99,14 +133,14 @@ const Secciones = () => {
     }
   };
 
-  // Handler para abrir el modal
+  // Abrir el modal para crear sección
   const openModal = () => {
     setNewSectionName('');
     setNewSectionGradeId('');
     setShowModal(true);
   };
 
-  // Handler para cerrar el modal
+  // Cerrar el modal
   const closeModal = () => {
     setShowModal(false);
   };
@@ -115,20 +149,21 @@ const Secciones = () => {
   const handleCreateSection = async (e) => {
     e.preventDefault();
 
-    // Validaciones básicas
+    // Validación: campo de nombre vacío
     if (!newSectionName.trim()) {
       return Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'El nombre de la sección es obligatorio.',
+        title: 'Campo vacío',
+        text: `Ingrese el nombre de la sección. Ejemplo: "${exampleSectionName || '7-1'}".`,
         confirmButtonColor: '#2563EB',
       });
     }
+    // Validación: nivel no seleccionado
     if (!newSectionGradeId) {
       return Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'Debes seleccionar un nivel válido.',
+        title: 'Campo vacío',
+        text: 'Seleccione el nivel correspondiente.',
         confirmButtonColor: '#2563EB',
       });
     }
@@ -140,50 +175,77 @@ const Secciones = () => {
     if (!selectedLevel) {
       return Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'El nivel seleccionado no coincide con los niveles disponibles.',
+        title: 'Nivel inválido',
+        text: 'El nivel seleccionado no es válido. Seleccione uno de la lista.',
         confirmButtonColor: '#2563EB',
       });
     }
 
-    // Normalizar el nivel
+    // Normalizar el nivel y obtener el patrón correspondiente
     const normalizedNivel = normalizeText(selectedLevel.nivel);
-
-    // Validar que el nivel esté permitido (tenga un patrón definido)
     const pattern = allowedPatterns[normalizedNivel];
     if (!pattern) {
       return Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: `No se permiten secciones para el nivel "${selectedLevel.nivel}".`,
+        title: 'Nivel no permitido',
+        text: `No se pueden crear secciones en el nivel "${selectedLevel.nivel}".`,
         confirmButtonColor: '#2563EB',
       });
     }
 
-    // Validar que el nombre ingresado cumpla el patrón
+    // Validar formato del nombre de la sección
     if (!pattern.test(newSectionName)) {
       return Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: `Para el nivel "${selectedLevel.nivel}", el nombre de la sección debe cumplir el formato, por ejemplo, "11-<número>" para Undécimo.`,
+        title: 'Formato incorrecto',
+        text: `El nombre debe ser como "${exampleSectionName}" según el nivel "${selectedLevel.nivel}".`,
         confirmButtonColor: '#2563EB',
       });
     }
 
-    // Validación: verificar si la sección ya existe (ignorando mayúsculas/minúsculas)
+    // Validar la consecutividad de las secciones
+    const match = newSectionName.match(/^(\d+)-(\d+)$/);
+    if (!match) {
+      return Swal.fire({
+        icon: 'error',
+        title: 'Formato incorrecto',
+        text: `El nombre debe ser como "${exampleSectionName}".`,
+        confirmButtonColor: '#2563EB',
+      });
+    }
+    const sectionLevel = match[1];
+    const sectionNumber = parseInt(match[2], 10);
+    const previousSectionName = `${sectionLevel}-${sectionNumber - 1}`;
+
+    // Si se intenta crear una sección mayor a 1, la sección anterior debe existir
+    if (sectionNumber > 1) {
+      const previousExists = secciones.some(
+        (sec) => sec.nombre_Seccion.toLowerCase() === previousSectionName.toLowerCase()
+      );
+      if (!previousExists) {
+        return Swal.fire({
+          icon: 'error',
+          title: 'Orden incorrecto',
+          text: `Para crear la sección "${newSectionName}", primero debe existir "${previousSectionName}".`,
+          confirmButtonColor: '#2563EB',
+        });
+      }
+    }
+
+    // Verificar que la sección no exista ya
     const sectionExists = secciones.some(
       (sec) => sec.nombre_Seccion.toLowerCase() === newSectionName.toLowerCase()
     );
     if (sectionExists) {
       return Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'La sección que intentas crear ya existe.',
+        title: 'Sección existente',
+        text: `La sección "${newSectionName}" ya existe.`,
         confirmButtonColor: '#2563EB',
       });
     }
 
-    // Payload para la creación
+    // Crear el objeto para el envío
     const payload = {
       nombre_Seccion: newSectionName,
       gradoId: Number(newSectionGradeId),
@@ -194,17 +256,17 @@ const Secciones = () => {
       Swal.fire({
         icon: 'success',
         title: 'Creado',
-        text: 'La sección se ha creado correctamente.',
+        text: `La sección "${newSectionName}" se creó correctamente.`,
         confirmButtonColor: '#2563EB',
       });
       fetchSecciones();
       closeModal();
     } catch (error) {
-      console.error('Error al crear sección:', error);
+      console.error('Error al crear la sección:', error);
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'Ocurrió un error al crear la sección.',
+        title: 'Error del sistema',
+        text: 'Ocurrió un error al guardar la sección. Intente nuevamente.',
         confirmButtonColor: '#2563EB',
       });
     }
@@ -227,16 +289,15 @@ const Secciones = () => {
       <div className="container mx-auto">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold text-gray-800">Lista de Secciones</h1>
-          {/* Botón para abrir el modal de creación */}
+          {/* Botón de crear sección en verde */}
           <button
             onClick={openModal}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
           >
             Crear Sección
           </button>
         </div>
 
-        {/* Filtro por nivel */}
         <div className="mb-4">
           <label htmlFor="nivelFilter" className="block text-gray-700 font-medium mb-1">
             Filtrar por Nivel:
@@ -259,36 +320,56 @@ const Secciones = () => {
         {filteredSecciones.length === 0 ? (
           <p className="text-center text-gray-600">No hay secciones disponibles.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredSecciones.map((seccion) => (
-              <div key={seccion.id_Seccion} className="bg-white p-4 rounded-lg shadow">
-                <h2 className="text-xl font-semibold text-blue-600">
-                  {seccion.nombre_Seccion}
-                </h2>
-                {seccion.grado && (
-                  <p className="text-gray-700">Nivel: {seccion.grado.nivel}</p>
-                )}
-                <div className="mt-4 flex justify-between">
-                  <Link
-                    to={`/lista-estudiantes/${seccion.id_Seccion}`}
-                    className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                  >
-                    Ver Lista
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(seccion.id_Seccion)}
-                    className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-                  >
-                    Eliminar
-                  </button>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {currentSecciones.map((seccion) => (
+                <div key={seccion.id_Seccion} className="bg-white p-4 rounded-lg shadow">
+                  <h2 className="text-xl font-semibold text-blue-600">
+                    {seccion.nombre_Seccion}
+                  </h2>
+                  {seccion.grado && (
+                    <p className="text-gray-700">Nivel: {seccion.grado.nivel}</p>
+                  )}
+                  <div className="mt-4 flex justify-between">
+                    <Link
+                      to={`/lista-estudiantes/${seccion.id_Seccion}`}
+                      className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                    >
+                      Ver Lista
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(seccion.id_Seccion)}
+                      className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
                 </div>
+              ))}
+            </div>
+
+            {/* Controles de paginación */}
+            {totalPages > 1 && (
+              <div className="flex justify-center mt-4">
+                {Array.from({ length: totalPages }, (_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentPage(index + 1)}
+                    className={`mx-1 px-3 py-1 rounded ${
+                      currentPage === index + 1
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-blue-100 text-blue-800'
+                    } text-sm transition`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Modal para crear sección */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
@@ -304,7 +385,7 @@ const Secciones = () => {
                   value={newSectionName}
                   onChange={(e) => setNewSectionName(e.target.value)}
                   className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ej: 7-5, 8-6, 11-5, 11-6, etc."
+                  placeholder={exampleSectionName ? `Ej: "${exampleSectionName}"` : 'Ej: "7-1"'}
                 />
               </div>
               <div className="mb-4">
@@ -326,7 +407,7 @@ const Secciones = () => {
                 </select>
               </div>
               <div className="flex justify-end space-x-2">
-              <button
+                <button
                   type="submit"
                   className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
                 >
@@ -339,7 +420,6 @@ const Secciones = () => {
                 >
                   Cancelar
                 </button>
-               
               </div>
             </form>
           </div>
