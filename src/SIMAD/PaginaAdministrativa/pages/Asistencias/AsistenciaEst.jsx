@@ -13,7 +13,7 @@ export const AsistenciaEst = () => {
   // ============================
   // 1. LEE DATOS DEL LOCALSTORAGE
   // ============================
-  const role = localStorage.getItem("role");       // "profesor", "admin", etc.
+  const role = localStorage.getItem("role");       
   const materiaLocalStorage = localStorage.getItem("materia"); // "1", "2", etc.
 
   // ============================
