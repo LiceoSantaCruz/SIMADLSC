@@ -10,11 +10,35 @@ import ErrorModal from "./components/ErrorModal";
 import SuccessModal from "./components/SuccessModal ";
 
 export const AsistenciaEst = () => {
+  // ============================
+  // 1. LEE DATOS DEL LOCALSTORAGE
+  // ============================
+  const role = localStorage.getItem("role");       // "profesor", "admin", etc.
+  const materiaLocalStorage = localStorage.getItem("materia"); // "1", "2", etc.
+
+  // ============================
+  // 2. OBTÉN TUS DATOS DEL HOOK
+  // ============================
   const { grados } = useGrados();
   const { materias } = useMaterias();
   const { profesores } = useProfesores();
   const { periodos } = usePeriodos();
 
+  // ============================
+  // 3. FILTRA MATERIAS SI ES PROFESOR
+  // ============================
+  // Si el rol es "profesor", mostramos solo la materia que coincide con la que viene del localStorage.
+  // Si es admin u otro rol, mostramos todas.
+  const filteredMaterias =
+    role === "profesor"
+      ? materias.filter(
+          (mat) => Number(mat.id_Materia) === Number(materiaLocalStorage)
+        )
+      : materias;
+
+  // ============================
+  // 4. ESTADO DEL FORMULARIO
+  // ============================
   const [formData, setFormData] = useState({
     fecha: "",
     id_Materia: "",
@@ -26,61 +50,68 @@ export const AsistenciaEst = () => {
   });
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showErrorModal, setShowErrorModal] = useState(false); // Nuevo estado para el modal de error personalizado
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   const { secciones, loading: loadingSecciones } = useSecciones(formData.id_grado);
-  const { estudiantes, setEstudiantes, loading: loadingEstudiantes } = useEstudiantesPorSeccion(formData.id_Seccion);
+  const { estudiantes, setEstudiantes, loading: loadingEstudiantes } =
+    useEstudiantesPorSeccion(formData.id_Seccion);
   const { handleCrearAsistencias, loading, error } = useCrearAsistencia();
 
-  // Validar si el día seleccionado es sábado o domingo en hora local de Centroamérica
+  // ============================
+  // 5. FUNCIÓN PARA VALIDAR FIN DE SEMANA
+  // ============================
   const isWeekend = (dateStr) => {
     if (!dateStr) return false;
-    const [year, month, day] = dateStr.split('-').map(Number);
-    const date = new Date(year, month - 1, day); // Se crea en hora local
-    const dayOfWeek = date.getDay(); // 0 domingo, 6 sábado
+    const [year, month, day] = dateStr.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    const dayOfWeek = date.getDay(); // 0: Domingo, 6: Sábado
     return dayOfWeek === 0 || dayOfWeek === 6;
   };
 
+  // ============================
+  // 6. HANDLERS DE CAMBIO
+  // ============================
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === "fecha") {
-      if (isWeekend(value)) {
-        setShowErrorModal(true);
-        setFormData((prevData) => ({ ...prevData, fecha: "" })); // Limpiar el campo de fecha
-        return;
-      }
+    if (name === "fecha" && isWeekend(value)) {
+      setShowErrorModal(true);
+      setFormData((prev) => ({ ...prev, fecha: "" }));
+      return;
     }
 
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (name === "id_grado") {
-      setFormData((prevData) => ({ ...prevData, id_Seccion: "" }));
+      // Al cambiar grado, limpiamos la sección y la lista de estudiantes
+      setFormData((prev) => ({ ...prev, id_Seccion: "" }));
       setEstudiantes([]);
     }
 
     if (name === "id_Seccion") {
+      // Al cambiar sección, limpiamos la lista de estudiantes
       setEstudiantes([]);
     }
   };
 
   const handleLeccionToggle = (leccion) => {
-    const updatedLecciones = formData.lecciones.includes(leccion)
+    const leccionesActualizadas = formData.lecciones.includes(leccion)
       ? formData.lecciones.filter((l) => l !== leccion)
       : [...formData.lecciones, leccion];
 
-    setFormData({ ...formData, lecciones: updatedLecciones });
+    setFormData((prev) => ({ ...prev, lecciones: leccionesActualizadas }));
   };
 
   const handleEstadoChange = (id_Estudiante, estado) => {
-    const updatedEstudiantes = estudiantes.map((estudiante) =>
-      estudiante.id_Estudiante === id_Estudiante
-        ? { ...estudiante, estado }
-        : estudiante
+    const updatedEstudiantes = estudiantes.map((est) =>
+      est.id_Estudiante === id_Estudiante ? { ...est, estado } : est
     );
     setEstudiantes(updatedEstudiantes);
   };
 
+  // ============================
+  // 7. SUBMIT DEL FORMULARIO
+  // ============================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -98,9 +129,9 @@ export const AsistenciaEst = () => {
 
     try {
       await handleCrearAsistencias(asistenciasData);
-
       setShowSuccessModal(true);
 
+      // Limpiar formulario y lista de estudiantes
       setFormData({
         fecha: "",
         id_Materia: "",
@@ -112,16 +143,20 @@ export const AsistenciaEst = () => {
       });
       setEstudiantes([]);
     } catch (err) {
-      // El error ya se maneja desde el hook y pasa al estado `error`
+      // El error se maneja desde el hook (error)
     }
   };
 
+  // ============================
+  // 8. RENDER
+  // ============================
   return (
     <div className="container mx-auto p-4">
       <h2 className="text-2xl font-semibold mb-4">Registrar Asistencia</h2>
 
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* FECHA */}
           <div>
             <label className="block mb-2">Fecha:</label>
             <input
@@ -133,6 +168,8 @@ export const AsistenciaEst = () => {
               className="w-full p-2 border rounded"
             />
           </div>
+
+          {/* GRADO */}
           <div>
             <label className="block mb-2">Grado:</label>
             <select
@@ -150,6 +187,8 @@ export const AsistenciaEst = () => {
               ))}
             </select>
           </div>
+
+          {/* SECCIÓN */}
           <div>
             <label className="block mb-2">Sección:</label>
             <select
@@ -172,6 +211,8 @@ export const AsistenciaEst = () => {
               )}
             </select>
           </div>
+
+          {/* MATERIA (FILTRADA) */}
           <div>
             <label className="block mb-2">Materia:</label>
             <select
@@ -182,13 +223,15 @@ export const AsistenciaEst = () => {
               className="w-full p-2 border rounded"
             >
               <option value="">Seleccionar Materia</option>
-              {materias.map((materia) => (
+              {filteredMaterias.map((materia) => (
                 <option key={materia.id_Materia} value={materia.id_Materia}>
                   {materia.nombre_Materia}
                 </option>
               ))}
             </select>
           </div>
+
+          {/* PROFESOR */}
           <div>
             <label className="block mb-2">Profesor:</label>
             <select
@@ -199,13 +242,16 @@ export const AsistenciaEst = () => {
               className="w-full p-2 border rounded"
             >
               <option value="">Seleccionar Profesor</option>
-              {profesores.map((profesor) => (
-                <option key={profesor.id_Profesor} value={profesor.id_Profesor}>
-                  {profesor.nombre_Profesor} {profesor.apellido1_Profesor} {profesor.apellido2_Profesor}
+              {profesores.map((prof) => (
+                <option key={prof.id_Profesor} value={prof.id_Profesor}>
+                  {prof.nombre_Profesor} {prof.apellido1_Profesor}{" "}
+                  {prof.apellido2_Profesor}
                 </option>
               ))}
             </select>
           </div>
+
+          {/* PERIODO */}
           <div>
             <label className="block mb-2">Periodo:</label>
             <select
@@ -223,6 +269,8 @@ export const AsistenciaEst = () => {
               ))}
             </select>
           </div>
+
+          {/* LECCIONES */}
           <div className="col-span-2">
             <label className="block mb-2">Seleccionar Lecciones:</label>
             <div className="grid grid-cols-6 gap-2">
@@ -248,6 +296,7 @@ export const AsistenciaEst = () => {
           </div>
         </div>
 
+        {/* LISTA DE ESTUDIANTES */}
         <h3 className="text-xl font-semibold mt-6 mb-4">Lista de Estudiantes</h3>
         <div className="overflow-x-auto">
           {loadingEstudiantes ? (
@@ -290,6 +339,8 @@ export const AsistenciaEst = () => {
             </table>
           )}
         </div>
+
+        {/* BOTÓN DE GUARDAR */}
         <button
           type="submit"
           disabled={loading}
@@ -299,13 +350,8 @@ export const AsistenciaEst = () => {
         </button>
       </form>
 
-      {/* Modales */}
-      {error && (
-        <ErrorModal
-          message={error}
-          onClose={() => {}}
-        />
-      )}
+      {/* MODALES */}
+      {error && <ErrorModal message={error} onClose={() => {}} />}
       {showErrorModal && (
         <ErrorModal
           message="No se pueden seleccionar sábados ni domingos como fecha de asistencia."

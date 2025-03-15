@@ -74,6 +74,7 @@ export default function LoginPage() {
       const idProfesor = data.payload?.id_Profesor; // Cambia esta línea
       const idEstudiante = data.payload?.id_Estudiante; // Cambia esta línea
       const userData = data.user_data; // Verifica si esto es correcto
+      const materia = data.payload?.materia; // Verifica si esto es correcto
       
       
       // Verificar si existe un rol
@@ -94,8 +95,11 @@ export default function LoginPage() {
           localStorage.setItem("id_profesor", idProfesor);
         }
         if (idEstudiante) {
-          localStorage.setItem("id_estudiante", idEstudiante);
-        }
+        localStorage.setItem("id_estudiante", idEstudiante);
+      }
+        if (materia) {
+        localStorage.setItem("materia", materia);
+      }
         localStorage.setItem("user_data", JSON.stringify(userData));
       } catch (error) {
         console.error("Error al guardar en localStorage:", error);
