@@ -27,6 +27,7 @@ import EventosEdit from '../pages/Eventos/EventosEdit';
 import GestionMatriculas from '../pages/Matricula/pages/GestionMatricula';
 import CrearSeccion from '../pages/Secciones/pages/CrearSeccion';
 import AsignaSeccionPage from '../pages/Matricula/pages/AsignaSeccionPage';
+import ReporteAsistenciaSeccion from '../pages/Asistencias/ReporteAsistenciaSeccion';
  
 export const AdminRoutes = () => {
   const [role, setRole] = useState(localStorage.getItem('role'));
@@ -63,6 +64,7 @@ export const AdminRoutes = () => {
             <Route path="/gestion-asistencia" element={<GestionAsistencia />} />
             <Route path="/justificacion-ausencias" element={<JustificacionAusencias />} />
             <Route path="/reporte-asistencia" element={<ReporteAsistencia />} />
+            <Route path="/reporte-asistencia-seccion" element={<ReporteAsistenciaSeccion />} />
           </>
         )}
 
