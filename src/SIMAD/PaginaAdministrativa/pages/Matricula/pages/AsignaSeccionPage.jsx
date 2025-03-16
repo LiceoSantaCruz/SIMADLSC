@@ -3,33 +3,45 @@ import { useAsignarSeccion } from "../Hooks/useAsignarSeccion";
 import { ConfirmModal } from "../components/ConfirmModalMatricula";
 import { AlertModal } from "../components/AlertModalMatricula";
 
+const nivelMap = {
+  7: "Séptimo",
+  8: "Octavo",
+  9: "Noveno",
+  10: "Décimo",
+  11: "Undécimo",
+};
 
 export default function AsignaSeccionPage() {
   const { matriculas, secciones, loading, error, onAssignSeccion } = useAsignarSeccion();
   const [selectedMatriculas, setSelectedMatriculas] = useState([]);
   const [selectedSeccion, setSelectedSeccion] = useState("");
-
+  const [selectedNivel, setSelectedNivel] = useState("");
+  const [searchName, setSearchName] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
-  // Si está cargando o hay error, se muestran mensajes
-  if (loading) return <p>Cargando datos...</p>;
-  if (error) return <p className="text-red-500">Error: {error}</p>;
+  if (loading) return <p className="text-center text-xl">Cargando datos...</p>;
+  if (error) return <p className="text-center text-red-500">Error: {error}</p>;
 
-  // Filtrar las matrículas aceptadas y sin sección asignada
+  const uniqueNiveles = [...new Set(matriculas.map((mat) => mat.estudiante.grado.nivel))].filter(nivel => nivel >= 7 && nivel <= 11);
+
   const filteredMatriculas = matriculas.filter(
-    (mat) => mat.estado_Matricula === "AC" && !mat.seccion
+    (mat) =>
+      mat.estado_Matricula === "AC" &&
+      !mat.seccion &&
+      (selectedNivel === "" || mat.estudiante.grado.nivel === selectedNivel) &&
+      (searchName === "" ||
+        mat.estudiante.nombre_Estudiante.toLowerCase().includes(searchName.toLowerCase()) ||
+        mat.estudiante.apellido1_Estudiante.toLowerCase().includes(searchName.toLowerCase()))
   );
 
-  // Filtra las secciones según el grado de la primera matrícula seleccionada
   const filteredSecciones = selectedMatriculas.length
     ? secciones.filter(
         (sec) => sec.gradoId === selectedMatriculas[0].estudiante.grado.id_grado
       )
     : secciones;
 
-  // Permite agregar/quitar matrícula de la selección. Todas deben tener el mismo grado.
   const toggleSelect = (mat) => {
     const exists = selectedMatriculas.some(
       (m) => m.id_Matricula === mat.id_Matricula
@@ -42,7 +54,7 @@ export default function AsignaSeccionPage() {
       if (selectedMatriculas.length > 0) {
         const currentGrado = selectedMatriculas[0].estudiante.grado.id_grado;
         if (mat.estudiante.grado.id_grado !== currentGrado) {
-          alert("Todas las matrículas deben tener el mismo grado.");
+          alert("Todas las matrículas deben tener el mismo nivel.");
           return;
         }
       }
@@ -50,7 +62,6 @@ export default function AsignaSeccionPage() {
     }
   };
 
-  // Abre el modal de confirmación
   const handleAsignar = () => {
     if (!selectedSeccion) {
       alert("Seleccione una sección primero.");
@@ -63,17 +74,14 @@ export default function AsignaSeccionPage() {
     setConfirmOpen(true);
   };
 
-  // Confirma la asignación
   const confirmAsignar = async () => {
     setConfirmOpen(false);
     try {
       const ids = selectedMatriculas.map((m) => m.id_Matricula);
       await onAssignSeccion(Number(selectedSeccion), ids);
-
-      // Después de la asignación, eliminamos las matrículas asignadas de la lista
       setAlertMessage("¡Sección asignada correctamente!");
       setAlertOpen(true);
-      setSelectedMatriculas([]); // Limpiar selección
+      setSelectedMatriculas([]);
       setSelectedSeccion("");
     } catch (err) {
       setAlertMessage("Error al asignar la sección: " + err.message);
@@ -82,67 +90,96 @@ export default function AsignaSeccionPage() {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">
-        Asignar Sección a Matrículas Aceptadas
-      </h2>
-      <p className="text-sm text-gray-600 mb-4">
-        Seleccione una o varias matrículas (todas con el mismo grado) y elija la
-        sección.
-      </p>
+    <div className="max-w-3xl mx-auto p-6">
+      <div className="bg-white shadow-md rounded-lg p-6">
+        <h2 className="text-3xl font-bold mb-2 text-gray-800">
+          Asignar Sección a Matrículas Aceptadas
+        </h2>
+        <p className="text-gray-600 mb-6">
+          Seleccione una o varias matrículas (todas con el mismo nivel) y elija la sección.
+        </p>
 
-      {/* Lista de matrículas aceptadas sin sección asignada */}
-      <div className="border p-2 mb-4 max-h-64 overflow-y-auto">
-        {filteredMatriculas.length === 0 ? (
-          <p className="text-gray-500">No hay matrículas aceptadas.</p>
-        ) : (
-          filteredMatriculas.map((mat) => (
-            <label key={mat.id_Matricula} className="flex items-center mb-1">
-              <input
-                type="checkbox"
-                checked={selectedMatriculas.some(
-                  (m) => m.id_Matricula === mat.id_Matricula
-                )}
-                onChange={() => toggleSelect(mat)}
-                className="mr-2"
-              />
-              <span>
-                <strong>Boleta #{mat.id_Matricula}</strong> - Estudiante:{" "}
-                {mat.estudiante.nombre_Estudiante}{" "}
-                {mat.estudiante.apellido1_Estudiante} (Grado:{" "}
-                {mat.estudiante.grado.nivel})
-              </span>
-            </label>
-          ))
-        )}
-      </div>
+        <div className="mb-6">
+          <label className="block text-lg font-semibold mb-2">Filtrar por Nivel</label>
+          <select
+            className="w-full border rounded-lg p-3 mb-4"
+            value={selectedNivel}
+            onChange={(e) => setSelectedNivel(e.target.value)}
+          >
+            <option value="">Todos los Niveles</option>
+            {uniqueNiveles.map((nivel) => (
+              <option key={nivel} value={nivel}>
+                {nivelMap[nivel]}
+              </option>
+            ))}
+          </select>
 
-      {/* Select de secciones filtradas */}
-      <div className="mb-4">
-        <label className="block font-semibold mb-1">Sección:</label>
-        <select
-          className="border p-2 rounded w-full"
-          value={selectedSeccion}
-          onChange={(e) => setSelectedSeccion(e.target.value)}
+          <label className="block text-lg font-semibold mb-2">Filtrar por Nombre</label>
+          <input
+            type="text"
+            className="w-full border rounded-lg p-3 mb-4"
+            placeholder="Buscar por nombre o apellido"
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
+          />
+
+          <h3 className="text-xl font-semibold mb-2">Matrículas Sin Sección</h3>
+          <div className="border rounded-lg p-4 max-h-80 overflow-y-auto">
+            {filteredMatriculas.length === 0 ? (
+              <p className="text-gray-500 text-center">No hay matrículas aceptadas.</p>
+            ) : (
+              filteredMatriculas.map((mat) => (
+                <label
+                  key={mat.id_Matricula}
+                  className="flex items-center p-2 hover:bg-gray-50 rounded-md mb-2 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedMatriculas.some(
+                      (m) => m.id_Matricula === mat.id_Matricula
+                    )}
+                    onChange={() => toggleSelect(mat)}
+                    className="mr-3"
+                  />
+                  <div>
+                    <p className="font-semibold text-gray-700">
+                      Boleta #{mat.id_Matricula} - {mat.estudiante.nombre_Estudiante}{" "}
+                      {mat.estudiante.apellido1_Estudiante}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Nivel: {nivelMap[mat.estudiante.grado.nivel]}
+                    </p>
+                  </div>
+                </label>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <label className="block text-lg font-semibold mb-2">Seleccione Sección</label>
+          <select
+            className="w-full border rounded-lg p-3"
+            value={selectedSeccion}
+            onChange={(e) => setSelectedSeccion(e.target.value)}
+          >
+            <option value="">Seleccione Sección</option>
+            {filteredSecciones.map((sec) => (
+              <option key={sec.id_Seccion} value={sec.id_Seccion}>
+                {sec.nombre_Seccion} (Nivel {nivelMap[sec.gradoId]})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button
+          onClick={handleAsignar}
+          className="w-full bg-green-500 text-white font-semibold py-3 rounded-lg hover:bg-green-600 transition-colors"
         >
-          <option value="">-- Seleccione Sección --</option>
-          {filteredSecciones.map((sec) => (
-            <option key={sec.id_Seccion} value={sec.id_Seccion}>
-              {sec.nombre_Seccion} (Grado {sec.gradoId})
-            </option>
-          ))}
-        </select>
+          Asignar Sección
+        </button>
       </div>
 
-      {/* Botón para asignar */}
-      <button
-        onClick={handleAsignar}
-        className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-      >
-        Asignar Sección
-      </button>
-
-      {/* Modal de confirmación */}
       <ConfirmModal
         isOpen={confirmOpen}
         onClose={() => setConfirmOpen(false)}
@@ -151,7 +188,6 @@ export default function AsignaSeccionPage() {
         message={`¿Está seguro de asignar la sección #${selectedSeccion} a las matrículas seleccionadas?`}
       />
 
-      {/* Modal de alerta */}
       <AlertModal
         isOpen={alertOpen}
         onClose={() => setAlertOpen(false)}
