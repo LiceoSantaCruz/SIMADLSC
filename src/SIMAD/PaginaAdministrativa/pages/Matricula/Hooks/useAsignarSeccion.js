@@ -36,8 +36,8 @@ export function useAsignarSeccion() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`${API_URL}/matriculas/assign-seccion`, {
-        method: "PUT",
+      const res = await fetch(`${API_URL}/matriculas/asignar-seccion`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ seccionId, matriculaIds }),
       });
