@@ -32,7 +32,7 @@ export default function AsignaSeccionPage() {
     (mat) =>
       mat.estado_Matricula === "AC" &&
       !mat.seccion &&
-      (selectedNivel === "" || mat.estudiante.grado.nivel === selectedNivel) &&
+      (selectedNivel === "" || parseInt(mat.estudiante.grado.nivel, 10) === parseInt(selectedNivel, 10)) &&
       (searchName === "" ||
         mat.estudiante.nombre_Estudiante.toLowerCase().includes(searchName.toLowerCase()) ||
         mat.estudiante.apellido1_Estudiante.toLowerCase().includes(searchName.toLowerCase()))
