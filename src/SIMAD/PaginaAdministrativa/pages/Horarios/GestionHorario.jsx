@@ -12,7 +12,6 @@ import LoadingIndicator from '../../../../Components/LoadingIndicator';
 
 const MySwal = withReactContent(Swal);
 
-// URL base de la API dependiendo del entorno
 const API_BASE_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:3000'
   : 'https://simadlsc-backend-production.up.railway.app';
@@ -20,12 +19,10 @@ const API_BASE_URL = window.location.hostname === 'localhost'
 export const GestionHorario = () => {
   const [formularioAbierto, setFormularioAbierto] = useState(false);
   const [horarios, setHorarios] = useState([]);
-  const [horarioEdit, setHorarioEdit] = useState(null); // Horario a editar
+  const [horarioEdit, setHorarioEdit] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10); // Elementos por página
+  const [itemsPerPage] = useState(10); 
   const [seccionSeleccionada, setSeccionSeleccionada] = useState('');
-
-  // Hook para obtener datos
   const { data: grados, loading: loadingGrados, error: errorGrados } = useFetch(`${API_BASE_URL}/grados`);
   const { data: secciones, loading: loadingSecciones, error: errorSecciones } = useFetch(`${API_BASE_URL}/secciones`);
   const { data: materias, loading: loadingMaterias, error: errorMaterias } = useFetch(`${API_BASE_URL}/materias`);
