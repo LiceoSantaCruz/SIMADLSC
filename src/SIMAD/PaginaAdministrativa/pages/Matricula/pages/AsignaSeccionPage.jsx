@@ -3,6 +3,7 @@ import { useAsignarSeccion } from "../Hooks/useAsignarSeccion";
 import { ConfirmModal } from "../components/ConfirmModalMatricula";
 import { AlertModal } from "../components/AlertModalMatricula";
 
+// Mapeo de número a texto
 const nivelMap = {
   7: "Séptimo",
   8: "Octavo",
@@ -10,6 +11,26 @@ const nivelMap = {
   10: "Décimo",
   11: "Undécimo",
 };
+
+// Función para normalizar el nivel (maneja numérico o texto).
+// Si es parseable a número (p.ej. "7" o 7), lo convierte a entero.
+// Si no, lo mapea manualmente (p.ej. "Séptimo" -> 7).
+function normalizarNivel(valor) {
+  const num = parseInt(valor, 10);
+  if (!isNaN(num)) {
+    return num;
+  }
+  switch (valor) {
+    case "Séptimo":   return 7;
+    case "Octavo":    return 8;
+    case "Noveno":    return 9;
+    case "Décimo":    return 10;
+    case "Undécimo":  return 11;
+    default:
+      // Fallback en caso de que venga algo inesperado
+      return 7;
+  }
+}
 
 export default function AsignaSeccionPage() {
   const { matriculas, secciones, loading, error, onAssignSeccion } = useAsignarSeccion();
@@ -24,26 +45,38 @@ export default function AsignaSeccionPage() {
   if (loading) return <p className="text-center text-xl">Cargando datos...</p>;
   if (error) return <p className="text-center text-red-500">Error: {error}</p>;
 
+  // Usamos normalizarNivel para extraer los valores de nivel
   const uniqueNiveles = [
-    ...new Set(matriculas.map((mat) => parseInt(mat.estudiante.grado.nivel, 10)))
-  ].filter(nivel => nivel >= 7 && nivel <= 11);
-  
-  const filteredMatriculas = matriculas.filter(
-    (mat) =>
+    ...new Set(
+      matriculas.map((mat) => normalizarNivel(mat.estudiante.grado.nivel))
+    ),
+  ].filter((nivel) => nivel >= 7 && nivel <= 11);
+
+  // Filtramos usando normalizarNivel en lugar de parseInt
+  const filteredMatriculas = matriculas.filter((mat) => {
+    const nivelNum = normalizarNivel(mat.estudiante.grado.nivel);
+    return (
       mat.estado_Matricula === "AC" &&
       !mat.seccion &&
-      (selectedNivel === "" || parseInt(mat.estudiante.grado.nivel, 10) === parseInt(selectedNivel, 10)) &&
+      (selectedNivel === "" || nivelNum === parseInt(selectedNivel, 10)) &&
       (searchName === "" ||
-        mat.estudiante.nombre_Estudiante.toLowerCase().includes(searchName.toLowerCase()) ||
-        mat.estudiante.apellido1_Estudiante.toLowerCase().includes(searchName.toLowerCase()))
-  );
+        mat.estudiante.nombre_Estudiante
+          .toLowerCase()
+          .includes(searchName.toLowerCase()) ||
+        mat.estudiante.apellido1_Estudiante
+          .toLowerCase()
+          .includes(searchName.toLowerCase()))
+    );
+  });
 
+  // Filtramos secciones con base en la primera matrícula seleccionada
   const filteredSecciones = selectedMatriculas.length
     ? secciones.filter(
         (sec) => sec.gradoId === selectedMatriculas[0].estudiante.grado.id_grado
       )
     : secciones;
 
+  // Manejo de selección de matrículas
   const toggleSelect = (mat) => {
     const exists = selectedMatriculas.some(
       (m) => m.id_Matricula === mat.id_Matricula
@@ -53,6 +86,7 @@ export default function AsignaSeccionPage() {
         prev.filter((m) => m.id_Matricula !== mat.id_Matricula)
       );
     } else {
+      // Si ya hay seleccionadas, verificamos que el grado coincida
       if (selectedMatriculas.length > 0) {
         const currentGrado = selectedMatriculas[0].estudiante.grado.id_grado;
         if (mat.estudiante.grado.id_grado !== currentGrado) {
@@ -64,6 +98,7 @@ export default function AsignaSeccionPage() {
     }
   };
 
+  // Al presionar "Asignar Sección"
   const handleAsignar = () => {
     if (!selectedSeccion) {
       alert("Seleccione una sección primero.");
@@ -76,6 +111,7 @@ export default function AsignaSeccionPage() {
     setConfirmOpen(true);
   };
 
+  // Confirmar la asignación
   const confirmAsignar = async () => {
     setConfirmOpen(false);
     try {
@@ -101,6 +137,7 @@ export default function AsignaSeccionPage() {
           Seleccione una o varias matrículas (todas con el mismo nivel) y elija la sección.
         </p>
 
+        {/* FILTROS */}
         <div className="mb-6">
           <label className="block text-lg font-semibold mb-2">Filtrar por Nivel</label>
           <select
@@ -125,39 +162,45 @@ export default function AsignaSeccionPage() {
             onChange={(e) => setSearchName(e.target.value)}
           />
 
+          {/* LISTADO DE MATRÍCULAS SIN SECCIÓN */}
           <h3 className="text-xl font-semibold mb-2">Matrículas Sin Sección</h3>
           <div className="border rounded-lg p-4 max-h-80 overflow-y-auto">
             {filteredMatriculas.length === 0 ? (
               <p className="text-gray-500 text-center">No hay matrículas aceptadas.</p>
             ) : (
-              filteredMatriculas.map((mat) => (
-                <label
-                  key={mat.id_Matricula}
-                  className="flex items-center p-2 hover:bg-gray-50 rounded-md mb-2 cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedMatriculas.some(
-                      (m) => m.id_Matricula === mat.id_Matricula
-                    )}
-                    onChange={() => toggleSelect(mat)}
-                    className="mr-3"
-                  />
-                  <div>
-                    <p className="font-semibold text-gray-700">
-                      Boleta #{mat.id_Matricula} - {mat.estudiante.nombre_Estudiante}{" "}
-                      {mat.estudiante.apellido1_Estudiante}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Nivel: {nivelMap[mat.estudiante.grado.nivel]}
-                    </p>
-                  </div>
-                </label>
-              ))
+              filteredMatriculas.map((mat) => {
+                const nivelNum = normalizarNivel(mat.estudiante.grado.nivel);
+                return (
+                  <label
+                    key={mat.id_Matricula}
+                    className="flex items-center p-2 hover:bg-gray-50 rounded-md mb-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedMatriculas.some(
+                        (m) => m.id_Matricula === mat.id_Matricula
+                      )}
+                      onChange={() => toggleSelect(mat)}
+                      className="mr-3"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-700">
+                        Boleta #{mat.id_Matricula} -{" "}
+                        {mat.estudiante.nombre_Estudiante}{" "}
+                        {mat.estudiante.apellido1_Estudiante}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Nivel: {nivelMap[nivelNum]}
+                      </p>
+                    </div>
+                  </label>
+                );
+              })
             )}
           </div>
         </div>
 
+        {/* SELECCIÓN DE SECCIÓN */}
         <div className="mb-6">
           <label className="block text-lg font-semibold mb-2">Seleccione Sección</label>
           <select
@@ -174,6 +217,7 @@ export default function AsignaSeccionPage() {
           </select>
         </div>
 
+        {/* BOTÓN PARA ASIGNAR */}
         <button
           onClick={handleAsignar}
           className="w-full bg-green-500 text-white font-semibold py-3 rounded-lg hover:bg-green-600 transition-colors"
@@ -182,6 +226,7 @@ export default function AsignaSeccionPage() {
         </button>
       </div>
 
+      {/* MODAL DE CONFIRMACIÓN */}
       <ConfirmModal
         isOpen={confirmOpen}
         onClose={() => setConfirmOpen(false)}
@@ -190,6 +235,7 @@ export default function AsignaSeccionPage() {
         message={`¿Está seguro de asignar la sección #${selectedSeccion} a las matrículas seleccionadas?`}
       />
 
+      {/* MODAL DE ALERTA */}
       <AlertModal
         isOpen={alertOpen}
         onClose={() => setAlertOpen(false)}
