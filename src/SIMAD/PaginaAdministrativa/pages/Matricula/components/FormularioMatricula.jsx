@@ -16,6 +16,24 @@ export const FormularioMatricula = () => {
   const { periodos } = usePeriodos();
   const { grados } = useGrados();
 
+  // Función para calcular la edad a partir de la fecha de nacimiento
+  const handleFechaNacimientoChange = (e) => {
+    handleChange(e);
+    const birthDate = new Date(e.target.value);
+    if (!e.target.value || isNaN(birthDate.getTime())) return;
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    // Actualizamos el campo 'edad' en el estado del formulario
+    const edadEvent = {
+      target: { name: "estudiante.edad", value: age },
+    };
+    handleChange(edadEvent);
+  };
+
   return (
     <div className="max-w-3xl mx-auto p-4 bg-white shadow-md">
       <h1 className="text-center text-2xl font-bold mb-2">
@@ -191,7 +209,7 @@ export const FormularioMatricula = () => {
                   type="date"
                   name="estudiante.fecha_nacimiento"
                   value={formData.estudiante.fecha_nacimiento}
-                  onChange={handleChange}
+                  onChange={handleFechaNacimientoChange}
                   className="border p-2 rounded-md w-full"
                 />
               </div>
@@ -214,15 +232,15 @@ export const FormularioMatricula = () => {
                   type="number"
                   name="estudiante.edad"
                   value={formData.estudiante.edad}
-                  onChange={handleChange}
+                  readOnly
                   className="border p-2 rounded-md w-full"
                 />
               </div>
             </div>
 
+            {/* Se agregan los campos de Condición Migratoria y Repite alguna materia */}
             <div className="flex space-x-4">
               <label className="block text-gray-700">Condición Migratoria:</label>
-              {/* Aquí se usan valores en minúscula para coincidir con el JSON */}
               <label className="inline-flex items-center">
                 <input
                   type="radio"

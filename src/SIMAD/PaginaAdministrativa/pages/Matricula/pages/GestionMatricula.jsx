@@ -317,6 +317,10 @@ export default function GestionMatricula() {
               {selectedMatricula.estudiante?.lugar_de_nacimiento}
             </p>
             <p>
+              <strong>Motivo de la Matrícula:</strong>{" "}
+              {selectedMatricula.estudiante?.motivo_matricula || "N/A"}
+            </p>
+            <p>
               <strong>Condición Migratoria:</strong>{" "}
               {selectedMatricula.estudiante?.condicion_migratoria}
             </p>
