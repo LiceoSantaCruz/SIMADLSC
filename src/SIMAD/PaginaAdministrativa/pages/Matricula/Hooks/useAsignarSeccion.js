@@ -17,6 +17,7 @@ export function useAsignarSeccion() {
         const resMats = await fetch(`${API_URL}/matriculas/sin-seccion`);
         if (!resMats.ok) throw new Error("Error al obtener matrículas sin sección");
         const mats = await resMats.json();
+        console.log(mats);
         // Ensure each matricula has grado.nivel
         const validatedMats = mats.map(mat => {
           if (!mat.estudiante.grado?.nivel) {
