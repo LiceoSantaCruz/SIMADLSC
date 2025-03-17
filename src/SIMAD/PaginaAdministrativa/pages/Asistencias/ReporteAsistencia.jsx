@@ -18,13 +18,15 @@ export const ReporteAsistencia = () => {
     setFechaFin,
     setIdPeriodo,
     asistencias,
-    setAsistencias, // Aseguramos acceso directo a este estado
+    setAsistencias,
     error,
     buscarAsistencias,
+    loading  // se extrae loading desde el hook
   } = useReporteAsistencia();
 
   const { periodos } = usePeriodos();
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const estudianteNombre =
     asistencias.length > 0
@@ -33,18 +35,29 @@ export const ReporteAsistencia = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setHasSearched(true);
     setAsistencias([]); // Limpiar asistencias antes de nueva búsqueda
     setShowErrorModal(false); // Ocultar modal de error si está visible
-
-    await buscarAsistencias();
-  };
-
-  // Manejar los resultados de la búsqueda después de actualizar `asistencias`
-  useEffect(() => {
-    if (asistencias.length === 0 && error) {
+    try {
+      await buscarAsistencias();
+    } catch (err) {
+      console.error("Error en la búsqueda:", err);
       setShowErrorModal(true);
     }
-  }, [asistencias, error]); // Verifica cambios en asistencias y error
+  };
+
+  // Validar solo cuando se haya completado la búsqueda (loading false)
+  useEffect(() => {
+    if (hasSearched && !loading) {
+      if (error) {
+        setShowErrorModal(true);
+      } else if (cedula.trim().length > 0 && asistencias.length === 0) {
+        setShowErrorModal(true);
+      } else {
+        setShowErrorModal(false);
+      }
+    }
+  }, [hasSearched, loading, error, cedula, asistencias]);
 
   const handleExportPDF = () => {
     const input = document.getElementById("reporte-asistencias");
@@ -90,26 +103,22 @@ export const ReporteAsistencia = () => {
     }
   };
 
-
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Encabezado */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Gestión de Reportes de Asistencia</h1>
         <p className="text-gray-600">
-          Consulta y gestiona los reportes de asistencia por cédula de estudiante y fechas.
+          Consulta y gestiona los reportes de asistencia por cédula o nombre de estudiante y fechas.
         </p>
       </div>
 
       {/* Formulario de búsqueda */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <form
-          className="grid grid-cols-1 md:grid-cols-3 gap-4"
-          onSubmit={handleSubmit}
-        >
+        <form className="grid grid-cols-1 md:grid-cols-3 gap-4" onSubmit={handleSubmit}>
           <div>
             <label htmlFor="cedula" className="block text-sm font-medium text-gray-700">
-              Cédula del Estudiante
+              Cédula o Nombre del Estudiante
             </label>
             <input
               type="text"
@@ -118,7 +127,7 @@ export const ReporteAsistencia = () => {
               value={cedula}
               onChange={(e) => setCedula(e.target.value)}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-              placeholder="Ingresa la cédula del estudiante"
+              placeholder="Ingresa la cédula o el nombre del estudiante"
               required
             />
           </div>
@@ -180,6 +189,7 @@ export const ReporteAsistencia = () => {
           </div>
         </form>
       </div>
+      
       {/* Resultados */}
       {asistencias.length > 0 && (
         <>
@@ -262,9 +272,7 @@ export const ReporteAsistencia = () => {
       {/* Modal de error */}
       {showErrorModal && (
         <ErrorModal
-          message={
-            "No se encontraron asistencias para la cédula proporcionada con los filtros seleccionados."
-          }
+          message="No se encontraron asistencias para el criterio de búsqueda ingresado o ocurrió un error. Por favor, verifica la información e inténtalo de nuevo."
           onClose={() => setShowErrorModal(false)}
         />
       )}

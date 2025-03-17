@@ -79,12 +79,28 @@ export default function GestionMatricula() {
     return cumpleNivel && cumpleEstado;
   });
 
+  // Función para ordenar: primero pendientes, luego rechazadas y por último aceptadas.
+  // Se asume que: si el estado no es "AC" ni "RE" se considera pendiente.
+  const sortMatriculas = (data) => {
+    const orderMap = {
+      "RE": 2,
+      "AC": 3,
+    };
+    return [...data].sort((a, b) => {
+      const aOrder = orderMap[a.estado_Matricula] || 1;
+      const bOrder = orderMap[b.estado_Matricula] || 1;
+      return aOrder - bOrder;
+    });
+  };
+
+  const sortedMatriculas = sortMatriculas(finalMatriculas);
+
   // Paginación: calcular índices y subconjunto (máximo 100 registros)
-  const totalItems = Math.min(finalMatriculas.length, 100);
+  const totalItems = Math.min(sortedMatriculas.length, 100);
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
-  const paginatedMatriculas = finalMatriculas.slice(indexOfFirst, indexOfLast);
+  const paginatedMatriculas = sortedMatriculas.slice(indexOfFirst, indexOfLast);
 
   // Manejadores de paginación
   const goToNextPage = () => {
