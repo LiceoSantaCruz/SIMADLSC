@@ -24,8 +24,10 @@ export default function AsignaSeccionPage() {
   if (loading) return <p className="text-center text-xl">Cargando datos...</p>;
   if (error) return <p className="text-center text-red-500">Error: {error}</p>;
 
-  const uniqueNiveles = [...new Set(matriculas.map((mat) => mat.estudiante.grado.nivel))].filter(nivel => nivel >= 7 && nivel <= 11);
-
+  const uniqueNiveles = [
+    ...new Set(matriculas.map((mat) => parseInt(mat.estudiante.grado.nivel, 10)))
+  ].filter(nivel => nivel >= 7 && nivel <= 11);
+  
   const filteredMatriculas = matriculas.filter(
     (mat) =>
       mat.estado_Matricula === "AC" &&
