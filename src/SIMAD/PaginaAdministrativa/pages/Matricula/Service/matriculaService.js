@@ -9,7 +9,6 @@ export const createMatricula = async (matriculaData) => {
     },
     body: JSON.stringify(matriculaData),
   });
-console.log(response);
   if (!response.ok) throw new Error('Error al crear matricula');
   return await response.json();
 };

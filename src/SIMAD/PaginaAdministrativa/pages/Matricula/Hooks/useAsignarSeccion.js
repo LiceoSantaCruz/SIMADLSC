@@ -17,7 +17,14 @@ export function useAsignarSeccion() {
         const resMats = await fetch(`${API_URL}/matriculas/sin-seccion`);
         if (!resMats.ok) throw new Error("Error al obtener matrículas sin sección");
         const mats = await resMats.json();
-        setMatriculas(mats);
+        // Ensure each matricula has grado.nivel
+        const validatedMats = mats.map(mat => {
+          if (!mat.estudiante.grado?.nivel) {
+            mat.estudiante.grado = { ...mat.estudiante.grado, nivel: 7 }; // Default to 7 if missing
+          }
+          return mat;
+        });
+        setMatriculas(validatedMats);
         // Cargar secciones
         const resSecs = await fetch(`${API_URL}/secciones`);
         if (!resSecs.ok) throw new Error("Error al obtener secciones");
