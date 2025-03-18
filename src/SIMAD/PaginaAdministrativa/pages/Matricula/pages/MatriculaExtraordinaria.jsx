@@ -1,7 +1,9 @@
   import useGrados from "../../Asistencias/Hook/useGrados";
   import { useMatriculaForm } from "../Hooks/useMatriculaForm";
   import { usePeriodos } from "../Hooks/usePeriodos";
-
+  import Swal from "sweetalert2";
+  import "@sweetalert2/theme-bulma/bulma.css";
+  
   export const MatriculaExtraordinaria = () => {
     const {
       page,
@@ -12,11 +14,10 @@
       handleDownloadPDF,
       isSubmitting,
     } = useMatriculaForm();
-
+  
     const { periodos } = usePeriodos();
     const { grados } = useGrados();
-
-    // Función para calcular la edad a partir de la fecha de nacimiento
+  
     const handleFechaNacimientoChange = (e) => {
       handleChange(e);
       const birthDate = new Date(e.target.value);
@@ -27,12 +28,32 @@
       if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
         age--;
       }
-      // Actualizamos el campo 'edad' en el estado del formulario
       const edadEvent = {
         target: { name: "estudiante.edad", value: age },
       };
       handleChange(edadEvent);
     };
+  
+    const onSubmitHandler = async (e) => {
+      e.preventDefault();
+      try {
+        await handleSubmit(e);
+        Swal.fire({
+          icon: "success",
+          title: "Éxito",
+          text: "Matrícula Extraordinaria enviada correctamente",
+          confirmButtonColor: "#2563EB",
+        });
+      } catch (err) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Error al enviar la matrícula extraordinaria",
+          confirmButtonColor: "#2563EB",
+        });
+      }
+    };
+  
 
     return (
       <div className="max-w-3xl mx-auto p-4 bg-white shadow-md">
@@ -44,7 +65,7 @@
           Verifique la información antes de enviar el formulario.
         </p>
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-6" onSubmit={onSubmitHandler}>
           {page === 1 ? (
             <>
               {/* Página 1: Datos del Estudiante */}

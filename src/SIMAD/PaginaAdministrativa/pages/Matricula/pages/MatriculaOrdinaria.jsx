@@ -1,6 +1,8 @@
 import useGrados from "../../Asistencias/Hook/useGrados";
 import { useMatriculaForm } from "../Hooks/useMatriculaForm";
 import { usePeriodos } from "../Hooks/usePeriodos";
+import Swal from "sweetalert2";
+import "@sweetalert2/theme-bulma/bulma.css";
 
 export const MatriculaOrdinaria = () => {
   const {
@@ -27,11 +29,31 @@ export const MatriculaOrdinaria = () => {
     if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
       age--;
     }
-    // Actualizamos el campo 'edad' en el estado del formulario
     const edadEvent = {
       target: { name: "estudiante.edad", value: age },
     };
     handleChange(edadEvent);
+  };
+
+  // Wrapper para el submit
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    try {
+      await handleSubmit(e);
+      Swal.fire({
+        icon: "success",
+        title: "Éxito",
+        text: "Matrícula Ordinaria enviada correctamente",
+        confirmButtonColor: "#2563EB",
+      });
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Error al enviar la matrícula ordinaria",
+        confirmButtonColor: "#2563EB",
+      });
+    }
   };
 
   return (
@@ -44,7 +66,7 @@ export const MatriculaOrdinaria = () => {
         Verifique la información antes de enviar el formulario.
       </p>
 
-      <form className="space-y-6" onSubmit={handleSubmit}>
+      <form className="space-y-6" onSubmit={onSubmitHandler}>
         {page === 1 ? (
           <>
             {/* Página 1: Datos del Estudiante */}

@@ -1,6 +1,8 @@
 import useGrados from "../../Asistencias/Hook/useGrados";
 import { useMatriculaForm } from "../Hooks/useMatriculaForm";
 import { usePeriodos } from "../Hooks/usePeriodos";
+import Swal from "sweetalert2";
+import "@sweetalert2/theme-bulma/bulma.css";
 
 export const FormularioMatricula = () => {
   const {
@@ -34,6 +36,27 @@ export const FormularioMatricula = () => {
     handleChange(edadEvent);
   };
 
+  // Wrapper del submit para mostrar modales con SweetAlert2
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    try {
+      await handleSubmit(e);
+      Swal.fire({
+        icon: "success",
+        title: "Éxito",
+        text: "Formulario enviado correctamente",
+        confirmButtonColor: "#2563EB",
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Hubo un error al enviar el formulario",
+        confirmButtonColor: "#2563EB",
+      });
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto p-4 bg-white shadow-md">
       <h1 className="text-center text-2xl font-bold mb-2">
@@ -44,7 +67,7 @@ export const FormularioMatricula = () => {
         Verifique la información antes de enviar el formulario.
       </p>
 
-      <form className="space-y-6" onSubmit={handleSubmit}>
+      <form className="space-y-6" onSubmit={onSubmitHandler}>
         {page === 1 ? (
           <>
             {/* Página 1: Datos del Estudiante */}
