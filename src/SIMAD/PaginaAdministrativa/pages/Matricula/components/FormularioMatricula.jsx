@@ -1,6 +1,8 @@
 import useGrados from "../../Asistencias/Hook/useGrados";
 import { useMatriculaForm } from "../Hooks/useMatriculaForm";
 import { usePeriodos } from "../Hooks/usePeriodos";
+import Swal from "sweetalert2";
+import "@sweetalert2/theme-bulma/bulma.css";
 
 export const FormularioMatricula = () => {
   const {
@@ -16,6 +18,45 @@ export const FormularioMatricula = () => {
   const { periodos } = usePeriodos();
   const { grados } = useGrados();
 
+  // Función para calcular la edad a partir de la fecha de nacimiento
+  const handleFechaNacimientoChange = (e) => {
+    handleChange(e);
+    const birthDate = new Date(e.target.value);
+    if (!e.target.value || isNaN(birthDate.getTime())) return;
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    // Actualizamos el campo 'edad' en el estado del formulario
+    const edadEvent = {
+      target: { name: "estudiante.edad", value: age },
+    };
+    handleChange(edadEvent);
+  };
+
+  // Wrapper del submit para mostrar modales con SweetAlert2
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    try {
+      await handleSubmit(e);
+      Swal.fire({
+        icon: "success",
+        title: "Éxito",
+        text: "Formulario enviado correctamente",
+        confirmButtonColor: "#2563EB",
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Hubo un error al enviar el formulario",
+        confirmButtonColor: "#2563EB",
+      });
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto p-4 bg-white shadow-md">
       <h1 className="text-center text-2xl font-bold mb-2">
@@ -26,7 +67,7 @@ export const FormularioMatricula = () => {
         Verifique la información antes de enviar el formulario.
       </p>
 
-      <form className="space-y-6" onSubmit={handleSubmit}>
+      <form className="space-y-6" onSubmit={onSubmitHandler}>
         {page === 1 ? (
           <>
             {/* Página 1: Datos del Estudiante */}
@@ -191,7 +232,7 @@ export const FormularioMatricula = () => {
                   type="date"
                   name="estudiante.fecha_nacimiento"
                   value={formData.estudiante.fecha_nacimiento}
-                  onChange={handleChange}
+                  onChange={handleFechaNacimientoChange}
                   className="border p-2 rounded-md w-full"
                 />
               </div>
@@ -214,15 +255,15 @@ export const FormularioMatricula = () => {
                   type="number"
                   name="estudiante.edad"
                   value={formData.estudiante.edad}
-                  onChange={handleChange}
+                  readOnly
                   className="border p-2 rounded-md w-full"
                 />
               </div>
             </div>
 
+            {/* Se agregan los campos de Condición Migratoria y Repite alguna materia */}
             <div className="flex space-x-4">
               <label className="block text-gray-700">Condición Migratoria:</label>
-              {/* Aquí se usan valores en minúscula para coincidir con el JSON */}
               <label className="inline-flex items-center">
                 <input
                   type="radio"

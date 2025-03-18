@@ -6,14 +6,14 @@ import useProfesores from "./Hook/useProfesores";
 import useSecciones from "./Hook/useSecciones";
 import useEstudiantesPorSeccion from "./Hook/useEstudiantesPorSeccion";
 import { usePeriodos } from "./Hook/usePeriodos";
-import ErrorModal from "./components/ErrorModal";
-import SuccessModal from "./components/SuccessModal ";
+import Swal from "sweetalert2";
+import "@sweetalert2/theme-bulma/bulma.css";
 
 export const AsistenciaEst = () => {
   // ============================
   // 1. LEE DATOS DEL LOCALSTORAGE
   // ============================
-  const role = localStorage.getItem("role");       
+  const role = localStorage.getItem("role");
   const materiaLocalStorage = localStorage.getItem("materia"); // "1", "2", etc.
 
   // ============================
@@ -27,8 +27,6 @@ export const AsistenciaEst = () => {
   // ============================
   // 3. FILTRA MATERIAS SI ES PROFESOR
   // ============================
-  // Si el rol es "profesor", mostramos solo la materia que coincide con la que viene del localStorage.
-  // Si es admin u otro rol, mostramos todas.
   const filteredMaterias =
     role === "profesor"
       ? materias.filter(
@@ -48,9 +46,6 @@ export const AsistenciaEst = () => {
     id_Periodo: "",
     lecciones: [],
   });
-
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showErrorModal, setShowErrorModal] = useState(false);
 
   const { secciones, loading: loadingSecciones } = useSecciones(formData.id_grado);
   const { estudiantes, setEstudiantes, loading: loadingEstudiantes } =
@@ -75,7 +70,12 @@ export const AsistenciaEst = () => {
     const { name, value } = e.target;
 
     if (name === "fecha" && isWeekend(value)) {
-      setShowErrorModal(true);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pueden seleccionar sábados ni domingos como fecha de asistencia.",
+        confirmButtonColor: "#2563EB",
+      });
       setFormData((prev) => ({ ...prev, fecha: "" }));
       return;
     }
@@ -129,8 +129,11 @@ export const AsistenciaEst = () => {
 
     try {
       await handleCrearAsistencias(asistenciasData);
-      setShowSuccessModal(true);
-
+      Swal.fire({
+        icon: "success",
+        title: "¡Asistencia creada exitosamente!",
+        confirmButtonColor: "#2563EB",
+      });
       // Limpiar formulario y lista de estudiantes
       setFormData({
         fecha: "",
@@ -143,7 +146,12 @@ export const AsistenciaEst = () => {
       });
       setEstudiantes([]);
     } catch (err) {
-      // El error se maneja desde el hook (error)
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error || "Error al crear la asistencia",
+        confirmButtonColor: "#2563EB",
+      });
     }
   };
 
@@ -349,21 +357,6 @@ export const AsistenciaEst = () => {
           {loading ? "Guardando..." : "Guardar Asistencia"}
         </button>
       </form>
-
-      {/* MODALES */}
-      {error && <ErrorModal message={error} onClose={() => {}} />}
-      {showErrorModal && (
-        <ErrorModal
-          message="No se pueden seleccionar sábados ni domingos como fecha de asistencia."
-          onClose={() => setShowErrorModal(false)}
-        />
-      )}
-      {showSuccessModal && (
-        <SuccessModal
-          message="¡Asistencia creada exitosamente!"
-          onClose={() => setShowSuccessModal(false)}
-        />
-      )}
     </div>
   );
 };

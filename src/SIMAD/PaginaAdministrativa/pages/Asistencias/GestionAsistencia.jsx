@@ -7,9 +7,8 @@ import {
   obtenerTodasLasAsistencias,
 } from "./Services/GestionAsistenciaService";
 import { usePeriodos } from "./Hook/usePeriodos";
-import EditarAsistenciaModal from "./components/EditarAsistenciaModal";
-import NoResultsModal from "./components/NoResultsModal";
-import ConfirmDeleteModal from "./components/ConfirmDeleteModal";
+import Swal from "sweetalert2";
+import "@sweetalert2/theme-bulma/bulma.css";
 
 export const GestionAsistencia = () => {
   const { materias, grados, secciones } = useDatosIniciales();
@@ -24,11 +23,6 @@ export const GestionAsistencia = () => {
     seccion: "",
   });
   const [error, setError] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
-  const [asistenciaSeleccionada, setAsistenciaSeleccionada] = useState(null);
-  const [noResultsVisible, setNoResultsVisible] = useState(false);
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [asistenciaIdToDelete, setAsistenciaIdToDelete] = useState(null);
 
   // Paginación: 20 items por página, máximo 100 registros.
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,6 +37,12 @@ export const GestionAsistencia = () => {
       } catch (err) {
         setError("Error al obtener las asistencias");
         setAsistencias([]);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Error al obtener las asistencias",
+          confirmButtonColor: "#2563EB",
+        });
       }
     };
 
@@ -53,16 +53,26 @@ export const GestionAsistencia = () => {
     try {
       const data = await obtenerGestionAsistencias(filtros);
       if (data.length === 0) {
-        setNoResultsVisible(true);
+        Swal.fire({
+          icon: "info",
+          title: "Sin resultados",
+          text: "No se encontraron asistencias con los criterios de búsqueda.",
+          confirmButtonColor: "#2563EB",
+        });
+        setAsistencias([]);
       } else {
         setAsistencias(data);
-        setNoResultsVisible(false);
       }
     } catch (err) {
       console.error("Error al obtener las asistencias:", err);
       setError("Error al obtener las asistencias");
       setAsistencias([]);
-      setNoResultsVisible(true);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Error al obtener las asistencias",
+        confirmButtonColor: "#2563EB",
+      });
     }
   };
 
@@ -71,48 +81,97 @@ export const GestionAsistencia = () => {
     setFiltros({ ...filtros, [name]: value });
   };
 
-  const handleEditar = (id) => {
+  const handleEditar = async (id) => {
     const asistencia = asistencias.find((a) => a.asistencia_id === id);
-    setAsistenciaSeleccionada(asistencia);
-    setModalVisible(true);
-  };
-
-  const handleUpdate = async (id, updatedData) => {
-    try {
-      await actualizarAsistencia(id, updatedData);
-      setAsistencias(
-        asistencias.map((a) =>
-          a.asistencia_id === id ? { ...a, ...updatedData } : a
-        )
-      );
-      setModalVisible(false);
-    } catch (err) {
-      setError("Error al actualizar la asistencia");
+    if (!asistencia) return;
+    const { value: formValues } = await Swal.fire({
+      title: "Editar Asistencia",
+      html:
+        `<input id="swal-input1" class="swal2-input" placeholder="Estado" value="${asistencia.estado}">` +
+        `<input id="swal-input2" class="swal2-input" placeholder="Lecciones" value="${
+          Array.isArray(asistencia.lecciones)
+            ? asistencia.lecciones.join(", ")
+            : asistencia.lecciones
+        }">`,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: "Actualizar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#2563EB",
+      preConfirm: () => {
+        const estado = document.getElementById("swal-input1").value;
+        const lecciones = document.getElementById("swal-input2").value;
+        if (!estado) {
+          Swal.showValidationMessage("El campo Estado es obligatorio");
+        }
+        return { estado, lecciones };
+      },
+    });
+    if (formValues) {
+      const updatedData = {
+        estado: formValues.estado,
+        lecciones: formValues.lecciones
+          .split(",")
+          .map((l) => l.trim())
+          .filter((l) => l !== ""),
+      };
+      try {
+        await actualizarAsistencia(asistencia.asistencia_id, updatedData);
+        setAsistencias(
+          asistencias.map((a) =>
+            a.asistencia_id === asistencia.asistencia_id
+              ? { ...a, ...updatedData }
+              : a
+          )
+        );
+        Swal.fire({
+          icon: "success",
+          title: "Actualización exitosa",
+          confirmButtonColor: "#2563EB",
+        });
+      } catch (err) {
+        console.error(err);
+        Swal.fire({
+          icon: "error",
+          title: "Error al actualizar la asistencia",
+          confirmButtonColor: "#2563EB",
+        });
+      }
     }
   };
 
-  const handleEliminar = (id) => {
-    setAsistenciaIdToDelete(id);
-    setDeleteModalVisible(true);
-  };
-
-  const confirmEliminar = async () => {
-    try {
-      await eliminarAsistencia(asistenciaIdToDelete);
-      setAsistencias((prevAsistencias) =>
-        prevAsistencias.filter(
-          (asistencia) => asistencia.asistencia_id !== asistenciaIdToDelete
-        )
-      );
-      setDeleteModalVisible(false);
-      setAsistenciaIdToDelete(null);
-    } catch (err) {
-      setError("Error al eliminar la asistencia");
+  const handleEliminar = async (id) => {
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Confirmar Eliminación",
+      text: "¿Estás seguro de que deseas eliminar esta asistencia?",
+      showCancelButton: true,
+      confirmButtonText: "Eliminar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#2563EB",
+    });
+    if (result.isConfirmed) {
+      try {
+        await eliminarAsistencia(id);
+        setAsistencias((prev) =>
+          prev.filter((a) => a.asistencia_id !== id)
+        );
+        Swal.fire({
+          icon: "success",
+          title: "Eliminado",
+          text: "La asistencia ha sido eliminada.",
+          confirmButtonColor: "#2563EB",
+        });
+      } catch (err) {
+        setError("Error al eliminar la asistencia");
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Error al eliminar la asistencia",
+          confirmButtonColor: "#2563EB",
+        });
+      }
     }
-  };
-
-  const handleCloseModal = () => {
-    setNoResultsVisible(false);
   };
 
   // Cálculo de paginación: se limita el total de asistencias a 100.
@@ -216,7 +275,6 @@ export const GestionAsistencia = () => {
           <tbody>
             {paginatedAsistencias.map((asistencia) => (
               <tr key={asistencia.asistencia_id} className="text-center">
-                {/* USAMOS OPTIONAL CHAINING PARA EVITAR EL ERROR */}
                 <td className="border px-4 py-2">
                   {asistencia.id_Estudiante?.nombre_Estudiante || "Sin nombre"}{" "}
                   {asistencia.id_Estudiante?.apellido1_Estudiante || ""}{" "}
@@ -237,6 +295,8 @@ export const GestionAsistencia = () => {
                 <td className="border px-4 py-2">
                   {typeof asistencia.lecciones === "string"
                     ? asistencia.lecciones.split(",").join(", ")
+                    : Array.isArray(asistencia.lecciones)
+                    ? asistencia.lecciones.join(", ")
                     : "N/A"}
                 </td>
                 <td className="border px-4 py-2">
@@ -283,31 +343,6 @@ export const GestionAsistencia = () => {
           Siguiente
         </button>
       </div>
-
-      {modalVisible && asistenciaSeleccionada && (
-        <EditarAsistenciaModal
-          asistencia={asistenciaSeleccionada}
-          onUpdate={handleUpdate}
-          onClose={() => setModalVisible(false)}
-        />
-      )}
-
-      {noResultsVisible && (
-        <NoResultsModal
-          message="No se encontraron asistencias con los criterios de búsqueda."
-          onClose={handleCloseModal}
-        />
-      )}
-
-      {deleteModalVisible && (
-        <ConfirmDeleteModal
-          isOpen={deleteModalVisible} // <-- Pasamos isOpen
-          title="Confirmar Eliminación" // <-- Opcional, si quieres mostrar un título
-          message="¿Estás seguro de que deseas eliminar esta asistencia?"
-          onConfirm={confirmEliminar}
-          onClose={() => setDeleteModalVisible(false)}
-        />
-      )}
     </div>
   );
 };

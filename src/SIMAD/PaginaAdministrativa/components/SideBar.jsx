@@ -82,6 +82,7 @@ export const SideBar = () => {
                                     <Link to="/gestion-asistencia" className="block py-1 text-sm hover:text-blue-500">Gestión asistencia</Link>
                                     <Link to="/justificacion-ausencias" className="block py-1 text-sm hover:text-blue-500">Justificación ausencias</Link>
                                     <Link to="/reporte-asistencia" className="block py-1 text-sm hover:text-blue-500">Reporte asistencia</Link>
+                                    <Link to="/reporte-asistencia-seccion" className="block py-1 text-sm hover:text-blue-500">Reporte asistencia sección</Link>
                                 </div>
                             )}
                         </div>
