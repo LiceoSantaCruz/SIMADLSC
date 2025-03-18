@@ -2,8 +2,9 @@ import { useReporteAsistencia } from './Hook/useReporteAsistencia';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { usePeriodos } from './Hook/usePeriodos';
-import ErrorModal from './components/ErrorModal';
 import { useEffect, useState } from 'react';
+import Swal from 'sweetalert2';
+import '@sweetalert2/theme-bulma/bulma.css';
 
 export const ReporteAsistencia = () => {
   const {
@@ -21,7 +22,7 @@ export const ReporteAsistencia = () => {
     setAsistencias,
     error,
     buscarAsistencias,
-    loading  // se extrae loading desde el hook
+    loading,
   } = useReporteAsistencia();
 
   const { periodos } = usePeriodos();
@@ -37,7 +38,7 @@ export const ReporteAsistencia = () => {
     e.preventDefault();
     setHasSearched(true);
     setAsistencias([]); // Limpiar asistencias antes de nueva búsqueda
-    setShowErrorModal(false); // Ocultar modal de error si está visible
+    setShowErrorModal(false);
     try {
       await buscarAsistencias();
     } catch (err) {
@@ -46,7 +47,6 @@ export const ReporteAsistencia = () => {
     }
   };
 
-  // Validar solo cuando se haya completado la búsqueda (loading false)
   useEffect(() => {
     if (hasSearched && !loading) {
       if (error) {
@@ -58,6 +58,17 @@ export const ReporteAsistencia = () => {
       }
     }
   }, [hasSearched, loading, error, cedula, asistencias]);
+
+  useEffect(() => {
+    if (showErrorModal) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se encontraron asistencias para el criterio de búsqueda ingresado o ocurrió un error. Por favor, verifica la información e inténtalo de nuevo.',
+        confirmButtonColor: '#2563EB',
+      }).then(() => setShowErrorModal(false));
+    }
+  }, [showErrorModal]);
 
   const handleExportPDF = () => {
     const input = document.getElementById("reporte-asistencias");
@@ -193,10 +204,7 @@ export const ReporteAsistencia = () => {
       {/* Resultados */}
       {asistencias.length > 0 && (
         <>
-          <div
-            id="reporte-asistencias"
-            className="bg-white p-4 rounded-lg shadow overflow-x-auto"
-          >
+          <div id="reporte-asistencias" className="bg-white p-4 rounded-lg shadow overflow-x-auto">
             <div className="mb-4">
               <h3 className="text-lg font-semibold">Grado: {grado}</h3>
               <h3 className="text-lg font-semibold">Sección: {seccion}</h3>
@@ -267,14 +275,6 @@ export const ReporteAsistencia = () => {
             </button>
           </div>
         </>
-      )}
-
-      {/* Modal de error */}
-      {showErrorModal && (
-        <ErrorModal
-          message="No se encontraron asistencias para el criterio de búsqueda ingresado o ocurrió un error. Por favor, verifica la información e inténtalo de nuevo."
-          onClose={() => setShowErrorModal(false)}
-        />
       )}
     </div>
   );

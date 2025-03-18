@@ -1,20 +1,15 @@
 import { useState } from "react";
 import { useAsignarSeccion } from "../Hooks/useAsignarSeccion";
-import { ConfirmModal } from "../components/ConfirmModalMatricula";
-import { AlertModal } from "../components/AlertModalMatricula";
 
 // Mapeo de número a texto
 const nivelMap = {
-  7: "Séptimo",
+  7: "Sétimo",
   8: "Octavo",
   9: "Noveno",
   10: "Décimo",
   11: "Undécimo",
 };
 
-// Función para normalizar el nivel (maneja numérico o texto).
-// Si es parseable a número (p.ej. "7" o 7), lo convierte a entero.
-// Si no, lo mapea manualmente (p.ej. "Séptimo" -> 7).
 function normalizarNivel(valor) {
   const num = parseInt(valor, 10);
   if (!isNaN(num)) {
@@ -27,10 +22,12 @@ function normalizarNivel(valor) {
     case "Décimo":    return 10;
     case "Undécimo":  return 11;
     default:
-      // Fallback en caso de que venga algo inesperado
       return 7;
   }
 }
+
+import Swal from 'sweetalert2';
+import '@sweetalert2/theme-bulma/bulma.css';
 
 export default function AsignaSeccionPage() {
   const { matriculas, secciones, loading, error, onAssignSeccion } = useAsignarSeccion();
@@ -38,21 +35,14 @@ export default function AsignaSeccionPage() {
   const [selectedSeccion, setSelectedSeccion] = useState("");
   const [selectedNivel, setSelectedNivel] = useState("");
   const [searchName, setSearchName] = useState("");
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
 
   if (loading) return <p className="text-center text-xl">Cargando datos...</p>;
   if (error) return <p className="text-center text-red-500">Error: {error}</p>;
 
-  // Usamos normalizarNivel para extraer los valores de nivel
   const uniqueNiveles = [
-    ...new Set(
-      matriculas.map((mat) => normalizarNivel(mat.estudiante.grado.nivel))
-    ),
+    ...new Set(matriculas.map((mat) => normalizarNivel(mat.estudiante.grado.nivel))),
   ].filter((nivel) => nivel >= 7 && nivel <= 11);
 
-  // Filtramos usando normalizarNivel en lugar de parseInt
   const filteredMatriculas = matriculas.filter((mat) => {
     const nivelNum = normalizarNivel(mat.estudiante.grado.nivel);
     return (
@@ -60,37 +50,31 @@ export default function AsignaSeccionPage() {
       !mat.seccion &&
       (selectedNivel === "" || nivelNum === parseInt(selectedNivel, 10)) &&
       (searchName === "" ||
-        mat.estudiante.nombre_Estudiante
-          .toLowerCase()
-          .includes(searchName.toLowerCase()) ||
-        mat.estudiante.apellido1_Estudiante
-          .toLowerCase()
-          .includes(searchName.toLowerCase()))
+        mat.estudiante.nombre_Estudiante.toLowerCase().includes(searchName.toLowerCase()) ||
+        mat.estudiante.apellido1_Estudiante.toLowerCase().includes(searchName.toLowerCase()))
     );
   });
 
-  // Filtramos secciones con base en la primera matrícula seleccionada
   const filteredSecciones = selectedMatriculas.length
-    ? secciones.filter(
-        (sec) => sec.gradoId === selectedMatriculas[0].estudiante.grado.id_grado
-      )
+    ? secciones.filter((sec) => sec.gradoId === selectedMatriculas[0].estudiante.grado.id_grado)
     : secciones;
 
-  // Manejo de selección de matrículas
   const toggleSelect = (mat) => {
-    const exists = selectedMatriculas.some(
-      (m) => m.id_Matricula === mat.id_Matricula
-    );
+    const exists = selectedMatriculas.some((m) => m.id_Matricula === mat.id_Matricula);
     if (exists) {
       setSelectedMatriculas((prev) =>
         prev.filter((m) => m.id_Matricula !== mat.id_Matricula)
       );
     } else {
-      // Si ya hay seleccionadas, verificamos que el grado coincida
       if (selectedMatriculas.length > 0) {
         const currentGrado = selectedMatriculas[0].estudiante.grado.id_grado;
         if (mat.estudiante.grado.id_grado !== currentGrado) {
-          alert("Todas las matrículas deben tener el mismo nivel.");
+          Swal.fire({
+            icon: 'warning',
+            title: 'Advertencia',
+            text: 'Todas las matrículas deben tener el mismo nivel.',
+            confirmButtonColor: '#2563EB',
+          });
           return;
         }
       }
@@ -98,32 +82,59 @@ export default function AsignaSeccionPage() {
     }
   };
 
-  // Al presionar "Asignar Sección"
   const handleAsignar = () => {
     if (!selectedSeccion) {
-      alert("Seleccione una sección primero.");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Advertencia',
+        text: 'Seleccione una sección primero.',
+        confirmButtonColor: '#2563EB',
+      });
       return;
     }
     if (selectedMatriculas.length === 0) {
-      alert("Seleccione al menos una matrícula.");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Advertencia',
+        text: 'Seleccione al menos una matrícula.',
+        confirmButtonColor: '#2563EB',
+      });
       return;
     }
-    setConfirmOpen(true);
+    Swal.fire({
+      icon: 'question',
+      title: 'Confirmar Asignación',
+      text: `¿Está seguro de asignar la sección #${selectedSeccion} a las matrículas seleccionadas?`,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, asignar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#2563EB',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        confirmAsignar();
+      }
+    });
   };
 
-  // Confirmar la asignación
   const confirmAsignar = async () => {
-    setConfirmOpen(false);
     try {
       const ids = selectedMatriculas.map((m) => m.id_Matricula);
       await onAssignSeccion(Number(selectedSeccion), ids);
-      setAlertMessage("¡Sección asignada correctamente!");
-      setAlertOpen(true);
+      Swal.fire({
+        icon: 'success',
+        title: 'Éxito',
+        text: '¡Sección asignada correctamente!',
+        confirmButtonColor: '#2563EB',
+      });
       setSelectedMatriculas([]);
       setSelectedSeccion("");
     } catch (err) {
-      setAlertMessage("Error al asignar la sección: " + err.message);
-      setAlertOpen(true);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al asignar la sección: ' + err.message,
+        confirmButtonColor: '#2563EB',
+      });
     }
   };
 
@@ -162,7 +173,6 @@ export default function AsignaSeccionPage() {
             onChange={(e) => setSearchName(e.target.value)}
           />
 
-          {/* LISTADO DE MATRÍCULAS SIN SECCIÓN */}
           <h3 className="text-xl font-semibold mb-2">Matrículas Sin Sección</h3>
           <div className="border rounded-lg p-4 max-h-80 overflow-y-auto">
             {filteredMatriculas.length === 0 ? (
@@ -185,9 +195,7 @@ export default function AsignaSeccionPage() {
                     />
                     <div>
                       <p className="font-semibold text-gray-700">
-                        Boleta #{mat.id_Matricula} -{" "}
-                        {mat.estudiante.nombre_Estudiante}{" "}
-                        {mat.estudiante.apellido1_Estudiante}
+                        Boleta #{mat.id_Matricula} - {mat.estudiante.nombre_Estudiante} {mat.estudiante.apellido1_Estudiante}
                       </p>
                       <p className="text-sm text-gray-500">
                         Nivel: {nivelMap[nivelNum]}
@@ -225,23 +233,6 @@ export default function AsignaSeccionPage() {
           Asignar Sección
         </button>
       </div>
-
-      {/* MODAL DE CONFIRMACIÓN */}
-      <ConfirmModal
-        isOpen={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
-        onConfirm={confirmAsignar}
-        title="Confirmar Asignación"
-        message={`¿Está seguro de asignar la sección #${selectedSeccion} a las matrículas seleccionadas?`}
-      />
-
-      {/* MODAL DE ALERTA */}
-      <AlertModal
-        isOpen={alertOpen}
-        onClose={() => setAlertOpen(false)}
-        title="Resultado"
-        message={alertMessage}
-      />
     </div>
   );
 }

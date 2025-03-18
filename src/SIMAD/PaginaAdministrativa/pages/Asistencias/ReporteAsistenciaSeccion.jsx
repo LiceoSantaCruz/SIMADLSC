@@ -3,72 +3,77 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { useReporteAsistenciaSeccion } from './Hook/useReporteAsistenciaSeccion';
 import useAllSecciones from './Hook/seAllSecciones';
-
-// Hook que obtiene el reporte
-// Hook que trae TODAS las secciones
+import Swal from 'sweetalert2';
+import '@sweetalert2/theme-bulma/bulma.css';
 
 const ReporteAsistenciaSeccion = () => {
-  // Aquí guardamos el texto que digita el usuario (ej: "7-1")
   const [nombreSeccion, setNombreSeccion] = useState('');
-
-  // Fechas
   const [fechaInicio, setFechaInicio] = useState('');
   const [fechaFin, setFechaFin] = useState('');
 
-  // Hook para obtener el reporte
   const { reporte, loading, error, buscarReporteSeccion } = useReporteAsistenciaSeccion();
+  const { secciones, loadingSecciones, errorSecciones } = useAllSecciones();
 
-  // Hook para cargar todas las secciones (podrías usar useSecciones si tienes un grado, pero
-  // aquí asumo que quieres buscar libremente por nombre de sección).
-  const {
-    secciones,          // Array de objetos: [{ id_Seccion, nombre_Seccion }, ...]
-    loadingSecciones,
-    errorSecciones
-  } = useAllSecciones();
-
-  // Manejo de submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validación de fechas
     if (new Date(fechaInicio) > new Date(fechaFin)) {
-      alert('La fecha de inicio no puede ser mayor que la fecha de fin.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'La fecha de inicio no puede ser mayor que la fecha de fin.',
+        confirmButtonColor: '#2563EB',
+      });
       return;
     }
 
-    // Validación de formato de sección
     if (!nombreSeccion.match(/^\d+-\d+$/)) {
-      alert('El formato de la sección es incorrecto. Debe ser algo como "7-1".');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Advertencia',
+        text: 'El formato de la sección es incorrecto. Debe ser algo como "7-1".',
+        confirmButtonColor: '#2563EB',
+      });
       return;
     }
 
     if (!nombreSeccion || !fechaInicio || !fechaFin) {
-      alert('Por favor completa todos los campos.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Advertencia',
+        text: 'Por favor completa todos los campos.',
+        confirmButtonColor: '#2563EB',
+      });
       return;
     }
 
-    // Buscamos la sección que coincida con lo digitado (ignorando mayúsculas/minúsculas)
     const seccionEncontrada = secciones.find(
       (sec) => sec.nombre_Seccion.toLowerCase() === nombreSeccion.toLowerCase()
     );
 
     if (!seccionEncontrada) {
-      alert(`No se encontró la sección "${nombreSeccion}". Verifica el nombre.`);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: `No se encontró la sección "${nombreSeccion}". Verifica el nombre.`,
+        confirmButtonColor: '#2563EB',
+      });
       return;
     }
 
-    // Si la encontramos, tomamos su ID real
     const idSeccion = seccionEncontrada.id_Seccion;
-
-    // Ahora sí, llamamos a la función que hace la búsqueda del reporte
     try {
       await buscarReporteSeccion({ idSeccion, fechaInicio, fechaFin });
     } catch (error) {
-      alert('Ocurrió un error al buscar el reporte. Por favor intenta nuevamente.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Ocurrió un error al buscar el reporte. Por favor intenta nuevamente.',
+        confirmButtonColor: '#2563EB',
+      });
     }
   };
 
-  // Manejo de exportar a PDF (igual que tu ejemplo)
   const handleExportPDF = () => {
     const input = document.getElementById('reporte-seccion');
     if (!input) return;
@@ -76,25 +81,20 @@ const ReporteAsistenciaSeccion = () => {
     html2canvas(input).then((canvas) => {
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
-
       const pageWidth = 210;
       const pageHeight = 297;
       const imgWidth = pageWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
       let heightLeft = imgHeight;
       let position = 0;
-
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
-
       while (heightLeft > 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
-
       pdf.save(`Reporte_Asistencia_Seccion_${nombreSeccion}.pdf`);
     });
   };
@@ -106,7 +106,6 @@ const ReporteAsistenciaSeccion = () => {
       {/* Formulario */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Input para la sección, en lugar de un ID numérico */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Sección (ej: 7-1)</label>
             <input
@@ -118,8 +117,6 @@ const ReporteAsistenciaSeccion = () => {
               required
             />
           </div>
-
-          {/* Fecha Inicio */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Fecha de Inicio</label>
             <input
@@ -130,8 +127,6 @@ const ReporteAsistenciaSeccion = () => {
               required
             />
           </div>
-
-          {/* Fecha Fin */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Fecha Final</label>
             <input
@@ -142,8 +137,6 @@ const ReporteAsistenciaSeccion = () => {
               required
             />
           </div>
-
-          {/* Botón */}
           <div className="flex items-end">
             <button
               type="submit"
@@ -156,10 +149,7 @@ const ReporteAsistenciaSeccion = () => {
         </form>
       </div>
 
-      {/* Errores de secciones */}
       {errorSecciones && <p className="text-red-500">Error: {errorSecciones}</p>}
-
-      {/* Cargando o error del reporte */}
       {loading && <p>Cargando reporte...</p>}
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -172,9 +162,8 @@ const ReporteAsistenciaSeccion = () => {
       {reporte && (
         <div id="reporte-seccion" className="bg-white p-4 rounded-lg shadow overflow-x-auto mb-6">
           <h2 className="text-xl font-semibold mb-4">
-            Sección: {reporte.nombre_Seccion} (ID: {reporte.id_Seccion})
+            Sección: {reporte.nombre_Seccion} 
           </h2>
-
           <div className="mb-4">
             <h3 className="font-bold">Estadísticas Generales</h3>
             <p>Asistencias Totales: {reporte.estadisticas_generales.total_asistencias}</p>
@@ -182,7 +171,6 @@ const ReporteAsistenciaSeccion = () => {
             <p>Escapados Totales: {reporte.estadisticas_generales.total_escapados}</p>
             <p>Justificados Totales: {reporte.estadisticas_generales.total_justificados}</p>
           </div>
-
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -208,7 +196,6 @@ const ReporteAsistenciaSeccion = () => {
         </div>
       )}
 
-      {/* Botón para exportar PDF */}
       {reporte && (
         <div className="mt-6">
           <button
