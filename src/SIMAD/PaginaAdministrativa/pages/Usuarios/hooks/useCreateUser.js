@@ -2,6 +2,11 @@
 import { useState } from 'react';
 import { createUser } from '../services/useUserService';
 
+const API_BASE_URL =
+  process.env.NODE_ENV === 'production'
+    ? 'https://simadlsc-backend-production.up.railway.app'
+    : 'http://localhost:3000';
+
 export const useCreateUser = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

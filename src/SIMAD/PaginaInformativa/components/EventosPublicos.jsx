@@ -11,24 +11,24 @@ const EventosPublicos = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const eventsPerPage = 6;
 
-  useEffect(() => {
-    if (eventos) {
-      // Filtrar eventos públicos aprobados y dirigidos a "todo publico"
-      const filteredPublicEvents = eventos.filter(
-        (evento) =>
-          evento.estadoEvento?.nombre.toLowerCase() === 'aprobado' &&
-          evento.dirigidoA?.nombre.toLowerCase() === 'todo publico'
-      );
-      // Ordenar por fecha y hora de inicio (ascendente)
-      const sortedPublicEvents = filteredPublicEvents.sort((a, b) => {
-        const dateTimeA = new Date(`${a.fecha_Evento}T${a.hora_inicio_Evento}`);
-        const dateTimeB = new Date(`${b.fecha_Evento}T${b.hora_inicio_Evento}`);
-        return dateTimeA - dateTimeB;
-      });
-      setPublicEvents(sortedPublicEvents);
-      setCurrentPage(1);
-    }
-  }, [eventos]);
+  // useEffect(() => {
+  //   if (eventos) {
+  //     // Filtrar eventos públicos aprobados y dirigidos a "todo publico"
+  //     const filteredPublicEvents = eventos.filter(
+  //       (evento) =>
+  //         evento.estadoEvento?.nombre.toLowerCase() === 'aprobado' &&
+  //         evento.dirigidoA?.nombre.toLowerCase() === 'todo publico'
+  //     );
+  //     // Ordenar por fecha y hora de inicio (ascendente)
+  //     const sortedPublicEvents = filteredPublicEvents.sort((a, b) => {
+  //       const dateTimeA = new Date(`${a.fecha_Evento}T${a.hora_inicio_Evento}`);
+  //       const dateTimeB = new Date(`${b.fecha_Evento}T${b.hora_inicio_Evento}`);
+  //       return dateTimeA - dateTimeB;
+  //     });
+  //     setPublicEvents(sortedPublicEvents);
+  //     setCurrentPage(1);
+  //   }
+  // }, [eventos]);
 
   // Función para formatear la hora al formato HH:MM
   const formatTime = (timeStr) => {
