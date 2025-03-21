@@ -20,6 +20,10 @@ const GestionUsuarios = () => {
   const [userToDelete, setUserToDelete] = useState(null); // Usuario a eliminar
   const { editUser } = useUserEdit();
   const token = localStorage.getItem("token"); // Recuperar el token
+  const [selectedRole, setSelectedRole] = useState(""); // Estado para el filtro por rol
+  const [currentPage, setCurrentPage] = useState(1); // Estado para la página actual
+  const usersPerPage = 7; // Número de usuarios por página
+  const [searchTerm, setSearchTerm] = useState(""); // Estado para el término de búsqueda
 
   // Hook para obtener los roles
   const { roles, loading: loadingRoles, error: rolesError } = useRoles(token);
@@ -93,6 +97,22 @@ const GestionUsuarios = () => {
     fetchUsers(); 
   };
 
+  // Filtrar usuarios por rol, nombre y paginación
+  const filteredUsers = users
+    .filter((user) =>
+      `${user.nombre_Usuario} ${user.apellido1_Usuario} ${user.apellido2_Usuario}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+    )
+    .filter((user) => (selectedRole ? user.rol_Usuario.nombre_Rol === selectedRole : true));
+
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
+  // Cambiar página
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   if (loading) {
     return <p>Cargando usuarios...</p>;
   }
@@ -102,12 +122,15 @@ const GestionUsuarios = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <header className="bg-white shadow-md py-6 mb-8">
-        <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-800">
-            Gestión de Usuarios
-          </h1>
+    <div className="min-h-full bg-gray-100 p-6">
+      <header className="  py-4 mb-8">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Lista de Usuarios</h2>
           <Link
             to="/Crear-usuarios"
             className="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-600"
@@ -115,12 +138,43 @@ const GestionUsuarios = () => {
             Crear Usuario
           </Link>
         </div>
-      </header>
+        {/* Barra de búsqueda */}
+        <div className="mb-4">
+          <label htmlFor="searchBar" className="block text-gray-700 font-medium">
+            Buscar por Nombre:
+          </label>
+          <input
+            id="searchBar"
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Escribe un nombre..."
+            className="mt-2 p-2 border rounded-lg w-full"
+          />
+        </div>
 
-      <div className="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-        <h2 className="text-xl font-semibold mb-4">Lista de Usuarios</h2>
+        {/* Filtro por rol */}
+        <div className="mb-4">
+          <label htmlFor="roleFilter" className="block text-gray-700 font-medium">
+            Filtrar por Rol:
+          </label>
+          <select
+            id="roleFilter"
+            value={selectedRole}
+            onChange={(e) => setSelectedRole(e.target.value)}
+            className="mt-2 p-2 border rounded-lg w-full"
+          >
+            <option value="">Todos</option>
+            {roles.map((role) => (
+              <option key={role.id_Rol} value={role.nombre_Rol}>
+                {role.nombre_Rol}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="overflow-x-auto">
-          {users.length > 0 ? (
+          {currentUsers.length > 0 ? (
             <table className="min-w-full table-auto bg-gray-50 shadow-sm rounded-lg">
               <thead className="bg-gray-200 text-gray-700">
                 <tr>
@@ -132,7 +186,7 @@ const GestionUsuarios = () => {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
+                {currentUsers.map((user) => (
                   <tr key={user.id_usuario} className="border-b">
                     <td className="px-4 py-2">{`${user.nombre_Usuario} ${user.apellido1_Usuario} ${user.apellido2_Usuario}`}</td>
                     <td className="px-4 py-2">{user.email_Usuario}</td>
@@ -181,6 +235,26 @@ const GestionUsuarios = () => {
             <div className="text-center text-gray-500 py-10">
               <p>No hay usuarios disponibles.</p>
             </div>
+          )}
+        </div>
+
+        {/* Paginación */}
+        <div className="flex justify-center mt-4">
+          {Array.from(
+            { length: Math.ceil(filteredUsers.length / usersPerPage) },
+            (_, index) => (
+              <button
+                key={index + 1}
+                onClick={() => paginate(index + 1)}
+                className={`px-4 py-2 mx-1 rounded-lg ${
+                  currentPage === index + 1
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-gray-700"
+                }`}
+              >
+                {index + 1}
+              </button>
+            )
           )}
         </div>
       </div>
