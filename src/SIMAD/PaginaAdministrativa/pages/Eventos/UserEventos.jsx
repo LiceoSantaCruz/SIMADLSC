@@ -1,11 +1,34 @@
-// src/components/UserEventos.jsx
-
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import UseFetchEventos from './Hook/UseFetchEventos';
 import Swal from 'sweetalert2';
 import '@sweetalert2/theme-bulma/bulma.css';
 import { FaInfoCircle, FaPlus } from 'react-icons/fa';
+
+// Función para formatear la hora al formato HH:MM
+const formatTime = (timeStr) => {
+  if (!timeStr) return 'N/A';
+  const parts = timeStr.split(':');
+  if (parts.length < 2) return timeStr;
+  const hours = parts[0].padStart(2, '0');
+  const minutes = parts[1].padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
+// Función para formatear la fecha a dd/mm/yyyy para mostrar
+const formatDateToDMY = (fechaString) => {
+  const date = new Date(fechaString + "T00:00:00");
+  return date.toLocaleDateString('es-ES');
+};
+
+// Función para formatear la fecha a YYYY-MM-DD para filtrar
+const formatDateToYMD = (fechaString) => {
+  const date = new Date(fechaString + "T00:00:00");
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 const UserEventos = () => {
   // Estado para manejar el filtro de estado
@@ -23,38 +46,36 @@ const UserEventos = () => {
 
   // Estado para filtros adicionales (dirigido_a y fecha)
   const [filters, setFilters] = useState({
-    estado: '',
     dirigido_a: '',
     fecha: '',
   });
 
-  // Filtrar eventos según el estado seleccionado
+  // Filtrar eventos según estado, dirigido_a y fecha, y ordenarlos por el evento más próximo a ocurrir
   useEffect(() => {
     if (eventos) {
-      const filtered = eventos.filter(
-        (evento) => evento.estadoEvento?.nombre.toLowerCase() === filterStatus.toLowerCase()
-      );
-      setFilteredEvents(filtered);
+      const filtered = eventos.filter((evento) => {
+        const matchesEstado =
+          evento.estadoEvento?.nombre.trim().toLowerCase() === filterStatus.trim().toLowerCase();
+        const matchesDirigidoA = filters.dirigido_a
+          ? evento.dirigidoA?.nombre.trim().toLowerCase() === filters.dirigido_a.trim().toLowerCase()
+          : true;
+        const matchesFecha = filters.fecha
+          ? formatDateToYMD(evento.fecha_Evento) === filters.fecha
+          : true;
+        return matchesEstado && matchesDirigidoA && matchesFecha;
+      });
+
+      // Ordenar de manera ascendente por fecha y hora de inicio (evento más próximo a ocurrir primero)
+      const sorted = filtered.sort((a, b) => {
+        const dateTimeA = new Date(`${a.fecha_Evento}T${a.hora_inicio_Evento}`);
+        const dateTimeB = new Date(`${b.fecha_Evento}T${b.hora_inicio_Evento}`);
+        return dateTimeA - dateTimeB;
+      });
+
+      setFilteredEvents(sorted);
       setCurrentPage(1);
     }
-  }, [eventos, filterStatus]);
-
-  // Función para formatear la hora al formato HH:MM
-  const formatTime = (timeStr) => {
-    if (!timeStr) return 'N/A';
-    const parts = timeStr.split(':');
-    if (parts.length < 2) return timeStr;
-    const hours = parts[0].padStart(2, '0');
-    const minutes = parts[1].padStart(2, '0');
-    return `${hours}:${minutes}`;
-  };
-
-  // Función para formatear la fecha a dd/mm/yyyy
-  const formatDateToDMY = (fechaString) => {
-    // Agregamos "T00:00:00" para forzar la interpretación en UTC
-    const date = new Date(fechaString + "T00:00:00");
-    return date.toLocaleDateString('es-ES');
-  };
+  }, [eventos, filterStatus, filters]);
 
   // Función para mostrar detalles del evento en un popup
   const handleViewInfo = (evento) => {
@@ -120,7 +141,7 @@ const UserEventos = () => {
         </Link>
       </div>
 
-      {/* Barra de filtros */}
+      {/* Barra de filtros por estado */}
       <div className="mb-6 flex space-x-4">
         <button
           onClick={() => setFilterStatus('Aprobado')}
@@ -184,9 +205,9 @@ const UserEventos = () => {
         />
       </div>
 
-      {/* Tabla de eventos */}
+      {/* Tabla de Eventos */}
       {filteredEvents.length === 0 ? (
-        <p className="text-gray-600">No tienes solicitudes de eventos en este estado.</p>
+        <p className="text-gray-600">No tienes solicitudes de eventos que coincidan con los filtros.</p>
       ) : (
         <>
           <div className="overflow-x-auto">
@@ -204,9 +225,7 @@ const UserEventos = () => {
                 {currentEvents.map((evento, index) => (
                   <tr
                     key={evento.id_Evento}
-                    className={`hover:bg-gray-100 transition ${
-                      index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
-                    }`}
+                    className={`hover:bg-gray-100 transition ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{evento.nombre_Evento}</div>
@@ -250,7 +269,7 @@ const UserEventos = () => {
             </table>
           </div>
 
-          {/* Controles de paginación en tonos azules */}
+          {/* Controles de paginación */}
           {totalPages > 1 && (
             <div className="flex justify-center mt-4">
               {Array.from({ length: totalPages }, (_, index) => (
