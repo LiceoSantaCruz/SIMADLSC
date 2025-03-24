@@ -1,216 +1,327 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { 
-    FaChalkboardTeacher, 
-    FaUserGraduate, 
-    FaCalendarAlt, 
-    FaClipboardList, 
-    FaUsers, 
-    FaUserCircle, 
-    FaSignOutAlt, 
-    FaBars, 
+import {
+    FaBars,
+    FaCalendarAlt,
+    FaClipboardList,
+    FaUsers,
+    FaUserGraduate,
+    FaChalkboardTeacher,
+    FaUserCircle,
+    FaListAlt,
     FaSearch,
-    FaListAlt
+    FaChevronDown,
+    FaMoon,
+    FaSun,
+    FaSchool
 } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+
 
 export const SideBar = () => {
-    const [isSidebarOpen, setSidebarOpen] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
-    const [role, setRole] = useState(localStorage.getItem('role'));
-    const [openSections, setOpenSections] = useState({
-        asistencia: false,
-        eventos: false,
-        horarios: false,
-        matricula: false,
-        usuarios: false,
-    });
-
+    const [isOpen, setIsOpen] = useState(true);
+    const [openSection, setOpenSection] = useState('');
+    const [darkMode, setDarkMode] = useState(true);
     const navigate = useNavigate();
+    const role = localStorage.getItem('role');
+
+    const toggleSidebar = () => setIsOpen(!isOpen);
+
+
+    const [showProfileOptions, setShowProfileOptions] = useState(false);
 
     const toggleSection = (section) => {
-        setOpenSections(prevState => ({
-            ...prevState,
-            [section]: !prevState[section]
-        }));
+        setOpenSection((prev) => (prev === section ? '' : section));
     };
+
 
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('role');
-        setIsAuthenticated(false);
-        window.location.href = '/paginainformativa';
+        navigate('/paginainformativa');
     };
 
-    useEffect(() => {
-        if (!isAuthenticated) {
-            navigate('/paginainformativa');
-        }
-    }, [isAuthenticated, navigate]);
 
-    const toggleSidebar = () => {
-        setSidebarOpen(!isSidebarOpen);
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            setDarkMode(true);
+            document.documentElement.classList.add('dark');
+        } else {
+            setDarkMode(false);
+            document.documentElement.classList.remove('dark');
+        }
+    }, []);
+
+    const toggleTheme = () => {
+        const newTheme = !darkMode;
+        setDarkMode(newTheme);
+        localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+
+        if (newTheme) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
     };
 
     return (
-        <>
-            {/* Botón de menú hamburguesa visible en móviles */}
-            <button
-                onClick={toggleSidebar}
-                className="lg:hidden p-3 text-gray-800 bg-white shadow-md rounded-full fixed top-4 left-4 z-50"
-            >
-                <FaBars size={24} />
-            </button>
+        <div
+            className={`h-screen ${isOpen ? 'w-64' : 'w-20'
+                } transition-all duration-300 transition-background ${darkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'
+                } flex flex-col shadow-lg`}
+        >
+            {/* Línea y logo */}
+            <div className="border-b border-gray-700 px-4 py-4 flex items-center gap-3">
+                <img
+                    src="/images/IMG_4153.JPG"
+                    alt="Logo"
+                    className="w-8 h-8 rounded-full object-cover"
+                />
+                {isOpen && (
+                    <span className="text-lg font-semibold text-blue-400">SIMADLSC</span>
+                )}
 
-            {/* Sidebar con fondo gradiente y estilos modernos */}
-            <div className={`fixed lg:relative top-0 left-0 w-64 h-full bg-gray-800 text-white p-4 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 min-h-screen flex flex-col overflow-y-auto`}>
-            {/* Título del Sidebar */}
-                <Link to="/info" className="text-2xl font-bold mb-6 text-blue-500 hover:text-blue-700">
-                    SIMADLSC
-                </Link>
+                <button
+                    className="ml-auto text-white hover:text-blue-400"
+                    onClick={toggleSidebar}
+                >
+                    <FaBars />
+                </button>
+            </div>
 
-                <nav className="flex flex-col space-y-2">
-                    {/* Asistencia: Solo para admin, superadmin y profesor */}
-                    {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
-                        <div>
-                            <div onClick={() => toggleSection('asistencia')} className="cursor-pointer flex items-center space-x-2 py-2 hover:bg-gray-200 rounded-md px-2 transition">
-                                <FaUserGraduate className="text-blue-400" />
-                                <span>Asistencia</span>
+            {/* Contenido del sidebar */}
+            <nav className="flex-1 px-2 space-y-1">
+                {/* Asistencia */}
+                {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
+                    <div>
+                        <button
+                            onClick={() => toggleSection('asistencia')}
+                            className="flex items-center w-full px-2 py-2 rounded-md hover:bg-blue-500/10 transition group"
+                        >
+                            <FaUserGraduate className="text-blue-400" />
+                            {isOpen && <span className="ml-3">Asistencia</span>}
+                            {isOpen && (
+                                <FaChevronDown
+                                    className={`ml-auto transform transition-transform ${openSection === 'asistencia' ? 'rotate-180' : ''
+                                        }`}
+                                    size={12}
+                                />
+                            )}
+                        </button>
+                        {isOpen && openSection === 'asistencia' && (
+                            <div className="ml-8 text-sm text-gray-300 space-y-1">
+                                <Link to="/asistencia-estudiantes" className="block hover:text-blue-400"> Asistencia estudiantes</Link>
+                                <Link to="/justificacion-ausencias" className="block hover:text-blue-400">Justificación ausencias</Link>
+                                <Link to="/reporte-asistencia" className="block hover:text-blue-400">Reporte asistencia</Link>
+                                <Link to="/gestion-asistencia" className="block hover:text-blue-400">Gestión Asistencia</Link>
                             </div>
-                            {openSections.asistencia && (
-                                <div className="ml-6 text-white">
-                                    <Link to="/asistencia-estudiantes" className="block py-1 text-sm hover:text-blue-500">Asistencia estudiantes</Link>
-                                    <Link to="/gestion-asistencia" className="block py-1 text-sm hover:text-blue-500">Gestión asistencia</Link>
-                                    <Link to="/justificacion-ausencias" className="block py-1 text-sm hover:text-blue-500">Justificación ausencias</Link>
-                                    <Link to="/reporte-asistencia" className="block py-1 text-sm hover:text-blue-500">Reporte asistencia</Link>
-                                    <Link to="/reporte-asistencia-seccion" className="block py-1 text-sm hover:text-blue-500">Reporte asistencia sección</Link>
-                                </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Eventos */}
+                <div>
+                    <button
+                        onClick={() => toggleSection('eventos')}
+                        className="flex items-center w-full px-2 py-2 rounded-md hover:bg-pink-500/10 transition group"
+                    >
+                        <FaCalendarAlt className="text-pink-400" />
+                        {isOpen && <span className="ml-3">Eventos</span>}
+                        {isOpen && (
+                            <FaChevronDown
+                                className={`ml-auto transform transition-transform ${openSection === 'eventos' ? 'rotate-180' : ''
+                                    }`}
+                                size={12}
+                            />
+                        )}
+                    </button>
+                    {isOpen && openSection === 'eventos' && (
+                        <div className="ml-8 text-sm text-gray-300 space-y-1">
+                            <Link to="/eventos" className="block hover:text-pink-400">Eventos</Link>
+                            {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
+                                <>
+                                    <Link to="/crear-eventos" className="block hover:text-pink-400">Crear eventos</Link>
+                                    <Link to="/user-eventos" className="block hover:text-pink-400">Solicitudes de eventos</Link>
+                                </>
+                            )}
+                            {role === 'superadmin' && (
+                                <Link to="/gestion-eventos" className="block hover:text-pink-400">Gestión Eventos</Link>
                             )}
                         </div>
                     )}
+                </div>
 
-                    {/* Eventos: Visible para todos los roles */}
+                {/* Horarios */}
+                {(role === 'admin' || role === 'superadmin' || role === 'profesor' || role === 'estudiante') && (
                     <div>
-                        <div onClick={() => toggleSection('eventos')} className="cursor-pointer flex items-center space-x-2 py-2 hover:bg-gray-200 rounded-md px-2 transition">
-                            <FaCalendarAlt className="text-pink-400" />
-                            <span>Eventos</span>
-                        </div>
-                        {openSections.eventos && (
-                            <div className="ml-6 text-white">
-                                <Link to="/eventos" className="block py-1 text-sm hover:text-pink-500">Eventos</Link>
-                                {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
-                                    <>
-                                        <Link to="/crear-eventos" className="block py-1 text-sm hover:text-pink-500">Crear eventos</Link>
-                                        <Link to="/user-eventos" className="block py-1 text-sm hover:text-pink-500">Estado solicitudes eventos</Link>
-                                    </>
+                        <button
+                            onClick={() => toggleSection('horarios')}
+                            className="flex items-center w-full px-2 py-2 rounded-md hover:bg-green-500/10 transition group"
+                        >
+                            <FaChalkboardTeacher className="text-green-400" />
+                            {isOpen && <span className="ml-3">Horarios</span>}
+                            {isOpen && (
+                                <FaChevronDown
+                                    className={`ml-auto transform transition-transform ${openSection === 'horarios' ? 'rotate-180' : ''
+                                        }`}
+                                    size={12}
+                                />
+                            )}
+                        </button>
+                        {isOpen && openSection === 'horarios' && (
+                            <div className="ml-8 text-sm text-gray-300 space-y-1">
+                                {(role !== 'estudiante') && (
+                                    <Link to="/horario-profesores" className="block hover:text-green-400">Horario de profesores</Link>
                                 )}
-                                {role === 'superadmin' && (
-                                    <Link to="/gestion-eventos" className="block py-1 text-sm hover:text-pink-500">Gestión eventos</Link>
+                                <Link to="/horario-estudiantes" className="block hover:text-green-400">Horario de estudiantes</Link>
+                                {(role === 'admin' || role === 'superadmin') && (
+                                    <Link to="/gestion-horario" className="block hover:text-green-400">Gestión Horario</Link>
                                 )}
                             </div>
                         )}
                     </div>
+                )}
 
-                    {/* Horarios: Para admin, superadmin, profesor y estudiante */}
-                    {(role === 'admin' || role === 'superadmin' || role === 'profesor' || role === 'estudiante') && (
-                        <div>
-                            <div onClick={() => toggleSection('horarios')} className="cursor-pointer flex items-center space-x-2 py-2 hover:bg-gray-200 rounded-md px-2 transition">
-                                <FaChalkboardTeacher className="text-green-400" />
-                                <span>Horarios</span>
-                            </div>
-                            {openSections.horarios && (
-                                <div className="ml-6 text-white">
-                                    {(role === 'profesor' || role === 'admin' || role === 'superadmin') && (
-                                        <Link to="/horario-profesores" className="block py-1 text-sm hover:text-green-500">Horario profesores</Link>
-                                    )}
-                                    {(role === 'estudiante' || role === 'admin' || role === 'superadmin') && (
-                                        <Link to="/horario-estudiantes" className="block py-1 text-sm hover:text-green-500">Horario estudiantes</Link>
-                                    )}
-                                    {(role === 'admin' || role === 'superadmin') && (
-                                        <Link to="/gestion-horario" className="block py-1 text-sm hover:text-green-500">Gestión horario</Link>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Matrícula: Para admin, superadmin y estudiante */}
-                    {(role === 'admin' || role === 'superadmin' || role === 'estudiante') && (
-                        <div>
-                            <div onClick={() => toggleSection('matricula')} className="cursor-pointer flex items-center space-x-2 py-2 hover:bg-gray-200 rounded-md px-2 transition">
-                                <FaClipboardList className="text-purple-400" />
-                                <span>Matrícula</span>
-
-
-                            </div>
-                            {openSections.matricula && (
-                                <div className="ml-6 text-white">
-                                    <Link to="/formulario-matricula" className="block py-1 text-sm hover:text-purple-500">Formulario matrícula</Link>
-                                    {(role === 'admin' || role === 'superadmin') && (
-                                        <>
-                                            <Link to="/gestion-matricula" className="block py-1 text-sm hover:text-purple-500">Gestión matrícula</Link>
-                                            <Link to="/matricula-ordinaria" className="block py-1 text-sm hover:text-purple-500">Matrícula ordinaria</Link>
-                                            <Link to="/matricula-extraordinaria" className="block py-1 text-sm hover:text-purple-500">Matrícula extraordinaria</Link>
-                                            <Link to="/asignar-seccion" className="block py-1 text-sm hover:text-purple-500">Asignar sección</Link>
-                                        </>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Secciones: Para admin, superadmin y profesor */}
-                    {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
-                        <Link 
-                            to="/secciones" 
-                            className="cursor-pointer flex items-center space-x-2 py-2 hover:bg-gray-200 rounded-md px-2 transition"
+                {/* Matrícula */}
+                {(role === 'admin' || role === 'superadmin' || role === 'estudiante') && (
+                    <div>
+                        <button
+                            onClick={() => toggleSection('matricula')}
+                            className="flex items-center w-full px-2 py-2 rounded-md hover:bg-purple-500/10 transition group"
                         >
-                            <FaListAlt className="text-orange-400" />
-                            <span>Secciones</span>
-                        </Link>
-                    )}
-
-                    {/* Búsqueda de Estudiantes: Para admin, superadmin y profesor */}
-                    {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
-                        <Link to="/busqueda-estudiantes" className="cursor-pointer flex items-center space-x-2 py-2 hover:bg-gray-200 rounded-md px-2 transition">
-                            <FaSearch className="text-yellow-500" />
-                            <span>Búsqueda estudiantes</span>
-                        </Link>
-                    )}
-
-                    {/* Usuarios: Solo para superadmin */}
-                    {role === 'superadmin' && (
-                        <div>
-                            <div onClick={() => toggleSection('usuarios')} className="cursor-pointer flex items-center space-x-2 py-2 hover:bg-gray-200 rounded-md px-2 transition">
-                                <FaUsers className="text-red-400" />
-                                <span>Usuarios</span>
-                            </div>
-                            {openSections.usuarios && (
-                                <div className="ml-6 text-white">
-                                    <Link to="/gestion-usuarios" className="block py-1 text-sm hover:text-red-500">Gestión usuarios</Link>
-                                </div>
+                            <FaClipboardList className="text-purple-400" />
+                            {isOpen && <span className="ml-3">Matrícula</span>}
+                            {isOpen && (
+                                <FaChevronDown
+                                    className={`ml-auto transform transition-transform ${openSection === 'matricula' ? 'rotate-180' : ''
+                                        }`}
+                                    size={12}
+                                />
                             )}
-                        </div>
-                    )}
-                </nav>
-
-                {/* Perfil y Logout */}
-                <div className="border-t border-gray-300 pt-4 mt-auto">
-                    <div className="flex items-center space-x-2 px-2">
-                        <FaUserCircle className="text-gray-500" size={20} />
-                        <span className="text-lg">Perfil</span>
-                    </div>
-                    <div className="ml-6 text-white">
-                        <Link to="/mi-perfil" className="py-1 block text-sm hover:text-gray-500 flex items-center space-x-1">
-                            <FaUserCircle size={14} />
-                            <span>Ver mi perfil</span>
-                        </Link>
-                        <button onClick={handleLogout} className="py-1 w-full text-left text-sm hover:text-red-500 flex items-center space-x-1">
-                            <FaSignOutAlt size={14} />
-                            <span>Cerrar sesión</span>
                         </button>
+                        {isOpen && openSection === 'matricula' && (
+                            <div className="ml-8 text-sm text-gray-300 space-y-1">
+                                <Link to="/formulario-matricula" className="block hover:text-purple-400">Formulario</Link>
+                                {(role === 'admin' || role === 'superadmin') && (
+                                    <>
+                                        <Link to="/matricula-ordinaria" className="block hover:text-purple-400">Matricula ordinaria</Link>
+                                        <Link to="/matricula-extraordinaria" className="block hover:text-purple-400"> Matricula Extraordinaria</Link>
+                                        <Link to="/asignar-seccion" className="block hover:text-purple-400">Asignar sección</Link>
+                                        <Link to="/gestion-matricula" className="block hover:text-purple-400">Gestión matricula</Link>
+                                   </>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Secciones */}
+                {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
+                    <Link
+                        to="/secciones"
+                        className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-orange-500/10 transition"
+                    >
+                        <FaListAlt className="text-orange-400" />
+                        {isOpen && <span>Secciones</span>}
+                    </Link>
+                )}
+
+                {/* Búsqueda */}
+                {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
+                    <Link
+                        to="/busqueda-estudiantes"
+                        className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-yellow-500/10 transition"
+                    >
+                        <FaSearch className="text-yellow-500" />
+                        {isOpen && <span>Búsqueda</span>}
+                    </Link>
+                )}
+
+                {/* Usuarios */}
+                {role === 'superadmin' && (
+                    <div>
+                        <button
+                            onClick={() => toggleSection('usuarios')}
+                            className="flex items-center w-full px-2 py-2 rounded-md hover:bg-red-500/10 transition group"
+                        >
+                            <FaUsers className="text-red-400" />
+                            {isOpen && <span className="ml-3">Usuarios</span>}
+                            {isOpen && (
+                                <FaChevronDown
+                                    className={`ml-auto transform transition-transform ${openSection === 'usuarios' ? 'rotate-180' : ''
+                                        }`}
+                                    size={12}
+                                />
+                            )}
+                        </button>
+                        {isOpen && openSection === 'usuarios' && (
+                            <div className="ml-8 text-sm text-gray-300 space-y-1">
+                                <Link to="/gestion-usuarios" className="block hover:text-red-400">Gestión Usuarios</Link>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </nav>
+
+            
+            
+
+
+            {/* Footer */}
+            <div className="border-t border-gray-700 px-4 py-4 space-y-4">
+                {/* Modo oscuro/claro con toggle */}
+                <div className="flex items-center justify-between">
+                    {isOpen && (
+                        <span className="text-sm flex items-center gap-1">
+                            {darkMode ? <FaMoon className="text-yellow-400" /> : <FaSun className="text-yellow-300" />}
+                            Modo {darkMode ? 'Oscuro' : 'Claro'}
+                        </span>
+                    )}
+
+                    <div
+                        onClick={toggleTheme}
+                        className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition duration-300 ${darkMode ? 'bg-gray-600 justify-start' : 'bg-yellow-400 justify-end'
+                            }`}
+                    >
+                        <div className="bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300" />
                     </div>
                 </div>
+
+                {/* Botón de perfil con dropdown */}
+                <div className="relative">
+                    <button
+                        onClick={() => setShowProfileOptions(!showProfileOptions)}
+                        className="flex items-center gap-2 text-sm hover:text-blue-400 transition w-full"
+                    >
+                        <FaUserCircle className="text-gray-300" size={18} />
+                        {isOpen && <span>Mi perfil</span>}
+                    </button>
+
+                    {/* Opciones de dropdown → hacia arriba */}
+                    {showProfileOptions && isOpen && (
+                        <div className="absolute bottom-12 left-0 w-full flex flex-col bg-gray-800 border border-gray-700 rounded-md shadow-md z-50">
+                            <Link
+                                to="/mi-perfil"
+                                className="px-4 py-2 text-sm hover:bg-gray-700 transition"
+                                onClick={() => setShowProfileOptions(false)}
+                            >
+                                Ver perfil
+                            </Link>
+                            <button
+                                onClick={() => {
+                                    handleLogout();
+                                    setShowProfileOptions(false);
+                                }}
+                                className="px-4 py-2 text-sm text-left hover:bg-gray-700 text-red-400 transition"
+                            >
+                                Cerrar sesión
+                            </button>
+                        </div>
+                    )}
+                </div>
+               
             </div>
-        </>
+        </div>
     );
 };
+
