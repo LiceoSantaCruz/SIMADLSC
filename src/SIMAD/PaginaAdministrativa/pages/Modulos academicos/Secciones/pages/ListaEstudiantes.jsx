@@ -1,7 +1,7 @@
 // src/Pages/ListaEstudiantes.jsx
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import UseFetchEstudiantesPorSeccion from '../../../Estudiantes/Hooks/UseFetchEstudiantesPorSeccion';
+import UseFetchEstudiantesPorSeccion from '../../../Modulos academicos/Estudiantes/Hooks/UseFetchEstudiantesPorSeccion';
 
 const ListaEstudiantes = () => {
   // Obtén el parámetro de la URL (asegúrate de definir la ruta en el Router, por ejemplo, "/lista-estudiantes/:seccionId")

@@ -4,11 +4,13 @@ import {
     FaClipboardList,
     FaUsers,
     FaUserGraduate,
+    FaBookOpen,
     FaChalkboardTeacher,
     FaUserCircle,
-    FaListAlt,
-    FaSearch,
     FaChevronDown,
+    FaListOl,
+    FaThLarge,
+    FaDoorOpen,
     FaMoon,
     FaSun,
     FaSchool
@@ -208,34 +210,13 @@ export const SideBar = () => {
                                         <Link to="/matricula-extraordinaria" className="block hover:text-purple-400"> Matricula Extraordinaria</Link>
                                         <Link to="/asignar-seccion" className="block hover:text-purple-400">Asignar sección</Link>
                                         <Link to="/gestion-matricula" className="block hover:text-purple-400">Gestión matricula</Link>
-                                   </>
+                                    </>
                                 )}
                             </div>
                         )}
                     </div>
                 )}
 
-                {/* Secciones */}
-                {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
-                    <Link
-                        to="/secciones"
-                        className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-orange-500/10 transition"
-                    >
-                        <FaListAlt className="text-orange-400" />
-                        {isOpen && <span>Secciones</span>}
-                    </Link>
-                )}
-
-                {/* Búsqueda */}
-                {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
-                    <Link
-                        to="/busqueda-estudiantes"
-                        className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-yellow-500/10 transition"
-                    >
-                        <FaSearch className="text-yellow-500" />
-                        {isOpen && <span>Búsqueda</span>}
-                    </Link>
-                )}
 
                 {/* Usuarios */}
                 {role === 'superadmin' && (
@@ -261,10 +242,70 @@ export const SideBar = () => {
                         )}
                     </div>
                 )}
+
+
+
             </nav>
 
-            
-            
+
+            {/* Gestión Académica */}
+            {(role === 'admin' || role === 'superadmin' || role === 'estudiante') && (
+                <div>
+                    <button
+                        onClick={() => toggleSection('gestionAcademica')}
+                        className="flex items-center w-full px-2 py-2 rounded-md hover:bg-cyan-500/10 transition group"
+                        aria-label="Abrir menú de gestión académica"
+                        aria-expanded={openSection === 'gestionAcademica'}
+                        aria-controls="submenu-gestionAcademica"
+                    >
+                        <FaSchool className="text-cyan-400" aria-hidden="true" />
+                        {isOpen && <span className="ml-3" id="gestionAcademica-label">Gestión Académica</span>}
+                        {isOpen && (
+                            <FaChevronDown
+                                className={`ml-auto transform transition-transform ${openSection === 'gestionAcademica' ? 'rotate-180' : ''
+                                    }`}
+                                size={12}
+                            />
+                        )}
+                    </button>
+                    {isOpen && openSection === 'gestionAcademica' && (
+                        <div
+                            id="submenu-gestionAcademica"
+                            role="region"
+                            aria-labelledby="gestionAcademica-label"
+                            className="ml-8 text-sm text-gray-300 space-y-1"
+                        >
+                            <Link to="/grados" className="flex items-center gap-2 hover:text-cyan-400 transition">
+                                <FaListOl className="text-cyan-400" /> Grados
+                            </Link>
+
+                            <Link to="/secciones" className="flex items-center gap-2 hover:text-cyan-400 transition">
+                                <FaThLarge className="text-cyan-400" /> Secciones
+                            </Link>
+
+                            <Link to="/aulas" className="flex items-center gap-2 hover:text-cyan-400 transition">
+                                <FaDoorOpen className="text-cyan-400" /> Aulas
+                            </Link>
+
+                            <Link to="/materias" className="flex items-center gap-2 hover:text-cyan-400 transition">
+                                <FaBookOpen className="text-cyan-400" /> Materias
+                            </Link>
+
+                            <Link to="/estudiantes" className="flex items-center gap-2 hover:text-cyan-400 transition">
+                                <FaUserGraduate className="text-cyan-400" /> Estudiantes
+                            </Link>
+
+                            <Link to="/periodos" className="flex items-center gap-2 hover:text-cyan-400 transition">
+                                <FaCalendarAlt className="text-cyan-400" /> Periodos
+                            </Link>
+
+                        </div>
+                    )}
+                </div>
+            )}
+
+
+
 
 
             {/* Footer */}
@@ -319,7 +360,7 @@ export const SideBar = () => {
                         </div>
                     )}
                 </div>
-               
+
             </div>
         </div>
     );

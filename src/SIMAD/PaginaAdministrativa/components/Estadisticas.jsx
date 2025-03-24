@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import EstudiantesService from "../Estudiantes/Service/EstudiantesService";
+import EstudiantesService from "../../PaginaAdministrativa/pages/Modulos academicos/Estudiantes/Service/EstudiantesService";
 import { Users, Mars, Venus } from "lucide-react";
 import CountUp from "react-countup";
 
