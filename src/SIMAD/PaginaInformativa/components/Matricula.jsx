@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import 'aos/dist/aos.css';
 import AOS from 'aos';
 
@@ -43,12 +44,14 @@ export const Matricula = () => {
             <p className="text-blue-900 text-center text-xs sm:text-sm font-medium mb-4 px-4 py-2 bg-blue-100 rounded-md shadow-sm">
               Nota: El periodo de matrícula será válido únicamente cuando se publique oficialmente en nuestras redes sociales.
             </p>
-            <button
-              className="bg-blue-900 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-full hover:bg-blue-700 transition duration-300 shadow-lg"
-              aria-label="Iniciar proceso de matrícula"
-            >
-              Iniciar matrícula
-            </button>
+            <Link to="/paginainformativa/login">
+              <button
+                className="bg-blue-900 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-full hover:bg-blue-700 transition duration-300 shadow-lg"
+                aria-label="Iniciar proceso de matrícula"
+              >
+                Iniciar matrícula
+              </button>
+            </Link>
           </div>
         </div>
       </div>
