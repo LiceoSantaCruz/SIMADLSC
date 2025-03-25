@@ -1,11 +1,35 @@
 // src/CrearEventos.jsx
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import '@sweetalert2/theme-bulma/bulma.css';
 import UseFetchEventos from './Hook/UseFetchEventos';
 import EventosService from './Service/EventosService';
+
+// Función para parsear "YYYY-MM-DD" a un objeto Date en hora local
+function parseLocalDate(yyyy_mm_dd) {
+  const [year, month, day] = yyyy_mm_dd.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+// Función para obtener la fecha actual en formato "YYYY-MM-DD"
+function getTodayDate() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Función para formatear la hora en formato HH:MM
+function formatTime(timeStr) {
+  if (!timeStr) return 'N/A';
+  const parts = timeStr.split(':');
+  if (parts.length < 2) return timeStr;
+  const hours = parts[0].padStart(2, '0');
+  const minutes = parts[1].padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
 
 const CrearEventos = () => {
   const { 
@@ -21,16 +45,10 @@ const CrearEventos = () => {
     dirigidosA,
     loadingDirigidosA,
     errorDirigidosA,
+    data: allEvents, // Todos los eventos existentes (para validar conflictos)
   } = UseFetchEventos();
 
-  // Función para obtener la fecha actual en formato YYYY-MM-DD (hora local)
-  const getTodayDate = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     nombre_Evento: '',
@@ -44,31 +62,97 @@ const CrearEventos = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  /**
-   * Función para verificar que la fecha sea al menos 3 días de anticipación.
-   * Usamos split para crear la fecha local (sin la parte horaria) y compararla.
-   */
+  // Verifica que la fecha seleccionada sea al menos 3 días de anticipación.
   const isAtLeastThreeDaysAhead = (fecha) => {
-    const [year, month, day] = fecha.split('-').map(Number);
-    const selectedDate = new Date(year, month - 1, day); // Se crea la fecha a medianoche local
+    const selectedDate = parseLocalDate(fecha);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    // Sumamos 3 días (en milisegundos)
     const tresDias = 3 * 24 * 60 * 60 * 1000;
     const minDate = new Date(today.getTime() + tresDias);
     return selectedDate >= minDate;
   };
 
+  // Determina si dos intervalos [startA, endA] y [startB, endB] se solapan
+  const isTimeOverlap = (startA, endA, startB, endB) => {
+    return startA < endB && endA > startB;
+  };
+
+  /**
+   * Verifica si en la misma ubicación y fecha ya existe un evento (pendiente o aprobado)
+   * cuyo horario se solape con el nuevo evento.
+   */
+  const checkHorarioConflicto = () => {
+    const selectedDate = parseLocalDate(formData.fecha_Evento);
+    const [startHour, startMinute] = formData.hora_inicio_Evento.split(':').map(Number);
+    const [endHour, endMinute] = formData.hora_fin_Evento.split(':').map(Number);
+
+    const newStart = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+      startHour,
+      startMinute
+    ).getTime();
+
+    const newEnd = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+      endHour,
+      endMinute
+    ).getTime();
+
+    const blockingStates = ['pendiente', 'aprobado'];
+
+    // Filtramos los eventos existentes que tengan la misma fecha y ubicación
+    // NOTA: Usamos ev.ubicacion.id, ya que la entidad es una relación
+    // Además, convertimos la fecha del evento a "YYYY-MM-DD" usando toISOString
+    const sameDayLocation = allEvents.filter((ev) => {
+      const evEstado = ev.estadoEvento?.nombre?.toLowerCase() || '';
+      const evDateStr = new Date(ev.fecha_Evento).toISOString().slice(0, 10);
+      const sameDate = evDateStr === formData.fecha_Evento;
+      const sameLocation = ev.ubicacion?.id === parseInt(formData.ubicacion, 10);
+      return sameDate && sameLocation && blockingStates.includes(evEstado);
+    });
+
+    // Verificamos solapamiento de horarios
+    for (const ev of sameDayLocation) {
+      const [evStartHour, evStartMinute] = ev.hora_inicio_Evento.split(':').map(Number);
+      const [evEndHour, evEndMinute] = ev.hora_fin_Evento.split(':').map(Number);
+
+      const evStart = new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate(),
+        evStartHour,
+        evStartMinute
+      ).getTime();
+
+      const evEnd = new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate(),
+        evEndHour,
+        evEndMinute
+      ).getTime();
+
+      if (isTimeOverlap(newStart, newEnd, evStart, evEnd)) {
+        return ev;
+      }
+    }
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validaciones básicas
     if (!formData.nombre_Evento.trim()) {
       Swal.fire({
         icon: 'warning',
@@ -78,7 +162,6 @@ const CrearEventos = () => {
       });
       return;
     }
-
     if (!formData.ubicacion || !formData.tipo_evento) {
       Swal.fire({
         icon: 'warning',
@@ -88,7 +171,6 @@ const CrearEventos = () => {
       });
       return;
     }
-
     if (!formData.fecha_Evento || !formData.hora_inicio_Evento || !formData.hora_fin_Evento) {
       Swal.fire({
         icon: 'warning',
@@ -98,7 +180,6 @@ const CrearEventos = () => {
       });
       return;
     }
-
     if (!isAtLeastThreeDaysAhead(formData.fecha_Evento)) {
       Swal.fire({
         icon: 'warning',
@@ -109,12 +190,25 @@ const CrearEventos = () => {
       return;
     }
 
-    // Crear objetos Date usando split para que se construyan en hora local
-    const [year, month, day] = formData.fecha_Evento.split('-').map(Number);
+    // Crear objetos Date usando parseLocalDate para obtener la fecha local exacta
+    const selectedDate = parseLocalDate(formData.fecha_Evento);
     const [startHour, startMinute] = formData.hora_inicio_Evento.split(':').map(Number);
-    const fechaInicio = new Date(year, month - 1, day, startHour, startMinute);
     const [endHour, endMinute] = formData.hora_fin_Evento.split(':').map(Number);
-    const fechaFinObj = new Date(year, month - 1, day, endHour, endMinute);
+
+    const fechaInicio = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+      startHour,
+      startMinute
+    );
+    const fechaFinObj = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+      endHour,
+      endMinute
+    );
 
     if (isNaN(fechaInicio.getTime()) || isNaN(fechaFinObj.getTime())) {
       Swal.fire({
@@ -125,7 +219,15 @@ const CrearEventos = () => {
       });
       return;
     }
-
+    if (fechaFinObj <= fechaInicio) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'La hora de fin debe ser posterior a la hora de inicio.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
     const diffInMs = fechaFinObj - fechaInicio;
     if (diffInMs < 3600000) {
       Swal.fire({
@@ -137,16 +239,20 @@ const CrearEventos = () => {
       return;
     }
 
-    if (fechaFinObj <= fechaInicio) {
+    // Verificar conflicto de horario en la misma ubicación y fecha
+    const conflicto = checkHorarioConflicto();
+    if (conflicto) {
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'La hora de fin debe ser posterior a la hora de inicio.',
-        confirmButtonText: 'Aceptar',
+        icon: 'warning',
+        title: 'Conflicto de horario',
+        html: `La ubicación ya está ocupada.<br>
+               El evento <strong>${conflicto.nombre_Evento}</strong> se realiza de ${formatTime(conflicto.hora_inicio_Evento)} a ${formatTime(conflicto.hora_fin_Evento)}.`,
+        confirmButtonColor: '#2563EB',
       });
       return;
     }
 
+    // Validar carga de estados y públicos
     if (loadingEstadosEventos) {
       Swal.fire({
         icon: 'info',
@@ -206,33 +312,27 @@ const CrearEventos = () => {
       return;
     }
 
+    // Crear payload (la fecha se envía en formato "YYYY-MM-DD")
+    const payload = {
+      nombre_Evento: formData.nombre_Evento.trim(),
+      descripcion_Evento: formData.descripcion_Evento.trim(),
+      fecha_Evento: formData.fecha_Evento,
+      hora_inicio_Evento: formData.hora_inicio_Evento,
+      hora_fin_Evento: formData.hora_fin_Evento,
+      id_dirigido_a: parseInt(formData.id_dirigido_a, 10),
+      id_ubicacion: parseInt(formData.ubicacion, 10),
+      id_tipo_evento: parseInt(formData.tipo_evento, 10),
+      id_estado_evento: estadoPendiente.id,
+    };
+
     setIsLoading(true);
     try {
-      const payload = {
-        nombre_Evento: formData.nombre_Evento.trim(),
-        descripcion_Evento: formData.descripcion_Evento.trim(),
-        fecha_Evento: formData.fecha_Evento,
-        hora_inicio_Evento: formData.hora_inicio_Evento,
-        hora_fin_Evento: formData.hora_fin_Evento,
-        id_dirigido_a: parseInt(formData.id_dirigido_a, 10),
-        id_ubicacion: parseInt(formData.ubicacion, 10),
-        id_tipo_evento: parseInt(formData.tipo_evento, 10),
-        id_estado_evento: estadoPendiente.id,
-      };
-
       await EventosService.createEvento(payload);
       Swal.fire({
         icon: 'success',
         title: 'Éxito',
         text: 'Evento creado exitosamente.',
         confirmButtonText: 'Aceptar',
-        customClass: {
-          popup: 'swal2-popup',
-          title: 'swal2-title',
-          content: 'swal2-content',
-          confirmButton: 'swal2-confirm',
-        },
-        buttonsStyling: false,
       }).then(() => {
         navigate('/user-eventos');
       });
@@ -243,13 +343,6 @@ const CrearEventos = () => {
         title: 'Error',
         text: err.response?.data?.message || 'Error al crear evento',
         confirmButtonText: 'Aceptar',
-        customClass: {
-          popup: 'swal2-popup',
-          title: 'swal2-title',
-          content: 'swal2-content',
-          confirmButton: 'swal2-confirm',
-        },
-        buttonsStyling: false,
       });
     } finally {
       setIsLoading(false);
@@ -258,10 +351,7 @@ const CrearEventos = () => {
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen flex justify-center items-center">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg"
-      >
+      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Crear Nuevo Evento</h2>
 
         {/* Campo de Nombre del Evento */}
@@ -392,9 +482,9 @@ const CrearEventos = () => {
               required
             >
               <option value="">Selecciona una ubicación</option>
-              {ubicaciones.map((ubicacion) => (
-                <option key={ubicacion.id} value={ubicacion.id}>
-                  {ubicacion.nombre}
+              {ubicaciones.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.nombre}
                 </option>
               ))}
             </select>
@@ -442,6 +532,6 @@ const CrearEventos = () => {
       </form>
     </div>
   );
-}; 
+};
 
 export default CrearEventos;
