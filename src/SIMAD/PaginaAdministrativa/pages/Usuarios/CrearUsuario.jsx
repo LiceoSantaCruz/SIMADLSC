@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createUser } from './services/useUserService';
-import axios from 'axios';
+import { createUser, getAllMaterias } from '../Usuarios/services/useUserService';
 
 const CrearUsuario = () => {
   const [newUser, setNewUser] = useState({
@@ -24,22 +23,11 @@ const CrearUsuario = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
-  const API_BASE_URL =
-    process.env.NODE_ENV === 'production'
-      ? 'https://simadlsc-backend-production.up.railway.app'
-      : 'http://localhost:3000';
-
   const fetchMaterias = async () => {
     if (materiasCargadas) return;
     try {
-      const response = await axios.get(`${API_BASE_URL}/materias`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      setMateriasDisponibles(response.data);
+      const data = await getAllMaterias(token);
+      setMateriasDisponibles(data);
       setMateriasCargadas(true);
     } catch (err) {
       console.error('Error al obtener las materias:', err);
@@ -54,17 +42,17 @@ const CrearUsuario = () => {
   const handleAddMateria = (materiaId) => {
     const materiaSeleccionada = materiasDisponibles.find((materia) => materia.id_Materia === materiaId);
     if (materiaSeleccionada) {
-      setNewUser((prevState) => ({
-        ...prevState,
-        materias: [...prevState.materias, materiaSeleccionada],
+      setNewUser((prev) => ({
+        ...prev,
+        materias: [...prev.materias, materiaSeleccionada],
       }));
     }
   };
 
   const handleRemoveMateria = (materiaId) => {
-    setNewUser((prevState) => ({
-      ...prevState,
-      materias: prevState.materias.filter((materia) => materia.id_Materia !== materiaId),
+    setNewUser((prev) => ({
+      ...prev,
+      materias: prev.materias.filter((materia) => materia.id_Materia !== materiaId),
     }));
   };
 
@@ -88,7 +76,6 @@ const CrearUsuario = () => {
       if (newUser.apellido1_Usuario.length > 100) throw new Error('El primer apellido no puede exceder 100 caracteres');
       if (newUser.apellido2_Usuario.length > 100) throw new Error('El segundo apellido no puede exceder 100 caracteres');
 
-      // Validar materias si el rol es profesor
       if (newUser.rol_Usuario === 3 && newUser.materias.length === 0) {
         throw new Error('Debe seleccionar al menos una materia para el profesor');
       }
@@ -102,8 +89,6 @@ const CrearUsuario = () => {
         rol_Usuario: newUser.rol_Usuario,
         id_Materia: newUser.materias.map((materia) => materia.id_Materia),
       };
-
-      console.log('Datos enviados al backend:', userToSubmit);
 
       await createUser(userToSubmit, token);
 
@@ -159,59 +144,13 @@ const CrearUsuario = () => {
         )}
 
         <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="nombre_Usuario"
-            value={newUser.nombre_Usuario}
-            onChange={handleInputChange}
-            placeholder="Nombre"
-            className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-            required
-          />
-          <input
-            type="text"
-            name="apellido1_Usuario"
-            value={newUser.apellido1_Usuario}
-            onChange={handleInputChange}
-            placeholder="Primer Apellido"
-            className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-            required
-          />
-          <input
-            type="text"
-            name="apellido2_Usuario"
-            value={newUser.apellido2_Usuario}
-            onChange={handleInputChange}
-            placeholder="Segundo Apellido"
-            className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-          />
-          <input
-            type="email"
-            name="email_Usuario"
-            value={newUser.email_Usuario}
-            onChange={handleInputChange}
-            placeholder="Correo Electrónico"
-            className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-            required
-            autoComplete="off"
-          />
-          <input
-            type="password"
-            name="contraseña_Usuario"
-            value={newUser.contraseña_Usuario}
-            onChange={handleInputChange}
-            placeholder="Contraseña"
-            className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-            required
-            autoComplete="off"
-          />
+          <input type="text" name="nombre_Usuario" value={newUser.nombre_Usuario} onChange={handleInputChange} placeholder="Nombre" className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none" required />
+          <input type="text" name="apellido1_Usuario" value={newUser.apellido1_Usuario} onChange={handleInputChange} placeholder="Primer Apellido" className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none" required />
+          <input type="text" name="apellido2_Usuario" value={newUser.apellido2_Usuario} onChange={handleInputChange} placeholder="Segundo Apellido" className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+          <input type="email" name="email_Usuario" value={newUser.email_Usuario} onChange={handleInputChange} placeholder="Correo Electrónico" className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none" required autoComplete="off" />
+          <input type="password" name="contraseña_Usuario" value={newUser.contraseña_Usuario} onChange={handleInputChange} placeholder="Contraseña" className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none" required autoComplete="off" />
 
-          <select
-            name="rol_Usuario"
-            value={newUser.rol_Usuario}
-            onChange={handleInputChange}
-            className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-          >
+          <select name="rol_Usuario" value={newUser.rol_Usuario} onChange={handleInputChange} className="border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none">
             <option value={1}>superAdmin</option>
             <option value={2}>admin</option>
             <option value={3}>profesor</option>
@@ -244,9 +183,7 @@ const CrearUsuario = () => {
                   value={materiaSeleccionada}
                   className="border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none text-black"
                 >
-                  <option value="" disabled>
-                    Seleccionar Materia
-                  </option>
+                  <option value="" disabled>Seleccionar Materia</option>
                   {filteredMaterias.map((materia) => (
                     <option key={materia.id_Materia} value={materia.id_Materia}>
                       {materia.nombre_Materia}
