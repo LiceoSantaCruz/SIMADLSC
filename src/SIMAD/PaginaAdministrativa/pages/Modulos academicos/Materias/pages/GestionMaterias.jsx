@@ -2,11 +2,10 @@ import { useEffect, useState } from 'react';
 import MateriaService from '../Service/MateriaService';
 import { Button } from '../../../../../../Components/ui/Button';
 import { Input } from '../../../../../../Components/ui/Input';
-import { toast } from 'sonner';
 import { Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 
-// Normalizar texto: quita tildes, convierte a minúsculas, elimina espacios extra
+// Normalizar texto para evitar duplicados con tildes, mayúsculas, espacios
 const normalizeText = (text) =>
   text
     .toLowerCase()
@@ -38,16 +37,19 @@ export const GestionMaterias = () => {
       );
       setMaterias(ordenadas);
 
-      const existentes = ordenadas.map((m) =>
-        normalizeText(m.nombre_Materia)
-      );
+      const existentes = ordenadas.map((m) => normalizeText(m.nombre_Materia));
       const faltan = materiasBase.filter(
         (m) => !existentes.includes(normalizeText(m))
       );
       setFaltantes(faltan);
     } catch (error) {
       console.error('Error al obtener las materias:', error);
-      toast.error('Error al obtener las materias');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudieron cargar las materias.',
+        confirmButtonColor: '#2563EB',
+      });
     }
   };
 
@@ -60,13 +62,17 @@ export const GestionMaterias = () => {
     const formateada = nombre.trim();
 
     if (!formateada) {
-      toast.warning('Ingrese el nombre de la materia');
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Campo vacío',
+        text: 'Por favor ingrese el nombre de la materia.',
+        confirmButtonColor: '#2563EB',
+      });
       return;
     }
 
     const yaExiste = materias.find(
-      (m) =>
-        normalizeText(m.nombre_Materia) === normalizeText(formateada)
+      (m) => normalizeText(m.nombre_Materia) === normalizeText(formateada)
     );
 
     if (yaExiste) {
@@ -81,12 +87,22 @@ export const GestionMaterias = () => {
 
     try {
       await MateriaService.createMateria({ nombre_Materia: formateada });
-      toast.success('Materia creada correctamente');
+      await Swal.fire({
+        icon: 'success',
+        title: 'Creada',
+        text: 'La materia fue creada correctamente.',
+        confirmButtonColor: '#2563EB',
+      });
       setNombre('');
       fetchMaterias();
     } catch (error) {
       console.error('Error al crear materia:', error);
-      toast.error('Error al crear la materia');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo crear la materia.',
+        confirmButtonColor: '#2563EB',
+      });
     }
   };
 
@@ -104,15 +120,21 @@ export const GestionMaterias = () => {
     if (confirmacion.isConfirmed) {
       try {
         await MateriaService.deleteMateria(id);
-        toast.success('Materia eliminada');
+        await Swal.fire({
+          icon: 'success',
+          title: 'Eliminada',
+          text: 'La materia fue eliminada correctamente.',
+          confirmButtonColor: '#2563EB',
+        });
         fetchMaterias();
       } catch (error) {
         console.error('Error al eliminar la materia:', error);
-        if (error.response?.data?.message) {
-          toast.error(`Error: ${error.response.data.message}`);
-        } else {
-          toast.error('Error al eliminar la materia');
-        }
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo eliminar la materia.',
+          confirmButtonColor: '#2563EB',
+        });
       }
     }
   };
@@ -132,11 +154,21 @@ export const GestionMaterias = () => {
         for (const nombre of faltantes) {
           await MateriaService.createMateria({ nombre_Materia: nombre });
         }
-        toast.success('Materias agregadas correctamente');
+        await Swal.fire({
+          icon: 'success',
+          title: 'Materias agregadas',
+          text: 'Todas las materias faltantes fueron agregadas correctamente.',
+          confirmButtonColor: '#2563EB',
+        });
         fetchMaterias();
       } catch (error) {
         console.error('Error al agregar materias:', error);
-        toast.error('Error al agregar las materias');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudieron agregar las materias.',
+          confirmButtonColor: '#2563EB',
+        });
       }
     }
   };
