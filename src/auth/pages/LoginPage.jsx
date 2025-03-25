@@ -164,7 +164,7 @@ export default function LoginPage() {
                   type="email"
                   value={email_Usuario}
                   onChange={(e) => setEmail_Usuario(e.target.value)}
-                  className="block w-full rounded-lg border border-gray-300 p-3 shadow-md focus:border-blue-500 focus:ring-blue-500 sm:text-sm transition ease-in-out duration-150"
+                  className="block w-full rounded-lg border border-gray-300 p-3 shadow-md text-black focus:border-blue-500 focus:ring-blue-500 sm:text-sm transition ease-in-out duration-150"
                   placeholder="Ingresa tu correo electrónico"
                   required
                   autoComplete="current-password"
@@ -186,7 +186,7 @@ export default function LoginPage() {
                   type="password"
                   value={contraseña_Usuario}
                   onChange={(e) => setContraseña_Usuario(e.target.value)}
-                  className="block w-full rounded-lg border border-gray-300 p-3 shadow-md focus:border-blue-500 focus:ring-blue-500 sm:text-sm transition ease-in-out duration-150"
+                  className="block w-full rounded-lg border border-gray-300 p-3 shadow-md text-black focus:border-blue-500 focus:ring-blue-500 sm:text-sm transition ease-in-out duration-150"
                   placeholder="Ingresa tu contraseña"
                   required
                   autoComplete="current-password"

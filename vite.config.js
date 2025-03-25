@@ -6,4 +6,7 @@ export default defineConfig({
   build: {
     minify: 'esbuild',
   },
+  optimizeDeps: {
+    include: ['jwt-decode'], // 👈 Forzar que Vite lo optimice bien
+  },
 });

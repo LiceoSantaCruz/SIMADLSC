@@ -219,6 +219,7 @@ export const AsistenciaEst = () => {
       });
       setEstudiantes([]);
     } catch (err) {
+      const error = err.response.data.error;
       Swal.fire({
         icon: "error",
         title: "Error",
