@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import GradoService from '../Service/GradoService';
 import { Button } from '../../../../../../Components/ui/Button';
 import { Input } from '../../../../../../Components/ui/Input';
-import { toast } from 'sonner';
 import { Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 
@@ -16,18 +15,22 @@ export const GestionGrados = () => {
   const fetchGrados = async () => {
     try {
       const data = await GradoService.getGrados();
-      const ordenados = data.sort((a, b) => 
-        todosLosGrados.indexOf(a.nivel) - todosLosGrados.indexOf(b.nivel)
+      const ordenados = data.sort(
+        (a, b) => todosLosGrados.indexOf(a.nivel) - todosLosGrados.indexOf(b.nivel)
       );
       setGrados(ordenados);
 
-      // Buscar faltantes
       const existentes = ordenados.map((g) => g.nivel);
       const faltan = todosLosGrados.filter((nivel) => !existentes.includes(nivel));
       setFaltantes(faltan);
     } catch (error) {
       console.error('Error al obtener los grados:', error);
-      toast.error('Error al obtener los grados');
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudieron cargar los grados.',
+        confirmButtonColor: '#2563EB',
+      });
     }
   };
 
@@ -38,26 +41,47 @@ export const GestionGrados = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const capitalizado = nivel.trim().charAt(0).toUpperCase() + nivel.trim().slice(1).toLowerCase();
+    const capitalizado =
+      nivel.trim().charAt(0).toUpperCase() + nivel.trim().slice(1).toLowerCase();
 
     if (!todosLosGrados.includes(capitalizado)) {
-      toast.warning('Solo se permiten los grados: Sétimo a Undécimo');
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Grado no permitido',
+        text: 'Solo se permiten los grados: Sétimo, Octavo, Noveno, Décimo, Undécimo.',
+        confirmButtonColor: '#2563EB',
+      });
       return;
     }
 
     if (grados.some((g) => g.nivel === capitalizado)) {
-      toast.warning('Ese grado ya está registrado');
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Grado duplicado',
+        text: `El grado "${capitalizado}" ya está registrado.`,
+        confirmButtonColor: '#2563EB',
+      });
       return;
     }
 
     try {
       await GradoService.createGrado({ nivel: capitalizado });
-      toast.success('Grado creado correctamente');
+      await Swal.fire({
+        icon: 'success',
+        title: 'Grado creado',
+        text: `El grado "${capitalizado}" fue creado exitosamente.`,
+        confirmButtonColor: '#2563EB',
+      });
       setNivel('');
       fetchGrados();
     } catch (error) {
       console.error('Error al crear el grado:', error);
-      toast.error('Error al crear el grado');
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo crear el grado.',
+        confirmButtonColor: '#2563EB',
+      });
     }
   };
 
@@ -75,18 +99,28 @@ export const GestionGrados = () => {
     if (confirmacion.isConfirmed) {
       try {
         await GradoService.deleteGrado(id);
-        toast.success('Grado eliminado');
+        await Swal.fire({
+          icon: 'success',
+          title: 'Eliminado',
+          text: 'El grado fue eliminado correctamente.',
+          confirmButtonColor: '#2563EB',
+        });
         fetchGrados();
       } catch (error) {
         console.error('Error al eliminar el grado:', error);
-        toast.error('Error al eliminar el grado');
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo eliminar el grado.',
+          confirmButtonColor: '#2563EB',
+        });
       }
     }
   };
 
   const handleAgregarTodos = async () => {
     const confirmacion = await Swal.fire({
-      title: 'Agregar grados Sétimo a Undécimo',
+      title: 'Agregar grados',
       text: `Se agregarán los siguientes grados: ${faltantes.join(', ')}`,
       icon: 'question',
       showCancelButton: true,
@@ -99,11 +133,21 @@ export const GestionGrados = () => {
         for (const nivel of faltantes) {
           await GradoService.createGrado({ nivel });
         }
-        toast.success('Grados agregados correctamente');
+        await Swal.fire({
+          icon: 'success',
+          title: 'Grados agregados',
+          text: 'Todos los grados faltantes fueron agregados correctamente.',
+          confirmButtonColor: '#2563EB',
+        });
         fetchGrados();
       } catch (error) {
-        console.error('Error al agregar los grados:', error);
-        toast.error('Error al agregar los grados');
+        console.error('Error al agregar grados:', error);
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudieron agregar los grados.',
+          confirmButtonColor: '#2563EB',
+        });
       }
     }
   };
@@ -112,7 +156,6 @@ export const GestionGrados = () => {
     <div className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-lg mt-10 space-y-6">
       <h2 className="text-2xl font-bold">Gestión de Grados</h2>
 
-      {/* Botón para agregar todos los grados */}
       {faltantes.length > 0 && (
         <Button
           onClick={handleAgregarTodos}
@@ -122,7 +165,6 @@ export const GestionGrados = () => {
         </Button>
       )}
 
-      {/* Formulario de creación */}
       <form onSubmit={handleSubmit} className="flex items-center gap-4">
         <Input
           type="text"
@@ -134,7 +176,6 @@ export const GestionGrados = () => {
         <Button type="submit">Agregar</Button>
       </form>
 
-      {/* Tabla de grados */}
       <div className="overflow-x-auto mt-6">
         <table className="min-w-full table-auto border text-sm">
           <thead className="bg-gray-100">

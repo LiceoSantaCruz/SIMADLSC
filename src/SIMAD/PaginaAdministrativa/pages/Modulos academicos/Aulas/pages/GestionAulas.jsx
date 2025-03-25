@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import AulaService from '../Service/AulaService';
 import { Button } from '../../../../../../Components/ui/Button';
 import { Input } from '../../../../../../Components/ui/Input';
-import { toast } from 'sonner';
 import { Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 
@@ -11,7 +10,7 @@ export const GestionAulas = () => {
   const [aulas, setAulas] = useState([]);
   const [faltantes, setFaltantes] = useState([]);
 
-  const aulasBase = ['1', '2', '3', '4', '5', '6']; // Puedes modificar este array según lo que necesites
+  const aulasBase = ['1', '2', '3', '4', '5', '6']; // Ajustá según tus necesidades
 
   const fetchAulas = async () => {
     try {
@@ -28,7 +27,12 @@ export const GestionAulas = () => {
       setFaltantes(faltan);
     } catch (error) {
       console.error('Error al obtener las aulas:', error);
-      toast.error('Error al obtener las aulas');
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudieron obtener las aulas.',
+        confirmButtonColor: '#2563EB',
+      });
     }
   };
 
@@ -41,7 +45,12 @@ export const GestionAulas = () => {
     const nombreFormateado = nombre.trim();
 
     if (!nombreFormateado) {
-      toast.warning('Ingrese el nombre del aula');
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Campo vacío',
+        text: 'Ingrese el nombre del aula.',
+        confirmButtonColor: '#2563EB',
+      });
       return;
     }
 
@@ -61,12 +70,22 @@ export const GestionAulas = () => {
 
     try {
       await AulaService.createAula({ nombre_Aula: nombreFormateado });
-      toast.success('Aula creada correctamente');
+      await Swal.fire({
+        icon: 'success',
+        title: 'Aula creada',
+        text: `El aula "${nombreFormateado}" fue registrada correctamente.`,
+        confirmButtonColor: '#2563EB',
+      });
       setNombre('');
       fetchAulas();
     } catch (error) {
       console.error('Error al crear aula:', error);
-      toast.error('Error al crear el aula');
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo crear el aula.',
+        confirmButtonColor: '#2563EB',
+      });
     }
   };
 
@@ -84,15 +103,21 @@ export const GestionAulas = () => {
     if (confirmacion.isConfirmed) {
       try {
         await AulaService.deleteAula(id);
-        toast.success('Aula eliminada');
+        await Swal.fire({
+          icon: 'success',
+          title: 'Aula eliminada',
+          text: 'El aula fue eliminada correctamente.',
+          confirmButtonColor: '#2563EB',
+        });
         fetchAulas();
       } catch (error) {
         console.error('Error al eliminar aula:', error);
-        if (error.response?.data?.message) {
-          toast.error(`Error: ${error.response.data.message}`);
-        } else {
-          toast.error('Error al eliminar el aula');
-        }
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.response?.data?.message || 'No se pudo eliminar el aula.',
+          confirmButtonColor: '#2563EB',
+        });
       }
     }
   };
@@ -112,11 +137,21 @@ export const GestionAulas = () => {
         for (const nombre of faltantes) {
           await AulaService.createAula({ nombre_Aula: nombre });
         }
-        toast.success('Aulas agregadas correctamente');
+        await Swal.fire({
+          icon: 'success',
+          title: 'Aulas agregadas',
+          text: 'Se agregaron todas las aulas faltantes correctamente.',
+          confirmButtonColor: '#2563EB',
+        });
         fetchAulas();
       } catch (error) {
         console.error('Error al agregar aulas:', error);
-        toast.error('Error al agregar las aulas');
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudieron agregar las aulas.',
+          confirmButtonColor: '#2563EB',
+        });
       }
     }
   };
