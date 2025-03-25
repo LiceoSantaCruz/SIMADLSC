@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import UseFetchSecciones from '../Hooks/UseFetchSecciones';
 import SeccionesService from '../Services/SeccionesService';
-import EstudiantesService from '../../../Estudiantes/Service/EstudiantesService';
+import EstudiantesService from '../../../../pages/Modulos academicos/Estudiantes/Service/EstudiantesService';
 import Swal from 'sweetalert2';
 import '@sweetalert2/theme-bulma/bulma.css';
 
