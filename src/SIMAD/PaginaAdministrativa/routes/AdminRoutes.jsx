@@ -26,6 +26,9 @@ import BusquedaEstudiantes from '../../PaginaAdministrativa/pages/Modulos academ
 import EventosEdit from '../pages/Eventos/EventosEdit';
 import GestionMatriculas from '../pages/Matricula/pages/GestionMatricula';
 import CrearSeccion from '../pages/Modulos academicos/Secciones/pages/CrearSeccion';
+import GestionGrados from '../pages/Modulos academicos/Grados/pages/GestionGrados';
+import GestionAulas from '../pages/Modulos academicos/Aulas/pages/GestionAulas';
+import GestionMaterias from '../pages/Modulos academicos/Materias/pages/GestionMaterias';
 import AsignaSeccionPage from '../pages/Matricula/pages/AsignaSeccionPage';
 import ReporteAsistenciaSeccion from '../pages/Asistencias/ReporteAsistenciaSeccion';
 import { MatriculaOrdinaria } from '../pages/Matricula/pages/MatriculaOrdinaria';
@@ -123,6 +126,27 @@ export const AdminRoutes = () => {
           <>
             <Route path="/gestion-usuarios" element={<GestionUsuarios />} />
             <Route path="/crear-usuarios" element={<CrearUsuario />} />
+          </>
+        )}
+
+        {/* Rutas de de grados  */}
+        {role === 'superadmin'  && (
+          <>
+            <Route path="/Gestion-grados" element={<GestionGrados/>} />
+          </>
+        )}
+        
+        {/* Rutas de de Aulas  */}
+        {role === 'superadmin'  && (
+          <>
+            <Route path="/Gestion-aulas" element={<GestionAulas/>} />
+          </>
+        )}
+
+        {/* Rutas de de materias  */}
+        {role === 'superadmin'  && (
+          <>
+            <Route path="/Gestion-materias" element={<GestionMaterias/>} />
           </>
         )}
 

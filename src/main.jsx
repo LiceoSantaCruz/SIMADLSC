@@ -5,8 +5,10 @@ import { SimadApp } from './SimadApp';
 
 
 
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <SimadApp />
   </React.StrictMode>
+  
 );

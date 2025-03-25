@@ -115,7 +115,8 @@ export const SideBar = () => {
                                 <Link to="/asistencia-estudiantes" className="block hover:text-blue-400"> Asistencia estudiantes</Link>
                                 <Link to="/justificacion-ausencias" className="block hover:text-blue-400">Justificación ausencias</Link>
                                 <Link to="/reporte-asistencia" className="block hover:text-blue-400">Reporte asistencia</Link>
-                                <Link to="/gestion-asistencia" className="block hover:text-blue-400">Gestión Asistencia</Link>
+                                <Link to="/gestion-asistencia" className="block hover:text-blue-400">Gestión asistencia</Link>
+                                <Link to="/reporte-asistencia-seccion" className="block py-1 text-sm hover:text-blue-500">Reporte asistencia sección</Link>
                             </div>
                         )}
                     </div>
@@ -243,13 +244,8 @@ export const SideBar = () => {
                     </div>
                 )}
 
-
-
-            </nav>
-
-
-            {/* Gestión Académica */}
-            {(role === 'admin' || role === 'superadmin' || role === 'estudiante') && (
+  {/* Gestión Académica */}
+  {(role === 'admin' || role === 'superadmin' || role === 'estudiante') && (
                 <div>
                     <button
                         onClick={() => toggleSection('gestionAcademica')}
@@ -259,7 +255,7 @@ export const SideBar = () => {
                         aria-controls="submenu-gestionAcademica"
                     >
                         <FaSchool className="text-cyan-400" aria-hidden="true" />
-                        {isOpen && <span className="ml-3" id="gestionAcademica-label">Gestión Académica</span>}
+                        {isOpen && <span className="ml-3" id="gestionAcademica-label">Gestión académica</span>}
                         {isOpen && (
                             <FaChevronDown
                                 className={`ml-auto transform transition-transform ${openSection === 'gestionAcademica' ? 'rotate-180' : ''
@@ -275,7 +271,7 @@ export const SideBar = () => {
                             aria-labelledby="gestionAcademica-label"
                             className="ml-8 text-sm text-gray-300 space-y-1"
                         >
-                            <Link to="/grados" className="flex items-center gap-2 hover:text-cyan-400 transition">
+                            <Link to="/Gestion-grados" className="flex items-center gap-2 hover:text-cyan-400 transition">
                                 <FaListOl className="text-cyan-400" /> Grados
                             </Link>
 
@@ -283,20 +279,16 @@ export const SideBar = () => {
                                 <FaThLarge className="text-cyan-400" /> Secciones
                             </Link>
 
-                            <Link to="/aulas" className="flex items-center gap-2 hover:text-cyan-400 transition">
+                            <Link to="/Gestion-aulas" className="flex items-center gap-2 hover:text-cyan-400 transition">
                                 <FaDoorOpen className="text-cyan-400" /> Aulas
                             </Link>
 
-                            <Link to="/materias" className="flex items-center gap-2 hover:text-cyan-400 transition">
+                            <Link to="/Gestion-materias" className="flex items-center gap-2 hover:text-cyan-400 transition">
                                 <FaBookOpen className="text-cyan-400" /> Materias
                             </Link>
 
-                            <Link to="/estudiantes" className="flex items-center gap-2 hover:text-cyan-400 transition">
+                            <Link to="/busqueda-estudiantes" className="flex items-center gap-2 hover:text-cyan-400 transition">
                                 <FaUserGraduate className="text-cyan-400" /> Estudiantes
-                            </Link>
-
-                            <Link to="/periodos" className="flex items-center gap-2 hover:text-cyan-400 transition">
-                                <FaCalendarAlt className="text-cyan-400" /> Periodos
                             </Link>
 
                         </div>
@@ -304,6 +296,11 @@ export const SideBar = () => {
                 </div>
             )}
 
+
+            </nav>
+
+
+          
 
 
 
