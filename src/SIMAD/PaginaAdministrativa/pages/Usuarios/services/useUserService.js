@@ -1,4 +1,4 @@
-//const BASE_URL = 'https://simadlsc-backend-production.up.railway.app/users';  // URL base para las peticiones
+// const BASE_URL = 'https://simadlsc-backend-production.up.railway.app/users';  // URL base para las peticiones
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -20,6 +20,28 @@ export const getAllUsers = async (token) => {
     return await response.json();
   } catch (error) {
     console.error('Error en getAllUsers:', error);
+    throw error;
+  }
+};
+
+// ✅ Obtener todas las materias
+export const getAllMaterias = async (token) => {
+  try {
+    const response = await fetch(`${API_URL}/materias`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al obtener las materias');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error en getAllMaterias:', error);
     throw error;
   }
 };
