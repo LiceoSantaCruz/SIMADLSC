@@ -180,103 +180,114 @@ export const GestionHorario = () => {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-5xl mx-auto px-4">
-        <h1 className="text-4xl font-extrabold text-center text-gray-900 mb-8">Gestión de Horarios</h1>
-
-        {/* Filtro por Sección (solo para admin/superadmin) */}
-        {(role === 'admin' || role === 'superadmin')  && !formularioAbierto && secciones && (
-          <div className="mb-6">
-            <label className="block text-lg font-medium text-gray-700 mb-2">
-              Seleccionar Sección
-            </label>
-            <select
-              value={seccionSeleccionada}
-              onChange={(e) => setSeccionSeleccionada(e.target.value)}
-              className="border p-2 rounded-lg w-full"
-            >
-              <option value="">Todas las secciones</option>
-              {secciones.map((sec) => (
-                <option key={sec.id_Seccion} value={sec.id_Seccion}>
-                  {sec.nombre_Seccion}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
-          <ToggleButton
-            label={formularioAbierto ? 'Cerrar Formulario' : 'Crear Horario'}
-            isSelected={formularioAbierto}
-            onClick={toggleFormulario}
-            color="green"
-          />
-          <button
-            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition"
-            onClick={exportarPdf}
-            disabled={horariosFiltrados.length === 0 || isLoading}
-            title={horariosFiltrados.length === 0 ? "No hay horarios para exportar" : "Exportar todos los horarios como PDF"}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 text-gray-900 dark:text-white">
+    <div className="max-w-5xl mx-auto px-4">
+      <h1 className="text-4xl font-extrabold text-center mb-8">Gestión de Horarios</h1>
+  
+      {/* Filtro por Sección */}
+      {(role === 'admin' || role === 'superadmin') && !formularioAbierto && secciones && (
+        <div className="mb-6">
+          <label className="block text-lg font-medium mb-2 text-gray-700 dark:text-gray-200">
+            Seleccionar Sección
+          </label>
+          <select
+            value={seccionSeleccionada}
+            onChange={(e) => setSeccionSeleccionada(e.target.value)}
+            className="border p-2 rounded-lg w-full dark:bg-gray-800 dark:border-gray-600 dark:text-white"
           >
-            Exportar Todos los Horarios como PDF
-          </button>
+            <option value="">Todas las secciones</option>
+            {secciones.map((sec) => (
+              <option key={sec.id_Seccion} value={sec.id_Seccion}>
+                {sec.nombre_Seccion}
+              </option>
+            ))}
+          </select>
         </div>
-
-        {isLoading && <LoadingIndicator />}
-        {hasError && (
-          <ErrorMessage message="Hubo un problema al cargar los datos. Por favor, intenta nuevamente." />
-        )}
-
-        {!isLoading && !hasError && (
-          <>
-            {formularioAbierto ? (
-              <div className="mb-8">
-                <FormularioHorarioEstudiante
-                  onSubmitSuccess={horarioEdit ? handleUpdateHorario : handleSubmitSuccess}
-                  onCancel={() => setFormularioAbierto(false)}
-                  initialData={horarioEdit}
-                  grados={grados}
-                  materias={materias}
-                  profesores={profesores}
-                  aulas={aulas}
-                />
-              </div>
-            ) : (
-              materias && profesores && aulas && (
-                <>
-                  <div className="bg-white shadow-lg rounded-md p-6">
-                    <ListaHorarios
-                      horarios={currentHorarios}
-                      onEditHorario={handleEditHorario}
-                      setHorarios={setHorarios}
-                      materias={materias}
-                      profesores={profesores}
-                      aulas={aulas}
-                      secciones={secciones}
-                    />
-                  </div>
-                  <div className="flex flex-wrap justify-center mt-6">
-                    {Array.from({ length: Math.ceil(horariosFiltrados.length / itemsPerPage) }, (_, index) => (
+      )}
+  
+      {/* Botones */}
+      <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+        <ToggleButton
+          label={formularioAbierto ? 'Cerrar Formulario' : 'Crear Horario'}
+          isSelected={formularioAbierto}
+          onClick={toggleFormulario}
+          color="green"
+        />
+        <button
+          className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition disabled:opacity-50"
+          onClick={exportarPdf}
+          disabled={horariosFiltrados.length === 0 || isLoading}
+          title={
+            horariosFiltrados.length === 0
+              ? "No hay horarios para exportar"
+              : "Exportar todos los horarios como PDF"
+          }
+        >
+          Exportar Todos los Horarios como PDF
+        </button>
+      </div>
+  
+      {/* Estados */}
+      {isLoading && <LoadingIndicator />}
+      {hasError && (
+        <ErrorMessage message="Hubo un problema al cargar los datos. Por favor, intenta nuevamente." />
+      )}
+  
+      {/* Contenido principal */}
+      {!isLoading && !hasError && (
+        <>
+          {formularioAbierto ? (
+            <div className="mb-8">
+              <FormularioHorarioEstudiante
+                onSubmitSuccess={horarioEdit ? handleUpdateHorario : handleSubmitSuccess}
+                onCancel={() => setFormularioAbierto(false)}
+                initialData={horarioEdit}
+                grados={grados}
+                materias={materias}
+                profesores={profesores}
+                aulas={aulas}
+              />
+            </div>
+          ) : (
+            materias && profesores && aulas && (
+              <>
+                <div className="bg-white dark:bg-gray-800 shadow-lg rounded-md p-6">
+                  <ListaHorarios
+                    horarios={currentHorarios}
+                    onEditHorario={handleEditHorario}
+                    setHorarios={setHorarios}
+                    materias={materias}
+                    profesores={profesores}
+                    aulas={aulas}
+                    secciones={secciones}
+                  />
+                </div>
+                <div className="flex flex-wrap justify-center mt-6">
+                  {Array.from(
+                    { length: Math.ceil(horariosFiltrados.length / itemsPerPage) },
+                    (_, index) => (
                       <button
                         key={index + 1}
                         onClick={() => paginate(index + 1)}
-                        className={`mx-2 my-1 px-4 py-2 rounded-md transition ${
+                        className={`mx-2 my-1 px-4 py-2 rounded-md transition text-sm ${
                           currentPage === index + 1
                             ? 'bg-blue-600 text-white'
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600'
                         }`}
                       >
                         {index + 1}
                       </button>
-                    ))}
-                  </div>
-                </>
-              )
-            )}
-          </>
-        )}
-      </div>
+                    )
+                  )}
+                </div>
+              </>
+            )
+          )}
+        </>
+      )}
     </div>
+  </div>
+  
   );
 };
 

@@ -140,99 +140,98 @@ export default function AsignaSeccionPage() {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-3xl font-bold mb-2 text-gray-800">
-          Asignar Sección a Matrículas Aceptadas
-        </h2>
-        <p className="text-gray-600 mb-6">
-          Seleccione una o varias matrículas (todas con el mismo nivel) y elija la sección.
-        </p>
+  <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg p-6">
+    <h2 className="text-3xl font-bold mb-2 text-gray-800 dark:text-white">
+      Asignar Sección a Matrículas Aceptadas
+    </h2>
+    <p className="text-gray-600 dark:text-gray-300 mb-6">
+      Seleccione una o varias matrículas (todas con el mismo nivel) y elija la sección.
+    </p>
 
-        {/* FILTROS */}
-        <div className="mb-6">
-          <label className="block text-lg font-semibold mb-2">Filtrar por Nivel</label>
-          <select
-            className="w-full border rounded-lg p-3 mb-4"
-            value={selectedNivel}
-            onChange={(e) => setSelectedNivel(e.target.value)}
-          >
-            <option value="">Todos los Niveles</option>
-            {uniqueNiveles.map((nivel) => (
-              <option key={nivel} value={nivel}>
-                {nivelMap[nivel]}
-              </option>
-            ))}
-          </select>
+    {/* FILTROS */}
+    <div className="mb-6">
+      <label className="block text-lg font-semibold mb-2 text-gray-800 dark:text-white">Filtrar por Nivel</label>
+      <select
+        className="w-full border rounded-lg p-3 mb-4 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600"
+        value={selectedNivel}
+        onChange={(e) => setSelectedNivel(e.target.value)}
+      >
+        <option value="">Todos los Niveles</option>
+        {uniqueNiveles.map((nivel) => (
+          <option key={nivel} value={nivel}>
+            {nivelMap[nivel]}
+          </option>
+        ))}
+      </select>
 
-          <label className="block text-lg font-semibold mb-2">Filtrar por Nombre</label>
-          <input
-            type="text"
-            className="w-full border rounded-lg p-3 mb-4"
-            placeholder="Buscar por nombre o apellido"
-            value={searchName}
-            onChange={(e) => setSearchName(e.target.value)}
-          />
+      <label className="block text-lg font-semibold mb-2 text-gray-800 dark:text-white">Filtrar por Nombre</label>
+      <input
+        type="text"
+        className="w-full border rounded-lg p-3 mb-4 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600"
+        placeholder="Buscar por nombre o apellido"
+        value={searchName}
+        onChange={(e) => setSearchName(e.target.value)}
+      />
 
-          <h3 className="text-xl font-semibold mb-2">Matrículas Sin Sección</h3>
-          <div className="border rounded-lg p-4 max-h-80 overflow-y-auto">
-            {filteredMatriculas.length === 0 ? (
-              <p className="text-gray-500 text-center">No hay matrículas aceptadas.</p>
-            ) : (
-              filteredMatriculas.map((mat) => {
-                const nivelNum = normalizarNivel(mat.estudiante.grado.nivel);
-                return (
-                  <label
-                    key={mat.id_Matricula}
-                    className="flex items-center p-2 hover:bg-gray-50 rounded-md mb-2 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedMatriculas.some(
-                        (m) => m.id_Matricula === mat.id_Matricula
-                      )}
-                      onChange={() => toggleSelect(mat)}
-                      className="mr-3"
-                    />
-                    <div>
-                      <p className="font-semibold text-gray-700">
-                        Boleta #{mat.id_Matricula} - {mat.estudiante.nombre_Estudiante} {mat.estudiante.apellido1_Estudiante}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Nivel: {nivelMap[nivelNum]}
-                      </p>
-                    </div>
-                  </label>
-                );
-              })
-            )}
-          </div>
-        </div>
-
-        {/* SELECCIÓN DE SECCIÓN */}
-        <div className="mb-6">
-          <label className="block text-lg font-semibold mb-2">Seleccione Sección</label>
-          <select
-            className="w-full border rounded-lg p-3"
-            value={selectedSeccion}
-            onChange={(e) => setSelectedSeccion(e.target.value)}
-          >
-            <option value="">Seleccione Sección</option>
-            {filteredSecciones.map((sec) => (
-              <option key={sec.id_Seccion} value={sec.id_Seccion}>
-                {sec.nombre_Seccion} (Nivel {nivelMap[sec.gradoId]})
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* BOTÓN PARA ASIGNAR */}
-        <button
-          onClick={handleAsignar}
-          className="w-full bg-green-500 text-white font-semibold py-3 rounded-lg hover:bg-green-600 transition-colors"
-        >
-          Asignar Sección
-        </button>
+      <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">Matrículas Sin Sección</h3>
+      <div className="border rounded-lg p-4 max-h-80 overflow-y-auto bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+        {filteredMatriculas.length === 0 ? (
+          <p className="text-gray-500 dark:text-gray-400 text-center">No hay matrículas aceptadas.</p>
+        ) : (
+          filteredMatriculas.map((mat) => {
+            const nivelNum = normalizarNivel(mat.estudiante.grado.nivel);
+            return (
+              <label
+                key={mat.id_Matricula}
+                className="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md mb-2 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedMatriculas.some((m) => m.id_Matricula === mat.id_Matricula)}
+                  onChange={() => toggleSelect(mat)}
+                  className="mr-3"
+                />
+                <div>
+                  <p className="font-semibold text-gray-700 dark:text-gray-200">
+                    Boleta #{mat.id_Matricula} - {mat.estudiante.nombre_Estudiante} {mat.estudiante.apellido1_Estudiante}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Nivel: {nivelMap[nivelNum]}
+                  </p>
+                </div>
+              </label>
+            );
+          })
+        )}
       </div>
     </div>
+
+    {/* SELECCIÓN DE SECCIÓN */}
+    <div className="mb-6">
+      <label className="block text-lg font-semibold mb-2 text-gray-800 dark:text-white">Seleccione Sección</label>
+      <select
+        className="w-full border rounded-lg p-3 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600"
+        value={selectedSeccion}
+        onChange={(e) => setSelectedSeccion(e.target.value)}
+      >
+        <option value="">Seleccione Sección</option>
+        {filteredSecciones.map((sec) => (
+          <option key={sec.id_Seccion} value={sec.id_Seccion}>
+            {sec.nombre_Seccion} (Nivel {nivelMap[sec.gradoId]})
+          </option>
+        ))}
+      </select>
+    </div>
+
+    {/* BOTÓN PARA ASIGNAR */}
+    <button
+      onClick={handleAsignar}
+      className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors"
+    >
+      Asignar Sección
+    </button>
+  </div>
+</div>
+
   );
 }

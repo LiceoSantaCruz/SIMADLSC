@@ -225,178 +225,179 @@ const EventosEdit = () => {
   }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen flex justify-center items-center">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg"
-      >
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Editar Evento</h2>
+    <div className="p-6 bg-gray-100 dark:bg-gray-900 min-h-screen flex justify-center items-center">
+  <form
+    onSubmit={handleSubmit}
+    className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-lg"
+  >
+    <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
+      Editar Evento
+    </h2>
 
-        {/* Campo de Nombre del Evento */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Nombre del Evento</label>
-          <input
-            type="text"
-            name="nombre_Evento"
-            value={formData.nombre_Evento}
-            onChange={handleChange}
-            className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            required
-          />
-        </div>
-
-        {/* Campo de Descripción */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Descripción</label>
-          <textarea
-            name="descripcion_Evento"
-            value={formData.descripcion_Evento}
-            onChange={handleChange}
-            className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            rows="4"
-          />
-        </div>
-
-        {/* Campo de Fecha del Evento */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Fecha del Evento</label>
-          <input
-            type="date"
-            name="fecha_Evento"
-            value={formData.fecha_Evento}
-            onChange={handleChange}
-            className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            required
-            min={(() => {
-              const today = new Date();
-              today.setDate(today.getDate() + 3);
-              const day = String(today.getDate()).padStart(2, '0');
-              const month = String(today.getMonth() + 1).padStart(2, '0'); // Los meses empiezan en 0
-              const year = today.getFullYear();
-              return `${year}-${month}-${day}`;
-            })()}
-          />
-          {/* Mostrar la fecha formateada */}
-          {formData.fecha_Evento && (
-            <p className="mt-2 text-sm text-gray-600">
-              Fecha seleccionada: {formatFecha(formData.fecha_Evento)}
-            </p>
-          )}
-        </div>
-
-        {/* Campos de Hora de Inicio y Fin */}
-        <div className="mb-4 flex space-x-4">
-          <div className="w-1/2">
-            <label className="block text-sm font-medium mb-2">Hora de Inicio</label>
-            <input
-              type="time"
-              name="hora_inicio_Evento"
-              value={formData.hora_inicio_Evento}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              required
-            />
-          </div>
-          <div className="w-1/2">
-            <label className="block text-sm font-medium mb-2">Hora de Fin</label>
-            <input
-              type="time"
-              name="hora_fin_Evento"
-              value={formData.hora_fin_Evento}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              required
-            />
-          </div>
-        </div>
-
-        {/* Campo de Dirigido a */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Dirigido a</label>
-          {loadingDirigidosA ? (
-            <p>Cargando públicos...</p>
-          ) : errorDirigidosA ? (
-            <p className="text-red-500">Error al cargar los públicos: {errorDirigidosA}</p>
-          ) : (
-            <select
-              name="id_dirigido_a"
-              value={formData.id_dirigido_a}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              required
-            >
-              <option value="">Selecciona un público</option>
-              {dirigidosA.map((publico) => (
-                <option key={publico.id} value={publico.id}>
-                  {publico.nombre}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-
-        {/* Campo de Ubicación */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Ubicación</label>
-          {loadingUbicaciones ? (
-            <p>Cargando ubicaciones...</p>
-          ) : errorUbicaciones ? (
-            <p className="text-red-500">Error al cargar ubicaciones: {errorUbicaciones}</p>
-          ) : (
-            <select
-              name="ubicacion"
-              value={formData.ubicacion}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              required
-            >
-              <option value="">Selecciona una ubicación</option>
-              {ubicaciones.map((ubicacion) => (
-                <option key={ubicacion.id} value={ubicacion.id}>
-                  {ubicacion.nombre}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-
-        {/* Campo de Tipo de Evento */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Tipo de Evento</label>
-          {loadingTiposEventos ? (
-            <p>Cargando tipos de eventos...</p>
-          ) : errorTiposEventos ? (
-            <p className="text-red-500">Error al cargar tipos de eventos: {errorTiposEventos}</p>
-          ) : (
-            <select
-              name="tipo_evento"
-              value={formData.tipo_evento}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              required
-            >
-              <option value="">Selecciona un tipo de evento</option>
-              {tiposEventos.map((tipo) => (
-                <option key={tipo.id} value={tipo.id}>
-                  {tipo.nombre}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-
-        {/* Botón de Envío */}
-        <button
-          type="submit"
-          disabled={isLoading}
-          className={`w-full bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 transition ${
-            isLoading ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-        >
-          {isLoading ? 'Actualizando...' : 'Actualizar Evento'}
-        </button>
-      </form>
+    {/* Nombre del Evento */}
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+        Nombre del Evento
+      </label>
+      <input
+        type="text"
+        name="nombre_Evento"
+        value={formData.nombre_Evento}
+        onChange={handleChange}
+        className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+        required
+      />
     </div>
+
+    {/* Descripción */}
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2 dark:text-gray-200">Descripción</label>
+      <textarea
+        name="descripcion_Evento"
+        value={formData.descripcion_Evento}
+        onChange={handleChange}
+        rows="4"
+        className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+      />
+    </div>
+
+    {/* Fecha */}
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2 dark:text-gray-200">Fecha del Evento</label>
+      <input
+        type="date"
+        name="fecha_Evento"
+        value={formData.fecha_Evento}
+        onChange={handleChange}
+        className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+        required
+        min={(() => {
+          const today = new Date();
+          today.setDate(today.getDate() + 3);
+          return today.toISOString().split("T")[0];
+        })()}
+      />
+      {formData.fecha_Evento && (
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          Fecha seleccionada: {formatFecha(formData.fecha_Evento)}
+        </p>
+      )}
+    </div>
+
+    {/* Hora Inicio y Fin */}
+    <div className="mb-4 flex space-x-4">
+      <div className="w-1/2">
+        <label className="block text-sm font-medium mb-2 dark:text-gray-200">Hora de Inicio</label>
+        <input
+          type="time"
+          name="hora_inicio_Evento"
+          value={formData.hora_inicio_Evento}
+          onChange={handleChange}
+          className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+          required
+        />
+      </div>
+      <div className="w-1/2">
+        <label className="block text-sm font-medium mb-2 dark:text-gray-200">Hora de Fin</label>
+        <input
+          type="time"
+          name="hora_fin_Evento"
+          value={formData.hora_fin_Evento}
+          onChange={handleChange}
+          className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+          required
+        />
+      </div>
+    </div>
+
+    {/* Dirigido a */}
+    <div className="mb-6">
+      <label className="block text-sm font-medium mb-2 dark:text-gray-200">Dirigido a</label>
+      {loadingDirigidosA ? (
+        <p className="dark:text-gray-300">Cargando públicos...</p>
+      ) : errorDirigidosA ? (
+        <p className="text-red-500">{errorDirigidosA}</p>
+      ) : (
+        <select
+          name="id_dirigido_a"
+          value={formData.id_dirigido_a}
+          onChange={handleChange}
+          className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+          required
+        >
+          <option value="">Selecciona un público</option>
+          {dirigidosA.map((publico) => (
+            <option key={publico.id} value={publico.id}>
+              {publico.nombre}
+            </option>
+          ))}
+        </select>
+      )}
+    </div>
+
+    {/* Ubicación */}
+    <div className="mb-6">
+      <label className="block text-sm font-medium mb-2 dark:text-gray-200">Ubicación</label>
+      {loadingUbicaciones ? (
+        <p className="dark:text-gray-300">Cargando ubicaciones...</p>
+      ) : errorUbicaciones ? (
+        <p className="text-red-500">{errorUbicaciones}</p>
+      ) : (
+        <select
+          name="ubicacion"
+          value={formData.ubicacion}
+          onChange={handleChange}
+          className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+          required
+        >
+          <option value="">Selecciona una ubicación</option>
+          {ubicaciones.map((ubicacion) => (
+            <option key={ubicacion.id} value={ubicacion.id}>
+              {ubicacion.nombre}
+            </option>
+          ))}
+        </select>
+      )}
+    </div>
+
+    {/* Tipo de Evento */}
+    <div className="mb-6">
+      <label className="block text-sm font-medium mb-2 dark:text-gray-200">Tipo de Evento</label>
+      {loadingTiposEventos ? (
+        <p className="dark:text-gray-300">Cargando tipos de eventos...</p>
+      ) : errorTiposEventos ? (
+        <p className="text-red-500">{errorTiposEventos}</p>
+      ) : (
+        <select
+          name="tipo_evento"
+          value={formData.tipo_evento}
+          onChange={handleChange}
+          className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+          required
+        >
+          <option value="">Selecciona un tipo de evento</option>
+          {tiposEventos.map((tipo) => (
+            <option key={tipo.id} value={tipo.id}>
+              {tipo.nombre}
+            </option>
+          ))}
+        </select>
+      )}
+    </div>
+
+    {/* Botón */}
+    <button
+      type="submit"
+      disabled={isLoading}
+      className={`w-full bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 transition ${
+        isLoading ? 'opacity-50 cursor-not-allowed' : ''
+      }`}
+    >
+      {isLoading ? 'Actualizando...' : 'Actualizar Evento'}
+    </button>
+  </form>
+</div>
+
   );
 };
 

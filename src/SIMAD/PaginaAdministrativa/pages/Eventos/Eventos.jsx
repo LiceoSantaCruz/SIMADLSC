@@ -141,48 +141,54 @@ const Eventos = () => {
   const totalPages = Math.ceil(approvedEvents.length / eventsPerPage);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="container mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Lista de eventos próximos</h1>
-        </div>
-        {approvedEvents.length === 0 ? (
-          <p className="text-gray-600">No hay eventos disponibles.</p>
-        ) : (
-          <>
-            {/* Usamos un grid responsivo: 1 columna en móvil, 2 en sm y 3 en md+ */}
-            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-              {currentEvents.map((evento) => (
-                <EventoItem
-                  key={evento.id_Evento}
-                  evento={evento}
-                  handleEventoClick={handleEventoClick}
-                  formatTime={formatTime}
-                  formatDateToDMY={formatDateToDMY}
-                />
-              ))}
-            </ul>
-            {totalPages > 1 && (
-              <div className="flex justify-center mt-4">
-                {Array.from({ length: totalPages }, (_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentPage(index + 1)}
-                    className={`mx-1 px-3 py-1 rounded text-sm transition ${
-                      currentPage === index + 1
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-blue-100 text-blue-800'
-                    }`}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
-              </div>
-            )}
-          </>
-        )}
+    <div className="p-6 bg-gray-100 dark:bg-gray-900 min-h-screen">
+    <div className="container mx-auto">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+          Lista de eventos próximos
+        </h1>
       </div>
+  
+      {approvedEvents.length === 0 ? (
+        <p className="text-gray-600 dark:text-gray-300">No hay eventos disponibles.</p>
+      ) : (
+        <>
+          {/* Grid de eventos responsivo */}
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {currentEvents.map((evento) => (
+              <EventoItem
+                key={evento.id_Evento}
+                evento={evento}
+                handleEventoClick={handleEventoClick}
+                formatTime={formatTime}
+                formatDateToDMY={formatDateToDMY}
+              />
+            ))}
+          </ul>
+  
+          {/* Paginación */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-4">
+              {Array.from({ length: totalPages }, (_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentPage(index + 1)}
+                  className={`mx-1 px-3 py-1 rounded text-sm transition font-medium ${
+                    currentPage === index + 1
+                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-white hover:bg-blue-200 dark:hover:bg-blue-700'
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
+  </div>
+  
   );
 };
 

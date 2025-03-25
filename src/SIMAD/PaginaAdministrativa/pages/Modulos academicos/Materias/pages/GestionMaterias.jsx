@@ -174,70 +174,67 @@ export const GestionMaterias = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-lg mt-10 space-y-6">
-      <h2 className="text-2xl font-bold">Gestión de Materias</h2>
+    <div className="max-w-3xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow-lg mt-10 space-y-6">
+  <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Gestión de Materias</h2>
 
-      {faltantes.length > 0 && (
-        <Button
-          onClick={handleAgregarTodas}
-          className="bg-green-600 hover:bg-green-700"
-        >
-          Agregar materias faltantes
-        </Button>
-      )}
+  {faltantes.length > 0 && (
+    <Button
+      onClick={handleAgregarTodas}
+      className="bg-green-600 hover:bg-green-700"
+    >
+      Agregar materias faltantes
+    </Button>
+  )}
 
-      <form onSubmit={handleSubmit} className="flex items-center gap-4">
-        <Input
-          type="text"
-          placeholder="Ej: Educación Cívica"
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-          required
-        />
-        <Button type="submit" disabled={!nombre.trim()}>
-          Agregar
-        </Button>
-      </form>
+  <form onSubmit={handleSubmit} className="flex items-center gap-4">
+    <Input
+      type="text"
+      placeholder="Ej: Educación Cívica"
+      value={nombre}
+      onChange={(e) => setNombre(e.target.value)}
+      required
+      className="dark:bg-gray-800 dark:text-white dark:border-gray-600"
+    />
+    <Button type="submit" disabled={!nombre.trim()}>Agregar</Button>
+  </form>
 
-      <div className="overflow-x-auto mt-6">
-        <table className="min-w-full table-auto border text-sm">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-4 py-2 text-left">Nombre</th>
-              <th className="px-4 py-2 text-left">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {materias.length > 0 ? (
-              materias.map((materia) => (
-                <tr
-                  key={materia.id_Materia || materia.id || materia.nombre_Materia}
-                  className="border-t"
+  <div className="overflow-x-auto mt-6">
+    <table className="min-w-full table-auto border text-sm">
+      <thead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100">
+        <tr>
+          <th className="px-4 py-2 text-left">Nombre</th>
+          <th className="px-4 py-2 text-left">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {materias.length > 0 ? (
+          materias.map((materia) => (
+            <tr
+              key={materia.id_Materia || materia.id || materia.nombre_Materia}
+              className="border-t border-gray-200 dark:border-gray-600"
+            >
+              <td className="px-4 py-2 text-gray-900 dark:text-gray-100">{materia.nombre_Materia}</td>
+              <td className="px-4 py-2">
+                <Button
+                  onClick={() => handleDelete(materia.id_Materia || materia.id)}
+                  className="bg-red-600 hover:bg-red-700"
                 >
-                  <td className="px-4 py-2">{materia.nombre_Materia}</td>
-                  <td className="px-4 py-2">
-                    <Button
-                      onClick={() =>
-                        handleDelete(materia.id_Materia || materia.id)
-                      }
-                      className="bg-red-600 hover:bg-red-700"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="2" className="px-4 py-4 text-center text-gray-500">
-                  No hay materias registradas
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="2" className="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
+              No hay materias registradas
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
   );
 };
 

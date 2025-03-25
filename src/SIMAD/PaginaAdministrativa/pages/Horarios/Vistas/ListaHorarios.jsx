@@ -114,123 +114,124 @@ const ListaHorarios = ({ horarios, onEditHorario, setHorarios, materias, profeso
   }, [horarios]);
 
   return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-4">Lista de Horarios</h2>
-      {horariosOrdenados.length === 0 ? (
-        <p>No hay horarios creados.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white shadow-md rounded-lg">
-            <thead>
-              <tr>
-                <th className="py-2 px-4 border-b">Sección</th>
-                <th className="py-2 px-4 border-b">Profesor</th>
-                <th className="py-2 px-4 border-b">Materia</th>
-                <th className="py-2 px-4 border-b">Día</th>
-                <th className="py-2 px-4 border-b">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {horariosOrdenados.map((horario) => (
-                <React.Fragment key={horario.id_Horario}>
-                  <tr className="text-center">
-                    <td className="py-2 px-4 border-b">{horario.seccion?.nombre_Seccion || 'N/A'}</td>
-                    <td className="py-2 px-4 border-b">
-                      {horario.profesor
-                        ? `${horario.profesor.nombre_Profesor} ${horario.profesor.apellido1_Profesor} ${horario.profesor.apellido2_Profesor}`
-                        : 'N/A'}
-                    </td>
-                    <td className="py-2 px-4 border-b">{horario.materia?.nombre_Materia || 'N/A'}</td>
-                    <td className="py-2 px-4 border-b">{horario.dia_semana_Horario}</td>
-                    <td className="py-2 px-4 border-b flex justify-center space-x-2">
-                      <button
-                        className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
-                        onClick={() => {
-                          if (modalAbierto) {
-                            Swal.fire(
-                              'Edición en curso',
-                              'Ya tienes una lección en edición. Cierra la edición actual para continuar.',
-                              'info'
-                            );
-                            return;
-                          }
-                          onEditHorario(horario);
-                        }}
-                      >
-                        Editar
-                      </button>
-                      <button
-                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                        onClick={() => eliminarHorario(horario.id_Horario)}
-                      >
-                        Eliminar
-                      </button>
-                      <button
-                        className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                        onClick={() => toggleDetalles(horario.id_Horario)}
-                      >
-                        {detallesAbiertos[horario.id_Horario] ? 'Ocultar' : 'Ver Más'}
-                      </button>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white p-6">
+    <h2 className="text-2xl font-semibold mb-4">Lista de Horarios</h2>
+  
+    {horariosOrdenados.length === 0 ? (
+      <p>No hay horarios creados.</p>
+    ) : (
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg">
+          <thead className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+            <tr>
+              <th className="py-2 px-4 border-b">Sección</th>
+              <th className="py-2 px-4 border-b">Profesor</th>
+              <th className="py-2 px-4 border-b">Materia</th>
+              <th className="py-2 px-4 border-b">Día</th>
+              <th className="py-2 px-4 border-b">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {horariosOrdenados.map((horario) => (
+              <React.Fragment key={horario.id_Horario}>
+                <tr className="text-center hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                  <td className="py-2 px-4 border-b">{horario.seccion?.nombre_Seccion || 'N/A'}</td>
+                  <td className="py-2 px-4 border-b">
+                    {horario.profesor
+                      ? `${horario.profesor.nombre_Profesor} ${horario.profesor.apellido1_Profesor} ${horario.profesor.apellido2_Profesor}`
+                      : 'N/A'}
+                  </td>
+                  <td className="py-2 px-4 border-b">{horario.materia?.nombre_Materia || 'N/A'}</td>
+                  <td className="py-2 px-4 border-b">{horario.dia_semana_Horario}</td>
+                  <td className="py-2 px-4 border-b flex justify-center space-x-2">
+                    <button
+                      className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
+                      onClick={() => {
+                        if (modalAbierto) {
+                          Swal.fire(
+                            'Edición en curso',
+                            'Ya tienes una lección en edición. Cierra la edición actual para continuar.',
+                            'info'
+                          );
+                          return;
+                        }
+                        onEditHorario(horario);
+                      }}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                      onClick={() => eliminarHorario(horario.id_Horario)}
+                    >
+                      Eliminar
+                    </button>
+                    <button
+                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                      onClick={() => toggleDetalles(horario.id_Horario)}
+                    >
+                      {detallesAbiertos[horario.id_Horario] ? 'Ocultar' : 'Ver Más'}
+                    </button>
+                  </td>
+                </tr>
+  
+                {detallesAbiertos[horario.id_Horario] && (
+                  <tr className="bg-gray-100 dark:bg-gray-800">
+                    <td colSpan="5" className="py-2 px-4">
+                      <div className="flex flex-col md:flex-row md:space-x-6">
+                        <div className="mb-2 md:mb-0">
+                          <p>
+                            <strong>Hora de Inicio:</strong> {formatearHora12(horario.hora_inicio_Horario)}
+                          </p>
+                          <p>
+                            <strong>Hora de Fin:</strong> {formatearHora12(horario.hora_fin_Horario)}
+                          </p>
+                        </div>
+                        <div>
+                          <p>
+                            <strong>Aula:</strong> {horario.aula?.nombre_Aula || 'N/A'}
+                          </p>
+                        </div>
+                      </div>
                     </td>
                   </tr>
-                  {/* Fila de detalles */}
-                  {detallesAbiertos[horario.id_Horario] && (
-                    <tr className="bg-gray-100">
-                      <td colSpan="5" className="py-2 px-4">
-                        <div className="flex flex-col md:flex-row md:space-x-6">
-                          <div className="mb-2 md:mb-0">
-                            <p>
-                              <strong>Hora de Inicio:</strong> {formatearHora12(horario.hora_inicio_Horario)}
-                            </p>
-                            <p>
-                              <strong>Hora de Fin:</strong> {formatearHora12(horario.hora_fin_Horario)}
-                            </p>
-                          </div>
-                          <div>
-                            <p>
-                              <strong>Aula:</strong> {horario.aula?.nombre_Aula || 'N/A'}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Modal para editar horario */}
-      {modalAbierto && horarioSeleccionado && (
+                )}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  
+    {/* Modal para editar horario */}
+    {modalAbierto && horarioSeleccionado && (
+      <div
+        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+        onClick={cerrarModal}
+      >
         <div
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-          onClick={cerrarModal}
+          className="bg-white dark:bg-gray-900 p-6 rounded-lg w-11/12 md:w-1/2 lg:w-1/3 max-h-full overflow-y-auto relative"
+          onClick={(e) => e.stopPropagation()}
         >
-          <div
-            className="bg-white p-6 rounded-lg w-11/12 md:w-1/2 lg:w-1/3 overflow-y-auto max-h-full relative"
-            onClick={(e) => e.stopPropagation()} // Evita cerrar el modal al hacer clic dentro
+          <button
+            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white text-2xl"
+            onClick={cerrarModal}
           >
-            <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
-              onClick={cerrarModal}
-            >
-              &times;
-            </button>
-            <FormularioHorarioEstudiante
-              onSubmitSuccess={actualizarHorarioEnLista}
-              onCancel={cerrarModal}
-              initialData={horarioSeleccionado}
-              materias={materias}
-              profesores={profesores}
-              aulas={aulas}
-              secciones={secciones}
-            />
-          </div>
+            &times;
+          </button>
+          <FormularioHorarioEstudiante
+            onSubmitSuccess={actualizarHorarioEnLista}
+            onCancel={cerrarModal}
+            initialData={horarioSeleccionado}
+            materias={materias}
+            profesores={profesores}
+            aulas={aulas}
+            secciones={secciones}
+          />
         </div>
-      )}
-    </div>
+      </div>
+    )}
+  </div>  
   );
 };
 

@@ -157,65 +157,70 @@ export const GestionAulas = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-lg mt-10 space-y-6">
-      <h2 className="text-2xl font-bold">Gestión de Aulas</h2>
-
-      {faltantes.length > 0 && (
-        <Button
-          onClick={handleAgregarTodas}
-          className="bg-green-600 hover:bg-green-700"
-        >
-          Agregar aulas faltantes
-        </Button>
-      )}
-
-      <form onSubmit={handleSubmit} className="flex items-center gap-4">
-        <Input
-          type="text"
-          placeholder="Ej: 1, 2, 3..."
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-          required
-        />
-        <Button type="submit" disabled={!nombre.trim()}>
-          Agregar
-        </Button>
-      </form>
-
-      <div className="overflow-x-auto mt-6">
-        <table className="min-w-full table-auto border text-sm">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-4 py-2 text-left">Nombre</th>
-              <th className="px-4 py-2 text-left">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {aulas.length > 0 ? (
-              aulas.map((aula) => (
-                <tr key={aula.id_aula} className="border-t">
-                  <td className="px-4 py-2">{aula.nombre_Aula}</td>
-                  <td className="px-4 py-2">
-                    <Button
-                      onClick={() => handleDelete(aula.id_aula)}
-                      className="bg-red-600 hover:bg-red-700"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="2" className="px-4 py-4 text-center text-gray-500">
-                  No hay aulas registradas
+    <div className="max-w-3xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow-lg mt-10 space-y-6">
+    <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Gestión de Aulas</h2>
+  
+    {faltantes.length > 0 && (
+      <Button
+        onClick={handleAgregarTodas}
+        className="bg-green-600 hover:bg-green-700 text-white"
+      >
+        Agregar aulas faltantes
+      </Button>
+    )}
+  
+    <form onSubmit={handleSubmit} className="flex items-center gap-4">
+      <Input
+        type="text"
+        placeholder="Ej: 1, 2, 3..."
+        value={nombre}
+        onChange={(e) => setNombre(e.target.value)}
+        required
+        className="text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+      />
+      <Button
+        type="submit"
+        disabled={!nombre.trim()}
+        className="bg-blue-500 hover:bg-blue-600 text-white"
+      >
+        Agregar
+      </Button>
+    </form>
+  
+    <div className="overflow-x-auto mt-6">
+      <table className="min-w-full table-auto border text-sm border-gray-300 dark:border-gray-600">
+        <thead className="bg-gray-100 dark:bg-gray-800">
+          <tr>
+            <th className="px-4 py-2 text-left text-gray-800 dark:text-white">Nombre</th>
+            <th className="px-4 py-2 text-left text-gray-800 dark:text-white">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {aulas.length > 0 ? (
+            aulas.map((aula) => (
+              <tr key={aula.id_aula} className="border-t border-gray-300 dark:border-gray-600">
+                <td className="px-4 py-2 text-gray-800 dark:text-gray-200">{aula.nombre_Aula}</td>
+                <td className="px-4 py-2">
+                  <Button
+                    onClick={() => handleDelete(aula.id_aula)}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </td>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="2" className="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
+                No hay aulas registradas
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
+  </div>
   );
 };
 

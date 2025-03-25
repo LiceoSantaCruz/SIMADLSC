@@ -350,187 +350,166 @@ const CrearEventos = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen flex justify-center items-center">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Crear Nuevo Evento</h2>
-
-        {/* Campo de Nombre del Evento */}
-        <div className="mb-4">
-          <label htmlFor="nombre_Evento" className="block text-sm font-medium mb-2">
-            Nombre del Evento
-          </label>
+    <div className="p-6 bg-gray-100 dark:bg-gray-900 min-h-screen flex justify-center items-center">
+    <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-lg">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Crear Nuevo Evento</h2>
+  
+      {/* Nombre del Evento */}
+      <div className="mb-4">
+        <label htmlFor="nombre_Evento" className="block text-sm font-medium mb-2 dark:text-gray-200">Nombre del Evento</label>
+        <input
+          type="text"
+          id="nombre_Evento"
+          name="nombre_Evento"
+          placeholder="Ej: Feria de Ciencias"
+          value={formData.nombre_Evento}
+          onChange={handleChange}
+          className="w-full border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+          required
+        />
+      </div>
+  
+      {/* Descripción */}
+      <div className="mb-4">
+        <label htmlFor="descripcion_Evento" className="block text-sm font-medium mb-2 dark:text-gray-200">Descripción del Evento</label>
+        <textarea
+          id="descripcion_Evento"
+          name="descripcion_Evento"
+          value={formData.descripcion_Evento}
+          onChange={handleChange}
+          className="w-full border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+          placeholder="Descripción del evento"
+        />
+      </div>
+  
+      {/* Fecha */}
+      <div className="mb-4">
+        <label htmlFor="fecha_Evento" className="block text-sm font-medium mb-2 dark:text-gray-200">Fecha del Evento</label>
+        <input
+          type="date"
+          id="fecha_Evento"
+          name="fecha_Evento"
+          value={formData.fecha_Evento}
+          onChange={handleChange}
+          min={getTodayDate()}
+          required
+          className="w-full border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+        />
+      </div>
+  
+      {/* Hora inicio y fin */}
+      <div className="mb-4 flex space-x-4">
+        <div className="w-1/2">
+          <label htmlFor="hora_inicio_Evento" className="block text-sm font-medium mb-2 dark:text-gray-200">Hora de Inicio</label>
           <input
-            type="text"
-            id="nombre_Evento"
-            name="nombre_Evento"
-            placeholder="Ej: Feria de Ciencias"
-            value={formData.nombre_Evento}
+            type="time"
+            id="hora_inicio_Evento"
+            name="hora_inicio_Evento"
+            value={formData.hora_inicio_Evento}
             onChange={handleChange}
-            className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             required
+            className="w-full border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
-
-        {/* Campo de Descripción */}
-        <div className="mb-4">
-          <label htmlFor="descripcion_Evento" className="block text-sm font-medium mb-2">
-            Descripción del Evento
-          </label>
-          <textarea
-            id="descripcion_Evento"
-            name="descripcion_Evento"
-            placeholder="Ej: Un evento para mostrar proyectos de investigación y actividades culturales de nuestros estudiantes"
-            value={formData.descripcion_Evento}
-            onChange={handleChange}
-            className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-          />
-        </div>
-
-        {/* Campo de Fecha del Evento */}
-        <div className="mb-4">
-          <label htmlFor="fecha_Evento" className="block text-sm font-medium mb-2">
-            Fecha del Evento
-          </label>
+        <div className="w-1/2">
+          <label htmlFor="hora_fin_Evento" className="block text-sm font-medium mb-2 dark:text-gray-200">Hora de Fin</label>
           <input
-            type="date"
-            id="fecha_Evento"
-            name="fecha_Evento"
-            value={formData.fecha_Evento}
+            type="time"
+            id="hora_fin_Evento"
+            name="hora_fin_Evento"
+            value={formData.hora_fin_Evento}
             onChange={handleChange}
-            className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             required
-            min={getTodayDate()}
+            className="w-full border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
-
-        {/* Campos de Hora de Inicio y Fin */}
-        <div className="mb-4 flex space-x-4">
-          <div className="w-1/2">
-            <label htmlFor="hora_inicio_Evento" className="block text-sm font-medium mb-2">
-              Hora de Inicio
-            </label>
-            <input
-              type="time"
-              id="hora_inicio_Evento"
-              name="hora_inicio_Evento"
-              value={formData.hora_inicio_Evento}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              required
-            />
-          </div>
-          <div className="w-1/2">
-            <label htmlFor="hora_fin_Evento" className="block text-sm font-medium mb-2">
-              Hora de Fin
-            </label>
-            <input
-              type="time"
-              id="hora_fin_Evento"
-              name="hora_fin_Evento"
-              value={formData.hora_fin_Evento}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              required
-            />
-          </div>
-        </div>
-
-        {/* Campo de Dirigido a */}
-        <div className="mb-6">
-          <label htmlFor="id_dirigido_a" className="block text-sm font-medium mb-2">
-            Dirigido a
-          </label>
-          {loadingDirigidosA ? (
-            <p>Cargando públicos...</p>
-          ) : errorDirigidosA ? (
-            <p className="text-red-500">Error al cargar los públicos: {errorDirigidosA}</p>
-          ) : (
-            <select
-              id="id_dirigido_a"
-              name="id_dirigido_a"
-              value={formData.id_dirigido_a}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              required
-            >
-              <option value="">Selecciona un público</option>
-              {dirigidosA.map((publico) => (
-                <option key={publico.id} value={publico.id}>
-                  {publico.nombre}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-
-        {/* Campo de Ubicación */}
-        <div className="mb-6">
-          <label htmlFor="ubicacion" className="block text-sm font-medium mb-2">
-            Ubicación
-          </label>
-          {loadingUbicaciones ? (
-            <p>Cargando ubicaciones...</p>
-          ) : errorUbicaciones ? (
-            <p className="text-red-500">Error al cargar ubicaciones: {errorUbicaciones}</p>
-          ) : (
-            <select
-              id="ubicacion"
-              name="ubicacion"
-              value={formData.ubicacion}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              required
-            >
-              <option value="">Selecciona una ubicación</option>
-              {ubicaciones.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.nombre}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-
-        {/* Campo de Tipo de Evento */}
-        <div className="mb-6">
-          <label htmlFor="tipo_evento" className="block text-sm font-medium mb-2">
-            Tipo de Evento
-          </label>
-          {loadingTiposEventos ? (
-            <p>Cargando tipos de eventos...</p>
-          ) : errorTiposEventos ? (
-            <p className="text-red-500">Error al cargar tipos de eventos: {errorTiposEventos}</p>
-          ) : (
-            <select
-              id="tipo_evento"
-              name="tipo_evento"
-              value={formData.tipo_evento}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              required
-            >
-              <option value="">Selecciona un tipo de evento</option>
-              {tiposEventos.map((tipo) => (
-                <option key={tipo.id} value={tipo.id}>
-                  {tipo.nombre}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-
-        {/* Botón de Envío */}
-        <button
-          type="submit"
-          disabled={isLoading}
-          className={`w-full bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 transition ${
-            isLoading ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-        >
-          {isLoading ? 'Creando...' : 'Crear Evento'}
-        </button>
-      </form>
-    </div>
+      </div>
+  
+      {/* Dirigido a */}
+      <div className="mb-6">
+        <label htmlFor="id_dirigido_a" className="block text-sm font-medium mb-2 dark:text-gray-200">Dirigido a</label>
+        {loadingDirigidosA ? (
+          <p className="dark:text-white">Cargando públicos...</p>
+        ) : errorDirigidosA ? (
+          <p className="text-red-500 dark:text-red-400">Error al cargar: {errorDirigidosA}</p>
+        ) : (
+          <select
+            id="id_dirigido_a"
+            name="id_dirigido_a"
+            value={formData.id_dirigido_a}
+            onChange={handleChange}
+            required
+            className="w-full border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            <option value="">Selecciona un público</option>
+            {dirigidosA.map((publico) => (
+              <option key={publico.id} value={publico.id}>{publico.nombre}</option>
+            ))}
+          </select>
+        )}
+      </div>
+  
+      {/* Ubicación */}
+      <div className="mb-6">
+        <label htmlFor="ubicacion" className="block text-sm font-medium mb-2 dark:text-gray-200">Ubicación</label>
+        {loadingUbicaciones ? (
+          <p className="dark:text-white">Cargando ubicaciones...</p>
+        ) : errorUbicaciones ? (
+          <p className="text-red-500 dark:text-red-400">Error: {errorUbicaciones}</p>
+        ) : (
+          <select
+            id="ubicacion"
+            name="ubicacion"
+            value={formData.ubicacion}
+            onChange={handleChange}
+            required
+            className="w-full border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            <option value="">Selecciona una ubicación</option>
+            {ubicaciones.map((u) => (
+              <option key={u.id} value={u.id}>{u.nombre}</option>
+            ))}
+          </select>
+        )}
+      </div>
+  
+      {/* Tipo de Evento */}
+      <div className="mb-6">
+        <label htmlFor="tipo_evento" className="block text-sm font-medium mb-2 dark:text-gray-200">Tipo de Evento</label>
+        {loadingTiposEventos ? (
+          <p className="dark:text-white">Cargando tipos de eventos...</p>
+        ) : errorTiposEventos ? (
+          <p className="text-red-500 dark:text-red-400">Error: {errorTiposEventos}</p>
+        ) : (
+          <select
+            id="tipo_evento"
+            name="tipo_evento"
+            value={formData.tipo_evento}
+            onChange={handleChange}
+            required
+            className="w-full border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            <option value="">Selecciona un tipo de evento</option>
+            {tiposEventos.map((tipo) => (
+              <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
+            ))}
+          </select>
+        )}
+      </div>
+  
+      {/* Botón */}
+      <button
+        type="submit"
+        disabled={isLoading}
+        className={`w-full bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 transition ${
+          isLoading ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+      >
+        {isLoading ? "Creando..." : "Crear Evento"}
+      </button>
+    </form>
+  </div>
+  
   );
 };
 

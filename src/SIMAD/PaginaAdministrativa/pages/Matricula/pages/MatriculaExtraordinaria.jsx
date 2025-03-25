@@ -101,6 +101,7 @@ export const MatriculaExtraordinaria = () => {
         confirmButtonColor: "#2563EB",
       });
     } catch (err) {
+      console.error("Error al enviar la matrícula extraordinaria:", err);
       Swal.fire({
         icon: "error",
         title: "Error",

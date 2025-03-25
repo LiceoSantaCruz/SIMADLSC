@@ -307,147 +307,146 @@ const Secciones = () => {
   }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen relative">
-      <div className="container mx-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold text-gray-800">Lista de Secciones</h1>
-          {/* Botón de crear sección en verde */}
-          <button
-            onClick={openModal}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-          >
-            Crear Sección
-          </button>
-        </div>
-
-        <div className="mb-4">
-          <label htmlFor="nivelFilter" className="block text-gray-700 font-medium mb-1">
-            Filtrar por Nivel:
-          </label>
-          <select
-            id="nivelFilter"
-            value={nivelFilter}
-            onChange={(e) => setNivelFilter(e.target.value)}
-            className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-          >
-            <option value="">Todos los niveles</option>
-            {levels.map((level, index) => (
-              <option key={level.id_grado || index} value={level.nivel}>
-                {level.nivel}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {sortedSecciones.length === 0 ? (
-          <p className="text-center text-gray-600">No hay secciones disponibles.</p>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {currentSecciones.map((seccion) => (
-                <div key={seccion.id_Seccion} className="bg-white p-4 rounded-lg shadow">
-                  <h2 className="text-xl font-semibold text-blue-600">
-                    {seccion.nombre_Seccion}
-                  </h2>
-                  {seccion.grado && (
-                    <p className="text-gray-700">Nivel: {seccion.grado.nivel}</p>
-                  )}
-                  <div className="mt-4 flex justify-between">
-                    <Link
-                      to={`/lista-estudiantes/${seccion.id_Seccion}`}
-                      className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                    >
-                      Ver Lista
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(seccion.id_Seccion)}
-                      className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
+    <div className="p-6 bg-gray-100 dark:bg-gray-900 min-h-screen relative">
+    <div className="container mx-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Lista de Secciones</h1>
+        <button
+          onClick={openModal}
+          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+        >
+          Crear Sección
+        </button>
+      </div>
+  
+      <div className="mb-4">
+        <label htmlFor="nivelFilter" className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+          Filtrar por Nivel:
+        </label>
+        <select
+          id="nivelFilter"
+          value={nivelFilter}
+          onChange={(e) => setNivelFilter(e.target.value)}
+          className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full dark:bg-gray-800 dark:text-white"
+        >
+          <option value="">Todos los niveles</option>
+          {levels.map((level, index) => (
+            <option key={level.id_grado || index} value={level.nivel}>
+              {level.nivel}
+            </option>
+          ))}
+        </select>
+      </div>
+  
+      {sortedSecciones.length === 0 ? (
+        <p className="text-center text-gray-600 dark:text-gray-400">No hay secciones disponibles.</p>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {currentSecciones.map((seccion) => (
+              <div key={seccion.id_Seccion} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                <h2 className="text-xl font-semibold text-blue-600 dark:text-blue-400">
+                  {seccion.nombre_Seccion}
+                </h2>
+                {seccion.grado && (
+                  <p className="text-gray-700 dark:text-gray-300">Nivel: {seccion.grado.nivel}</p>
+                )}
+                <div className="mt-4 flex justify-between">
+                  <Link
+                    to={`/lista-estudiantes/${seccion.id_Seccion}`}
+                    className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                  >
+                    Ver Lista
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(seccion.id_Seccion)}
+                    className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                  >
+                    Eliminar
+                  </button>
                 </div>
+              </div>
+            ))}
+          </div>
+  
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-4">
+              {Array.from({ length: totalPages }, (_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentPage(index + 1)}
+                  className={`mx-1 px-3 py-1 rounded text-sm transition ${
+                    currentPage === index + 1
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                  }`}
+                >
+                  {index + 1}
+                </button>
               ))}
             </div>
-
-            {/* Controles de paginación */}
-            {totalPages > 1 && (
-              <div className="flex justify-center mt-4">
-                {Array.from({ length: totalPages }, (_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentPage(index + 1)}
-                    className={`mx-1 px-3 py-1 rounded ${
-                      currentPage === index + 1
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-blue-100 text-blue-800'
-                    } text-sm transition`}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-      </div>
-
-      {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-4">Crear Sección</h2>
-            <form onSubmit={handleCreateSection}>
-              <div className="mb-4">
-                <label htmlFor="sectionName" className="block text-gray-700 font-medium mb-1">
-                  Nombre de la Sección:
-                </label>
-                <input
-                  type="text"
-                  id="sectionName"
-                  value={newSectionName}
-                  onChange={(e) => setNewSectionName(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder={exampleSectionName ? `Ej: "${exampleSectionName}"` : 'Ej: "7-1"'}
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="sectionLevel" className="block text-gray-700 font-medium mb-1">
-                  Nivel:
-                </label>
-                <select
-                  id="sectionLevel"
-                  value={newSectionGradeId}
-                  onChange={(e) => setNewSectionGradeId(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Seleccione un nivel</option>
-                  {levels.map((level) => (
-                    <option key={level.id_grado} value={level.id_grado}>
-                      {level.nivel}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                >
-                  Crear
-                </button>
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+          )}
+        </>
       )}
     </div>
+  
+    {showModal && (
+      <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
+          <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Crear Sección</h2>
+          <form onSubmit={handleCreateSection}>
+            <div className="mb-4">
+              <label htmlFor="sectionName" className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                Nombre de la Sección:
+              </label>
+              <input
+                type="text"
+                id="sectionName"
+                value={newSectionName}
+                onChange={(e) => setNewSectionName(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                placeholder={exampleSectionName ? `Ej: "${exampleSectionName}"` : 'Ej: "7-1"'}
+              />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="sectionLevel" className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                Nivel:
+              </label>
+              <select
+                id="sectionLevel"
+                value={newSectionGradeId}
+                onChange={(e) => setNewSectionGradeId(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                <option value="">Seleccione un nivel</option>
+                {levels.map((level) => (
+                  <option key={level.id_grado} value={level.id_grado}>
+                    {level.nivel}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+              >
+                Crear
+              </button>
+              <button
+                type="button"
+                onClick={closeModal}
+                className="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded hover:bg-gray-400 dark:hover:bg-gray-500 transition"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )}
+  </div>
+  
   );
 };
 

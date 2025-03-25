@@ -153,63 +153,65 @@ export const GestionGrados = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-lg mt-10 space-y-6">
-      <h2 className="text-2xl font-bold">Gestión de Grados</h2>
+    <div className="max-w-3xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow-lg mt-10 space-y-6">
+  <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Gestión de Grados</h2>
 
-      {faltantes.length > 0 && (
-        <Button
-          onClick={handleAgregarTodos}
-          className="bg-green-600 hover:bg-green-700"
-        >
-          Agregar grados faltantes
-        </Button>
-      )}
+  {faltantes.length > 0 && (
+    <Button
+      onClick={handleAgregarTodos}
+      className="bg-green-600 hover:bg-green-700"
+    >
+      Agregar grados faltantes
+    </Button>
+  )}
 
-      <form onSubmit={handleSubmit} className="flex items-center gap-4">
-        <Input
-          type="text"
-          placeholder="Ej: Sétimo, Octavo..."
-          value={nivel}
-          onChange={(e) => setNivel(e.target.value)}
-          required
-        />
-        <Button type="submit">Agregar</Button>
-      </form>
+  <form onSubmit={handleSubmit} className="flex items-center gap-4">
+    <Input
+      type="text"
+      placeholder="Ej: Sétimo, Octavo..."
+      value={nivel}
+      onChange={(e) => setNivel(e.target.value)}
+      required
+      className="dark:bg-gray-800 dark:text-white dark:border-gray-600"
+    />
+    <Button type="submit">Agregar</Button>
+  </form>
 
-      <div className="overflow-x-auto mt-6">
-        <table className="min-w-full table-auto border text-sm">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-4 py-2 text-left">Nivel</th>
-              <th className="px-4 py-2 text-left">Acciones</th>
+  <div className="overflow-x-auto mt-6">
+    <table className="min-w-full table-auto border text-sm">
+      <thead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100">
+        <tr>
+          <th className="px-4 py-2 text-left">Nivel</th>
+          <th className="px-4 py-2 text-left">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {grados.length > 0 ? (
+          grados.map((grado) => (
+            <tr key={grado.id_grado} className="border-t border-gray-200 dark:border-gray-600">
+              <td className="px-4 py-2 text-gray-900 dark:text-gray-100">{grado.nivel}</td>
+              <td className="px-4 py-2">
+                <Button
+                  onClick={() => handleDelete(grado.id_grado)}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {grados.length > 0 ? (
-              grados.map((grado) => (
-                <tr key={grado.id_grado} className="border-t">
-                  <td className="px-4 py-2">{grado.nivel}</td>
-                  <td className="px-4 py-2">
-                    <Button
-                      onClick={() => handleDelete(grado.id_grado)}
-                      className="bg-red-600 hover:bg-red-700"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="2" className="px-4 py-4 text-center text-gray-500">
-                  No hay grados registrados
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="2" className="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
+              No hay grados registrados
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
+
   );
 };
 

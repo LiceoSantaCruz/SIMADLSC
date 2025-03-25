@@ -266,172 +266,164 @@ export const GestionAsistencia = () => {
   const paginatedAsistencias = asistencias.slice(indexOfFirst, indexOfLast);
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Gestión de Asistencias</h1>
-
-      {/* Texto explicativo para el usuario */}
-      <p className="mb-2 text-sm text-gray-700">
-        Por favor seleccione Periodo, Grado, Materia y Sección antes de realizar la búsqueda.
-      </p>
-
-      <div className="mb-4 grid grid-cols-1 md:grid-cols-5 gap-4">
+    <div className="p-6 bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300 min-h-screen">
+    <h1 className="text-2xl font-bold mb-4">Gestión de Asistencias</h1>
+  
+    <p className="mb-2 text-sm text-gray-700 dark:text-gray-300">
+      Por favor seleccione Periodo, Grado, Materia y Sección antes de realizar la búsqueda.
+    </p>
+  
+    <div className="mb-4 grid grid-cols-1 md:grid-cols-5 gap-4">
+      {/* Filtros */}
+      {[
+        {
+          name: "periodo",
+          label: "Seleccionar Periodo",
+          options: periodos,
+          key: "id_Periodo",
+          text: "nombre_Periodo"
+        },
+        {
+          name: "grado",
+          label: "Seleccionar Grado",
+          options: grados,
+          key: "id_grado",
+          text: "nivel"
+        },
+        {
+          name: "materia",
+          label: "Seleccionar Materia",
+          options: materias,
+          key: "id_Materia",
+          text: "nombre_Materia"
+        },
+        {
+          name: "seccion",
+          label: "Seleccionar Sección",
+          options: secciones,
+          key: "id_Seccion",
+          text: "nombre_Seccion"
+        },
+      ].map(({ name, label, options, key, text }) => (
         <select
-          name="periodo"
-          value={filtros.periodo}
+          key={name}
+          name={name}
+          value={filtros[name]}
           onChange={handleChange}
-          className="border rounded px-4 py-2"
+          className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded px-4 py-2"
         >
-          <option value="">Seleccionar Periodo</option>
-          {periodos.map((periodo) => (
-            <option key={periodo.id_Periodo} value={periodo.id_Periodo}>
-              {periodo.nombre_Periodo}
+          <option value="">{label}</option>
+          {options.map((item) => (
+            <option key={item[key]} value={item[key]}>
+              {item[text]}
             </option>
           ))}
         </select>
-
-        <input
-          type="date"
-          name="fecha"
-          value={filtros.fecha}
-          onChange={handleChange}
-          className="border rounded px-4 py-2"
-        />
-
-        <select
-          name="grado"
-          value={filtros.grado}
-          onChange={handleChange}
-          className="border rounded px-4 py-2"
-        >
-          <option value="">Seleccionar Grado</option>
-          {grados.map((grado) => (
-            <option key={grado.id_grado} value={grado.id_grado}>
-              {grado.nivel}
-            </option>
-          ))}
-        </select>
-
-        <select
-          name="materia"
-          value={filtros.materia}
-          onChange={handleChange}
-          className="border rounded px-4 py-2"
-        >
-          <option value="">Seleccionar Materia</option>
-          {materias.map((materia) => (
-            <option key={materia.id_Materia} value={materia.id_Materia}>
-              {materia.nombre_Materia}
-            </option>
-          ))}
-        </select>
-
-        <select
-          name="seccion"
-          value={filtros.seccion}
-          onChange={handleChange}
-          className="border rounded px-4 py-2"
-        >
-          <option value="">Seleccionar Sección</option>
-          {secciones.map((seccion) => (
-            <option key={seccion.id_Seccion} value={seccion.id_Seccion}>
-              {seccion.nombre_Seccion}
-            </option>
-          ))}
-        </select>
-
-        <button
-          onClick={handleBuscar}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Buscar
-        </button>
-      </div>
-
-      {paginatedAsistencias.length > 0 ? (
-        <table className="min-w-full bg-white border border-gray-300">
-          <thead>
-            <tr>
-              <th className="border px-4 py-2">Estudiante</th>
-              <th className="border px-4 py-2">Fecha</th>
-              <th className="border px-4 py-2">Profesor</th>
-              <th className="border px-4 py-2">Materia</th>
-              <th className="border px-4 py-2">Sección</th>
-              <th className="border px-4 py-2">Estado</th>
-              <th className="border px-4 py-2">Lecciones</th>
-              <th className="border px-4 py-2">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedAsistencias.map((asistencia) => (
-              <tr key={asistencia.asistencia_id} className="text-center">
-                <td className="border px-4 py-2">
-                  {asistencia.id_Estudiante?.nombre_Estudiante || "Sin nombre"}{" "}
-                  {asistencia.id_Estudiante?.apellido1_Estudiante || ""}{" "}
-                  {asistencia.id_Estudiante?.apellido2_Estudiante || ""}
-                </td>
-                <td className="border px-4 py-2">{asistencia.fecha}</td>
-                <td className="border px-4 py-2">
-                  {asistencia.id_Profesor?.nombre_Profesor || "Sin profesor"}{" "}
-                  {asistencia.id_Profesor?.apellido1_Profesor || ""}
-                </td>
-                <td className="border px-4 py-2">
-                  {asistencia.id_Materia?.nombre_Materia || "Sin materia"}
-                </td>
-                <td className="border px-4 py-2">
-                  {asistencia.id_Seccion?.nombre_Seccion || "Sin sección"}
-                </td>
-                <td className="border px-4 py-2">{asistencia.estado}</td>
-                <td className="border px-4 py-2">
-                  {typeof asistencia.lecciones === "string"
-                    ? asistencia.lecciones.split(",").join(", ")
-                    : Array.isArray(asistencia.lecciones)
-                    ? asistencia.lecciones.join(", ")
-                    : "N/A"}
-                </td>
-                <td className="border px-4 py-2">
-                  <button
-                    onClick={() => handleEditar(asistencia.asistencia_id)}
-                    className="bg-green-700 text-white px-3 py-1 rounded mr-2 hover:bg-green-800"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleEliminar(asistencia.asistencia_id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-300"
-                  >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <p>No se encontraron asistencias.</p>
-      )}
-
-      {/* Controles de paginación */}
-      <div className="flex justify-center items-center gap-4 mt-4">
-        <button
-          onClick={() => currentPage > 1 && setCurrentPage((prev) => prev - 1)}
-          disabled={currentPage === 1}
-          className="bg-gray-300 px-4 py-2 rounded-md disabled:opacity-50"
-        >
-          Anterior
-        </button>
-        <span>
-          Página {currentPage} de {totalPages}
-        </span>
-        <button
-          onClick={() =>
-            currentPage < totalPages && setCurrentPage((prev) => prev + 1)
-          }
-          disabled={currentPage === totalPages}
-          className="bg-gray-300 px-4 py-2 rounded-md disabled:opacity-50"
-        >
-          Siguiente
-        </button>
-      </div>
+      ))}
+  
+      <input
+        type="date"
+        name="fecha"
+        value={filtros.fecha}
+        onChange={handleChange}
+        className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded px-4 py-2"
+      />
+  
+      <button
+        onClick={handleBuscar}
+        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition"
+      >
+        Buscar
+      </button>
     </div>
+  
+    {/* Tabla de resultados */}
+    {paginatedAsistencias.length > 0 ? (
+      <table className="min-w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md overflow-hidden">
+        <thead>
+          <tr className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+            <th className="border px-4 py-2">Estudiante</th>
+            <th className="border px-4 py-2">Fecha</th>
+            <th className="border px-4 py-2">Profesor</th>
+            <th className="border px-4 py-2">Materia</th>
+            <th className="border px-4 py-2">Sección</th>
+            <th className="border px-4 py-2">Estado</th>
+            <th className="border px-4 py-2">Lecciones</th>
+            <th className="border px-4 py-2">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {paginatedAsistencias.map((asistencia) => (
+            <tr key={asistencia.asistencia_id} className="text-center border-t dark:border-gray-600">
+              <td className="border px-4 py-2">
+                {asistencia.id_Estudiante?.nombre_Estudiante || "Sin nombre"}{" "}
+                {asistencia.id_Estudiante?.apellido1_Estudiante || ""}{" "}
+                {asistencia.id_Estudiante?.apellido2_Estudiante || ""}
+              </td>
+              <td className="border px-4 py-2">{asistencia.fecha}</td>
+              <td className="border px-4 py-2">
+                {asistencia.id_Profesor?.nombre_Profesor || "Sin profesor"}{" "}
+                {asistencia.id_Profesor?.apellido1_Profesor || ""}
+              </td>
+              <td className="border px-4 py-2">
+                {asistencia.id_Materia?.nombre_Materia || "Sin materia"}
+              </td>
+              <td className="border px-4 py-2">
+                {asistencia.id_Seccion?.nombre_Seccion || "Sin sección"}
+              </td>
+              <td className="border px-4 py-2">{asistencia.estado}</td>
+              <td className="border px-4 py-2">
+                {typeof asistencia.lecciones === "string"
+                  ? asistencia.lecciones.split(",").join(", ")
+                  : Array.isArray(asistencia.lecciones)
+                  ? asistencia.lecciones.join(", ")
+                  : "N/A"}
+              </td>
+              <td className="border px-4 py-2 space-x-2">
+                <button
+                  onClick={() => handleEditar(asistencia.asistencia_id)}
+                  className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded transition"
+                >
+                  Editar
+                </button>
+                <button
+                  onClick={() => handleEliminar(asistencia.asistencia_id)}
+                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition"
+                >
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    ) : (
+      <p className="text-gray-700 dark:text-gray-300">No se encontraron asistencias.</p>
+    )}
+  
+    {/* Paginación */}
+    <div className="flex justify-center items-center gap-4 mt-4">
+      <button
+        onClick={() => currentPage > 1 && setCurrentPage((prev) => prev - 1)}
+        disabled={currentPage === 1}
+        className="bg-gray-300 dark:bg-gray-700 text-black dark:text-white px-4 py-2 rounded disabled:opacity-50"
+      >
+        Anterior
+      </button>
+      <span className="text-gray-800 dark:text-gray-200">
+        Página {currentPage} de {totalPages}
+      </span>
+      <button
+        onClick={() =>
+          currentPage < totalPages && setCurrentPage((prev) => prev + 1)
+        }
+        disabled={currentPage === totalPages}
+        className="bg-gray-300 dark:bg-gray-700 text-black dark:text-white px-4 py-2 rounded disabled:opacity-50"
+      >
+        Siguiente
+      </button>
+    </div>
+  </div>
+  
   );
 };

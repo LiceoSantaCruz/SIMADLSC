@@ -237,91 +237,92 @@ export const HorarioProf = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      {/* Si es admin/superadmin, mostrar selector de profesor */}
-      {(role === 'admin' || role === 'superadmin') && (
-        <div className="bg-white p-4 rounded-lg shadow-lg mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Selecciona un Profesor</h1>
-          <select
-            className="border p-2 rounded-lg w-full mb-4"
-            onChange={(e) => setIdProfesorSeleccionado(e.target.value)}
-            value={idProfesorSeleccionado || ''}
-          >
-            <option value="">Seleccione un profesor</option>
-            {profesores.map((profesor) => (
-              <option key={profesor.id_Profesor} value={profesor.id_Profesor}>
-                {`${profesor.nombre_Profesor} ${profesor.apellido1_Profesor} ${profesor.apellido2_Profesor}`}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      <button
-        className="bg-green-500 text-white px-4 py-2 rounded-lg mb-4 hover:bg-green-600"
-        onClick={exportarPdf}
-        disabled={!idProfesorSeleccionado && role !== 'profesor'}
-      >
-        Exportar Horario como PDF
-      </button>
-
-      {/* Vista principal del horario */}
-      {horarios.length > 0 ? (
-        <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
-          <h2 className="text-2xl font-bold mb-4">
-            {role === 'profesor'
-              ? `Horario de ${nombreProfesor} ${apellidosProfesor}`
-              : 'Horarios de todos los profesores'}
-          </h2>
-          <table className="min-w-full table-auto">
-            <thead className="bg-gray-200 text-gray-700 sticky top-0">
-              <tr>
-                <th className="px-2 py-2 text-left text-xs">Día</th>
-                {lessons.map((lesson, i) => (
-                  <th key={i} className="px-2 py-2 text-center text-xs">
-                    <div>{lesson}</div>
-                    <div className="text-xs text-gray-500">
-                      {`${convertirHora12(lessonTimes[lesson].start)} - ${convertirHora12(
-                        lessonTimes[lesson].end
-                      )}`}
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="text-xs">
-              {diasSemana.map((dia, i) => (
-                <tr key={i} className="border-b">
-                  <td className="px-2 py-2 font-bold">{dia}</td>
-                  {lessons.map((lesson) => {
-                    const horario = obtenerHorarioPorDiaYLeccion(dia, lesson);
-                    return (
-                      <td
-                        key={lesson}
-                        className="px-2 py-2 text-center cursor-pointer hover:bg-blue-100"
-                        onClick={() => mostrarDetalles(horario)}
-                      >
-                        {horario ? (
-                          <button className="text-blue-500 underline">
-                            {horario.seccion?.nombre_Seccion || 'Ver detalles'}
-                          </button>
-                        ) : (
-                          '-'
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 text-gray-800 dark:text-white">
+    {(role === 'admin' || role === 'superadmin') && (
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg mb-6">
+        <h1 className="text-2xl font-bold mb-4">Selecciona un Profesor</h1>
+        <select
+          className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-black dark:text-white p-2 rounded-lg w-full"
+          onChange={(e) => setIdProfesorSeleccionado(e.target.value)}
+          value={idProfesorSeleccionado || ''}
+        >
+          <option value="">Seleccione un profesor</option>
+          {profesores.map((profesor) => (
+            <option key={profesor.id_Profesor} value={profesor.id_Profesor}>
+              {`${profesor.nombre_Profesor} ${profesor.apellido1_Profesor} ${profesor.apellido2_Profesor}`}
+            </option>
+          ))}
+        </select>
+      </div>
+    )}
+  
+    <button
+      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg mb-4 disabled:opacity-50 disabled:cursor-not-allowed transition"
+      onClick={exportarPdf}
+      disabled={!idProfesorSeleccionado && role !== 'profesor'}
+    >
+      Exportar Horario como PDF
+    </button>
+  
+    {horarios.length > 0 ? (
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md overflow-x-auto">
+        <h2 className="text-2xl font-bold mb-4">
+          {role === 'profesor'
+            ? `Horario de ${nombreProfesor} ${apellidosProfesor}`
+            : 'Horarios de todos los profesores'}
+        </h2>
+        <table className="min-w-full table-auto text-sm">
+          <thead className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 sticky top-0">
+            <tr>
+              <th className="px-2 py-2 text-left text-xs">Día</th>
+              {lessons.map((lesson, i) => (
+                <th key={i} className="px-2 py-2 text-center text-xs">
+                  <div>{lesson}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {`${convertirHora12(lessonTimes[lesson].start)} - ${convertirHora12(
+                      lessonTimes[lesson].end
+                    )}`}
+                  </div>
+                </th>
               ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="bg-white p-6 rounded-lg shadow-md text-center">
-          <p className="text-lg">No hay horarios para mostrar.</p>
-        </div>
-      )}
-    </div>
+            </tr>
+          </thead>
+          <tbody>
+            {diasSemana.map((dia, i) => (
+              <tr key={i} className="border-b dark:border-gray-700">
+                <td className="px-2 py-2 font-semibold">{dia}</td>
+                {lessons.map((lesson) => {
+                  const horario = obtenerHorarioPorDiaYLeccion(dia, lesson);
+                  return (
+                    <td
+                      key={lesson}
+                      className="px-2 py-2 text-center cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900 transition"
+                      onClick={() => mostrarDetalles(horario)}
+                    >
+                      {horario ? (
+                        <button className="text-blue-600 dark:text-blue-400 underline">
+                          {horario.seccion?.nombre_Seccion || 'Ver detalles'}
+                        </button>
+                      ) : (
+                        '-'
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
+        <p className="text-lg dark:text-gray-300">
+          No hay horarios para mostrar.
+        </p>
+      </div>
+    )}
+  </div>
+  
   );
 };
 

@@ -13,30 +13,40 @@ const JustificationModal = ({ onConfirm, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded shadow-lg p-6 max-w-sm w-full">
-        <h2 className="text-green-600 text-lg font-semibold mb-2">Justificar</h2>
-        <textarea
-          className="w-full border p-2 rounded mb-4"
-          rows={4}
-          placeholder="Ingrese el motivo de la justificación"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <div className="flex justify-end gap-1">
-          <button
-            onClick={handleConfirm}
-            className="bg-green-500 text-white px-4 py-2 rounded ">
-            Confirmar
-          </button>
-          <button
-            onClick={onClose}
-            className="bg-gray-300 text-gray-800 px-4 py-2 rounded mr-2">
-            Cancelar
-          </button>
-        </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-md mx-4">
+      {/* Título */}
+      <h2 className="text-xl font-bold text-green-600 mb-4 text-center">
+        Justificar Ausencia
+      </h2>
+  
+      {/* Área de texto */}
+      <textarea
+        className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white p-3 rounded-lg mb-6 resize-none focus:outline-none focus:ring-2 focus:ring-green-500"
+        rows={5}
+        placeholder="Ingrese el motivo de la justificación"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
+  
+      {/* Botones */}
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={handleConfirm}
+          className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-md transition font-medium"
+        >
+          Confirmar
+        </button>
+        <button
+          onClick={onClose}
+          className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-5 py-2 rounded-md transition font-medium"
+        >
+          Cancelar
+        </button>
       </div>
     </div>
+  </div>
+  
   );
 };
 

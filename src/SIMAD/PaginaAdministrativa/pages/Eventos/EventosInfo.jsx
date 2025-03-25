@@ -39,20 +39,40 @@ const EventoInfo = () => {
   if (!evento) return <div className="p-6">Evento no encontrado.</div>;
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen flex justify-center items-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">{evento.nombre_Evento}</h2>
-        <p className="mb-2"><strong>Descripción:</strong> {evento.descripcion_Evento}</p>
-        <p className="mb-2"><strong>Fecha:</strong> {evento.fecha_Evento}</p>
-        <p className="mb-2"><strong>Hora de inicio:</strong> {evento.hora_inicio_Evento}</p>
-        <p className="mb-2"><strong>Hora de fin:</strong> {evento.hora_fin_Evento}</p>
-        <p className="mb-2"><strong>Dirigido a:</strong> {evento.dirigido_a_Evento.nombre_dirigido_a}</p>
-        <p className="mb-4"><strong>Estado:</strong> {evento.estado_Evento.nombre_estado_evento}</p>
-        <Link to="/gestion-eventos" className="text-blue-500 hover:underline">
-          Volver a gestión de eventos
-        </Link>
-      </div>
+    <div className="p-6 bg-gray-100 dark:bg-gray-900 min-h-screen flex justify-center items-center">
+    <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-lg">
+      <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+        {evento.nombre_Evento}
+      </h2>
+  
+      <p className="mb-2 text-gray-700 dark:text-gray-300">
+        <strong className="text-gray-900 dark:text-white">Descripción:</strong> {evento.descripcion_Evento}
+      </p>
+      <p className="mb-2 text-gray-700 dark:text-gray-300">
+        <strong className="text-gray-900 dark:text-white">Fecha:</strong> {evento.fecha_Evento}
+      </p>
+      <p className="mb-2 text-gray-700 dark:text-gray-300">
+        <strong className="text-gray-900 dark:text-white">Hora de inicio:</strong> {evento.hora_inicio_Evento}
+      </p>
+      <p className="mb-2 text-gray-700 dark:text-gray-300">
+        <strong className="text-gray-900 dark:text-white">Hora de fin:</strong> {evento.hora_fin_Evento}
+      </p>
+      <p className="mb-2 text-gray-700 dark:text-gray-300">
+        <strong className="text-gray-900 dark:text-white">Dirigido a:</strong> {evento.dirigido_a_Evento.nombre_dirigido_a}
+      </p>
+      <p className="mb-4 text-gray-700 dark:text-gray-300">
+        <strong className="text-gray-900 dark:text-white">Estado:</strong> {evento.estado_Evento.nombre_estado_evento}
+      </p>
+  
+      <Link
+        to="/gestion-eventos"
+        className="text-blue-600 dark:text-blue-400 hover:underline transition"
+      >
+        Volver a gestión de eventos
+      </Link>
     </div>
+  </div>
+  
   );
 };
 

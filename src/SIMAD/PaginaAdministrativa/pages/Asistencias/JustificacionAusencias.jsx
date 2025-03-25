@@ -67,6 +67,7 @@ export const JustificacionAusencias = () => {
         });
         await searchAsistencias(formData);
       } catch (err) {
+        console.error("Error al guardar justificación:", err);
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -131,112 +132,117 @@ export const JustificacionAusencias = () => {
   }, [error, hasSearched, loading, asistencias, formData, materias]);
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Justificar Ausencias</h1>
-
-      {/* Texto explicativo para guiar al usuario en la búsqueda */}
-      <p className="mb-4 text-gray-700">
-        Para buscar asistencias, primero ingresa la <strong>cédula</strong> del estudiante.
-        Si lo deseas, también puedes filtrar por <strong>fecha</strong> y/o
-        <strong> materia</strong> para refinar la búsqueda. Luego, haz clic en{" "}
-        <strong>Buscar</strong> para ver los resultados. Finalmente, presiona{" "}
-        <strong>Justificar</strong> en la fila correspondiente para registrar la justificación.
-      </p>
-
-      <form onSubmit={handleSearch} className="bg-white p-4 rounded shadow-md mb-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input
-            type="text"
-            name="cedula"
-            placeholder="Cédula o Nombre del Estudiante"
-            onChange={handleChange}
-            className="border p-2 rounded"
-            required
-          />
-          <input
-            type="date"
-            name="fecha"
-            onChange={handleChange}
-            className="border p-2 rounded"
-          />
-          <select
-            name="id_Materia"
-            onChange={handleChange}
-            className="border p-2 rounded"
-          >
-            <option value="">Seleccionar Materia</option>
-            {materias.map((materia) => (
-              <option key={materia.id_Materia} value={materia.id_Materia}>
-                {materia.nombre_Materia}
-              </option>
-            ))}
-          </select>
-          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-            Buscar
-          </button>
-        </div>
-      </form>
-
-      {/* Encabezado del estudiante si hay asistencias */}
-      {asistencias.length > 0 && (
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold">
-            Estudiante: {asistencias[0]?.id_Estudiante?.nombre_Estudiante}{" "}
-            {asistencias[0]?.id_Estudiante?.apellido1_Estudiante}{" "}
-            {asistencias[0]?.id_Estudiante?.apellido2_Estudiante || ""}
-          </h3>
-          <p className="text-md">
-            Sección: {asistencias[0]?.id_Seccion?.nombre_Seccion || "N/A"}
-          </p>
-        </div>
-      )}
-
-      {loading ? (
-        <p>Cargando asistencias...</p>
-      ) : (
-        <table className="min-w-full bg-white">
-          <thead>
-            <tr className="text-center">
-              <th className="py-2 border">Fecha</th>
-              <th className="py-2 border">Materia</th>
-              <th className="py-2 border">Profesor</th>
-              <th className="py-2 border">Lecciones</th>
-              <th className="py-2 border">Estado</th>
-              <th className="py-2 border">Justificar</th>
+    <div className="p-6 bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300 min-h-screen">
+    <h1 className="text-2xl font-bold mb-4">Justificar Ausencias</h1>
+  
+    <p className="mb-4 text-gray-700 dark:text-gray-300">
+      Para buscar asistencias, primero ingresa la <strong>cédula</strong> del estudiante.
+      Si lo deseas, también puedes filtrar por <strong>fecha</strong> y/o
+      <strong> materia</strong> para refinar la búsqueda. Luego, haz clic en{" "}
+      <strong>Buscar</strong> para ver los resultados. Finalmente, presiona{" "}
+      <strong>Justificar</strong> en la fila correspondiente para registrar la justificación.
+    </p>
+  
+    {/* Formulario */}
+    <form onSubmit={handleSearch} className="bg-white dark:bg-gray-800 p-4 rounded shadow-md mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <input
+          type="text"
+          name="cedula"
+          placeholder="Cédula o Nombre del Estudiante"
+          onChange={handleChange}
+          className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-2 rounded"
+          required
+        />
+        <input
+          type="date"
+          name="fecha"
+          onChange={handleChange}
+          className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-2 rounded"
+        />
+        <select
+          name="id_Materia"
+          onChange={handleChange}
+          className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-2 rounded"
+        >
+          <option value="">Seleccionar Materia</option>
+          {materias.map((materia) => (
+            <option key={materia.id_Materia} value={materia.id_Materia}>
+              {materia.nombre_Materia}
+            </option>
+          ))}
+        </select>
+        <button
+          type="submit"
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition"
+        >
+          Buscar
+        </button>
+      </div>
+    </form>
+  
+    {/* Info del estudiante */}
+    {asistencias.length > 0 && (
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold">
+          Estudiante: {asistencias[0]?.id_Estudiante?.nombre_Estudiante}{" "}
+          {asistencias[0]?.id_Estudiante?.apellido1_Estudiante}{" "}
+          {asistencias[0]?.id_Estudiante?.apellido2_Estudiante || ""}
+        </h3>
+        <p className="text-md">
+          Sección: {asistencias[0]?.id_Seccion?.nombre_Seccion || "N/A"}
+        </p>
+      </div>
+    )}
+  
+    {/* Tabla */}
+    {loading ? (
+      <p className="text-gray-600 dark:text-gray-300">Cargando asistencias...</p>
+    ) : (
+      <table className="min-w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700">
+        <thead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+          <tr className="text-center">
+            <th className="py-2 border">Fecha</th>
+            <th className="py-2 border">Materia</th>
+            <th className="py-2 border">Profesor</th>
+            <th className="py-2 border">Lecciones</th>
+            <th className="py-2 border">Estado</th>
+            <th className="py-2 border">Justificar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {asistencias.map((asistencia) => (
+            <tr key={asistencia.asistencia_id} className="text-center border-t dark:border-gray-600">
+              <td className="border px-4 py-2">{asistencia.fecha}</td>
+              <td className="border px-4 py-2">
+                {asistencia.id_Materia?.nombre_Materia || "N/A"}
+              </td>
+              <td className="border px-4 py-2">
+                {asistencia.id_Profesor?.nombre_Profesor || "N/A"}
+              </td>
+              <td className="border px-4 py-2">
+                {Array.isArray(asistencia.lecciones)
+                  ? asistencia.lecciones.join(", ")
+                  : typeof asistencia.lecciones === "string"
+                  ? asistencia.lecciones.split(", ").join(", ")
+                  : "N/A"}
+              </td>
+              <td className="border px-4 py-2">{asistencia.estado}</td>
+              <td className="border px-4 py-2">
+                <button
+                  onClick={() => handleJustificar(asistencia.asistencia_id)}
+                  className="bg-green-700 hover:bg-green-800 text-white px-2 py-1 rounded transition"
+                  disabled={asistencia.estado !== "A"}
+                >
+                  Justificar
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {asistencias.map((asistencia) => (
-              <tr key={asistencia.asistencia_id} className="text-center">
-                <td className="border px-4 py-2">{asistencia.fecha}</td>
-                <td className="border px-4 py-2">
-                  {asistencia.id_Materia?.nombre_Materia || "N/A"}
-                </td>
-                <td className="border px-4 py-2">
-                  {asistencia.id_Profesor?.nombre_Profesor || "N/A"}
-                </td>
-                <td className="border px-4 py-2">
-                  {Array.isArray(asistencia.lecciones)
-                    ? asistencia.lecciones.join(", ")
-                    : typeof asistencia.lecciones === "string"
-                    ? asistencia.lecciones.split(", ").join(", ")
-                    : "N/A"}
-                </td>
-                <td className="border px-4 py-2">{asistencia.estado}</td>
-                <td className="border px-4 py-2">
-                  <button
-                    onClick={() => handleJustificar(asistencia.asistencia_id)}
-                    className="bg-green-700 text-white px-2 py-1 rounded"
-                    disabled={asistencia.estado !== "A"}
-                  >
-                    Justificar
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </div>
+  
   );
 };

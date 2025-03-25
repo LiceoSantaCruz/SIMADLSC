@@ -161,163 +161,142 @@ export default function GestionMatricula() {
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Gestión de Matrículas</h2>
-
-      {/* Barra de búsqueda y filtros */}
-      <div className="flex flex-wrap items-center gap-4 mb-4">
-        <input
-          type="text"
-          placeholder="Buscar por cédula..."
-          value={searchTerm}
-          onChange={(e) => handleSearchChange(e.target.value)}
-          className="border p-2 rounded-md"
-        />
-        <select
-          value={selectedNivelFilter}
-          onChange={(e) => {
-            setSelectedNivelFilter(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="border p-2 rounded-md"
-        >
-          <option value="">Todos los niveles</option>
-          {niveles.map((nivel) => (
-            <option key={nivel} value={nivel}>
-              {nivel}
-            </option>
-          ))}
-        </select>
-        <select
-          value={selectedEstadoFilter}
-          onChange={(e) => {
-            setSelectedEstadoFilter(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="border p-2 rounded-md"
-        >
-          <option value="">Todos los estados</option>
-          {estados.map((estado) => (
-            <option key={estado} value={estado}>
-              {estado}
-            </option>
-          ))}
-        </select>
-        <button className="bg-blue-500 text-white px-4 py-2 rounded-md">
-          Buscar
-        </button>
-      </div>
-
-      {/* Tabla principal */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border">
-          <thead className="bg-gray-200">
-            <tr>
-              <th className="px-4 py-2 border">N° boleta</th>
-              <th className="px-4 py-2 border">Apellido1</th>
-              <th className="px-4 py-2 border">Apellido2</th>
-              <th className="px-4 py-2 border">Nombre</th>
-              <th className="px-4 py-2 border">Cédula</th>
-              <th className="px-4 py-2 border">Nivel</th>
-              <th className="px-4 py-2 border">Periodo</th>
-              <th className="px-4 py-2 border">Estado</th>
-              <th className="px-4 py-2 border">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedMatriculas.map((mat) => (
-              <tr key={mat.id_Matricula} className="text-center">
-                <td className="px-4 py-2 border">{mat.id_Matricula}</td>
-                <td className="px-4 py-2 border">
-                  {mat.estudiante.apellido1_Estudiante}
-                </td>
-                <td className="px-4 py-2 border">
-                  {mat.estudiante.apellido2_Estudiante}
-                </td>
-                <td className="px-4 py-2 border">
-                  {mat.estudiante.nombre_Estudiante}
-                </td>
-                <td className="px-4 py-2 border">
-                  {mat.estudiante.cedula}
-                </td>
-                <td className="px-4 py-2 border">
-                  {mat.estudiante.grado.nivel}
-                </td>
-                <td className="px-4 py-2 border">
-                  {mat.periodo.nombre_Periodo}
-                </td>
-                <td className="px-4 py-2 border">
-                  {mat.estado_Matricula}
-                </td>
-                <td className="px-4 py-2 border space-x-2">
-                  <button
-                    onClick={() => showInfo(mat)}
-                    className="bg-gray-300 px-2 py-1 rounded-md"
-                  >
-                    Info
-                  </button>
-                  {mat.estado_Matricula !== "AC" && (
-                    <button
-                      onClick={() =>
-                        handleUpdateEstado(mat.id_Matricula, "Aceptado")
-                      }
-                      className="bg-green-500 text-white px-2 py-1 rounded-md"
-                    >
-                      Aceptar
-                    </button>
-                  )}
-                  {mat.estado_Matricula !== "AC" &&
-                    mat.estado_Matricula !== "RE" && (
-                      <button
-                        onClick={() =>
-                          handleUpdateEstado(mat.id_Matricula, "Rechazado")
-                        }
-                        className="bg-yellow-400 px-2 py-1 rounded-md"
-                      >
-                        Rechazar
-                      </button>
-                    )}
-                  {mat.estado_Matricula === "RE" && (
-                    <button
-                      onClick={() => showDeleteConfirm(mat.id_Matricula)}
-                      className="bg-red-500 text-white px-2 py-1 rounded-md"
-                    >
-                      Eliminar
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {paginatedMatriculas.length === 0 && (
-              <tr>
-                <td colSpan={9} className="text-center py-4">
-                  No se encontraron matrículas
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Controles de paginación */}
-      <div className="flex justify-center items-center gap-4 mt-4">
-        <button
-          onClick={goToPrevPage}
-          disabled={currentPage === 1}
-          className="bg-gray-300 px-4 py-2 rounded-md disabled:opacity-50"
-        >
-          Anterior
-        </button>
-        <span>
-          Página {currentPage} de {totalPages}
-        </span>
-        <button
-          onClick={goToNextPage}
-          disabled={currentPage === totalPages}
-          className="bg-gray-300 px-4 py-2 rounded-md disabled:opacity-50"
-        >
-          Siguiente
-        </button>
-      </div>
+    <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Gestión de Matrículas</h2>
+  
+    {/* Barra de búsqueda y filtros */}
+    <div className="flex flex-wrap items-center gap-4 mb-4">
+      <input
+        type="text"
+        placeholder="Buscar por cédula..."
+        value={searchTerm}
+        onChange={(e) => handleSearchChange(e.target.value)}
+        className="border p-2 rounded-md text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+      />
+      <select
+        value={selectedNivelFilter}
+        onChange={(e) => {
+          setSelectedNivelFilter(e.target.value);
+          setCurrentPage(1);
+        }}
+        className="border p-2 rounded-md text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+      >
+        <option value="">Todos los niveles</option>
+        {niveles.map((nivel) => (
+          <option key={nivel} value={nivel}>
+            {nivel}
+          </option>
+        ))}
+      </select>
+      <select
+        value={selectedEstadoFilter}
+        onChange={(e) => {
+          setSelectedEstadoFilter(e.target.value);
+          setCurrentPage(1);
+        }}
+        className="border p-2 rounded-md text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+      >
+        <option value="">Todos los estados</option>
+        {estados.map((estado) => (
+          <option key={estado} value={estado}>
+            {estado}
+          </option>
+        ))}
+      </select>
+      <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Buscar</button>
     </div>
+  
+    {/* Tabla principal */}
+    <div className="overflow-x-auto">
+      <table className="min-w-full border border-gray-300 dark:border-gray-600">
+        <thead className="bg-gray-200 dark:bg-gray-800">
+          <tr>
+            <th className="px-4 py-2 border dark:border-gray-600 text-gray-800 dark:text-white">N° boleta</th>
+            <th className="px-4 py-2 border dark:border-gray-600 text-gray-800 dark:text-white">Apellido1</th>
+            <th className="px-4 py-2 border dark:border-gray-600 text-gray-800 dark:text-white">Apellido2</th>
+            <th className="px-4 py-2 border dark:border-gray-600 text-gray-800 dark:text-white">Nombre</th>
+            <th className="px-4 py-2 border dark:border-gray-600 text-gray-800 dark:text-white">Cédula</th>
+            <th className="px-4 py-2 border dark:border-gray-600 text-gray-800 dark:text-white">Nivel</th>
+            <th className="px-4 py-2 border dark:border-gray-600 text-gray-800 dark:text-white">Periodo</th>
+            <th className="px-4 py-2 border dark:border-gray-600 text-gray-800 dark:text-white">Estado</th>
+            <th className="px-4 py-2 border dark:border-gray-600 text-gray-800 dark:text-white">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {paginatedMatriculas.map((mat) => (
+            <tr key={mat.id_Matricula} className="text-center text-gray-800 dark:text-gray-200">
+              <td className="px-4 py-2 border dark:border-gray-600">{mat.id_Matricula}</td>
+              <td className="px-4 py-2 border dark:border-gray-600">{mat.estudiante.apellido1_Estudiante}</td>
+              <td className="px-4 py-2 border dark:border-gray-600">{mat.estudiante.apellido2_Estudiante}</td>
+              <td className="px-4 py-2 border dark:border-gray-600">{mat.estudiante.nombre_Estudiante}</td>
+              <td className="px-4 py-2 border dark:border-gray-600">{mat.estudiante.cedula}</td>
+              <td className="px-4 py-2 border dark:border-gray-600">{mat.estudiante.grado.nivel}</td>
+              <td className="px-4 py-2 border dark:border-gray-600">{mat.periodo.nombre_Periodo}</td>
+              <td className="px-4 py-2 border dark:border-gray-600">{mat.estado_Matricula}</td>
+              <td className="px-4 py-2 border dark:border-gray-600 space-x-2">
+                <button
+                  onClick={() => showInfo(mat)}
+                  className="bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white px-2 py-1 rounded-md"
+                >
+                  Info
+                </button>
+                {mat.estado_Matricula !== "AC" && (
+                  <button
+                    onClick={() => handleUpdateEstado(mat.id_Matricula, "Aceptado")}
+                    className="bg-green-500 text-white px-2 py-1 rounded-md hover:bg-green-600"
+                  >
+                    Aceptar
+                  </button>
+                )}
+                {mat.estado_Matricula !== "AC" && mat.estado_Matricula !== "RE" && (
+                  <button
+                    onClick={() => handleUpdateEstado(mat.id_Matricula, "Rechazado")}
+                    className="bg-yellow-400 text-black px-2 py-1 rounded-md hover:bg-yellow-500"
+                  >
+                    Rechazar
+                  </button>
+                )}
+                {mat.estado_Matricula === "RE" && (
+                  <button
+                    onClick={() => showDeleteConfirm(mat.id_Matricula)}
+                    className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600"
+                  >
+                    Eliminar
+                  </button>
+                )}
+              </td>
+            </tr>
+          ))}
+          {paginatedMatriculas.length === 0 && (
+            <tr>
+              <td colSpan={9} className="text-center py-4 text-gray-500 dark:text-gray-400">
+                No se encontraron matrículas
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  
+    {/* Controles de paginación */}
+    <div className="flex justify-center items-center gap-4 mt-4">
+      <button
+        onClick={goToPrevPage}
+        disabled={currentPage === 1}
+        className="bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white px-4 py-2 rounded-md disabled:opacity-50"
+      >
+        Anterior
+      </button>
+      <span className="text-gray-800 dark:text-white">
+        Página {currentPage} de {totalPages}
+      </span>
+      <button
+        onClick={goToNextPage}
+        disabled={currentPage === totalPages}
+        className="bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white px-4 py-2 rounded-md disabled:opacity-50"
+      >
+        Siguiente
+      </button>
+    </div>
+  </div>
   );
 }
