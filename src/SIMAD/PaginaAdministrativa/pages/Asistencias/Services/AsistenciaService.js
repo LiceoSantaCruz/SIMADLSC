@@ -38,29 +38,78 @@ export const justificarAusencia = async (asistenciaId, justificacion) => {
 export const fetchAsistencias = async ({ cedula, fecha, id_Materia }) => {
   let url = `${API_URL}/asistencias/estudiante/${cedula}`;
   const params = new URLSearchParams();
-  if (fecha) params.append('fecha', fecha);
-  if (id_Materia) params.append('id_Materia', id_Materia);
+
+  if (fecha) params.append("fecha", fecha);
+  if (id_Materia) params.append("id_Materia", id_Materia);
+
   const queryString = params.toString();
   if (queryString) url += `?${queryString}`;
 
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Error al obtener las asistencias');
+  try {
+    const response = await fetch(url);
+
+    // Verificamos si la respuesta es OK (status 200-299)
+    if (!response.ok) {
+      // Extraemos el status y tratamos de parsear el body
+      const status = response.status;
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (_) {
+        // Si no se puede parsear, data queda null
+      }
+
+      // Dependiendo del status, lanzamos un Error con un prefijo
+      if (status === 404) {
+        const msg = data?.message || "No se encontraron asistencias con los filtros proporcionados.";
+        throw new Error(`NOT_FOUND: ${msg}`);
+      } else if (status >= 400 && status < 500) {
+        const msg = data?.message || "Hubo un error al procesar la solicitud.";
+        throw new Error(`CLIENT_ERROR: ${msg}`);
+      } else {
+        const msg = data?.message || "Ocurrió un error en el servidor.";
+        throw new Error(`SERVER_ERROR: ${msg}`);
+      }
+    }
+
+    // Si la respuesta es OK, devolvemos el JSON
+    return await response.json();
+  } catch (error) {
+    // Si el fetch falla (CORS, desconexión, etc.), no hay response
+    // Verificamos si ya es un error NOT_FOUND, SERVER_ERROR, etc.
+    if (
+      error.message.startsWith("NOT_FOUND:") ||
+      error.message.startsWith("CLIENT_ERROR:") ||
+      error.message.startsWith("SERVER_ERROR:")
+    ) {
+      // Es un error que ya clasificamos arriba
+      throw error;
+    } else {
+      // Caso de fallo de red, CORS, etc.
+      throw new Error(`NETWORK_ERROR: ${error.message}`);
+    }
   }
-  return response.json();
 };
 
 export const obtenerReporteAsistencias = async (cedula, fechaInicio, fechaFin, idPeriodo) => {
-    const params = new URLSearchParams();
-    if (fechaInicio) params.append('fechaInicio', fechaInicio);
-    if (fechaFin) params.append('fechaFin', fechaFin);
-    if (idPeriodo) params.append('id_Periodo', idPeriodo);
+  const params = new URLSearchParams();
+  if (fechaInicio) params.append("fechaInicio", fechaInicio);
+  if (fechaFin) params.append("fechaFin", fechaFin);
+  if (idPeriodo) params.append("id_Periodo", idPeriodo);
 
-    const response = await fetch(`${API_URL}/asistencias/reporte/${cedula}?${params.toString()}`);
-    if (!response.ok) {
-      throw new Error('Error al obtener los datos');
+  const response = await fetch(`${API_URL}/asistencias/reporte/${cedula}?${params.toString()}`);
+
+  // Verificamos si la respuesta es exitosa
+  if (!response.ok) {
+    if (response.status === 404) {
+      // Caso: No se encontraron resultados
+      throw new Error("NOT_FOUND");
+    } else {
+      // Error de servidor (500, 403, etc.)
+      throw new Error("SERVER_ERROR");
     }
-    const data = await response.json();
-    return data;
-  
+  }
+
+  const data = await response.json();
+  return data;
 };

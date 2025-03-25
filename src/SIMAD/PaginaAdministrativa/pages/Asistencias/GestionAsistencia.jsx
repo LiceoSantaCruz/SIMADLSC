@@ -28,6 +28,37 @@ export const GestionAsistencia = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
+  /**
+   * parseError:
+   * Retorna siempre un mensaje amigable para el usuario,
+   * sin exponer detalles técnicos del error.
+   */
+  const parseError = (_err, defaultMessage) => {
+    // Ignoramos el error original y mostramos solo el mensaje recibido como parámetro.
+    return defaultMessage;
+  };
+
+  // Función de validación para los filtros de búsqueda
+  const validateFiltros = () => {
+    // Validar campos obligatorios (excepto fecha, que se asume opcional)
+    if (!filtros.periodo || !filtros.grado || !filtros.materia || !filtros.seccion) {
+      return {
+        isValid: false,
+        message: "Por favor, seleccione todos los campos requeridos (Periodo, Grado, Materia y Sección).",
+      };
+    }
+
+    // Validar que la fecha no sea mayor a la actual (si está ingresada)
+    if (filtros.fecha && new Date(filtros.fecha) > new Date()) {
+      return {
+        isValid: false,
+        message: "La fecha seleccionada no puede ser mayor a la fecha actual.",
+      };
+    }
+
+    return { isValid: true };
+  };
+
   useEffect(() => {
     const fetchAsistencias = async () => {
       try {
@@ -35,12 +66,16 @@ export const GestionAsistencia = () => {
         setAsistencias(data);
         setError("");
       } catch (err) {
-        setError("Error al obtener las asistencias");
+        const errorMessage = parseError(
+          err,
+          "Ha ocurrido un problema al obtener las asistencias. Por favor, intente de nuevo más tarde."
+        );
+        setError(errorMessage);
         setAsistencias([]);
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: "Error al obtener las asistencias",
+          text: errorMessage,
           confirmButtonColor: "#2563EB",
         });
       }
@@ -50,6 +85,18 @@ export const GestionAsistencia = () => {
   }, []);
 
   const handleBuscar = async () => {
+    // Validar filtros antes de ejecutar la búsqueda
+    const { isValid, message } = validateFiltros();
+    if (!isValid) {
+      Swal.fire({
+        icon: "warning",
+        title: "Validación",
+        text: message,
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
     try {
       const data = await obtenerGestionAsistencias(filtros);
       if (data.length === 0) {
@@ -64,13 +111,18 @@ export const GestionAsistencia = () => {
         setAsistencias(data);
       }
     } catch (err) {
+      // Mensaje de advertencia amigable para búsquedas fallidas
+      const errorMessage = parseError(
+        err,
+        "Ocurrió un problema durante la búsqueda. Por favor, verifique los datos ingresados y vuelva a intentarlo."
+      );
       console.error("Error al obtener las asistencias:", err);
-      setError("Error al obtener las asistencias");
+      setError(errorMessage);
       setAsistencias([]);
       Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Error al obtener las asistencias",
+        icon: "warning",
+        title: "Advertencia",
+        text: errorMessage,
         confirmButtonColor: "#2563EB",
       });
     }
@@ -84,6 +136,7 @@ export const GestionAsistencia = () => {
   const handleEditar = async (id) => {
     const asistencia = asistencias.find((a) => a.asistencia_id === id);
     if (!asistencia) return;
+
     const { value: formValues } = await Swal.fire({
       title: "Editar Asistencia",
       html:
@@ -101,13 +154,35 @@ export const GestionAsistencia = () => {
       preConfirm: () => {
         const estado = document.getElementById("swal-input1").value;
         const lecciones = document.getElementById("swal-input2").value;
+
         if (!estado) {
           Swal.showValidationMessage("El campo Estado es obligatorio");
         }
         return { estado, lecciones };
       },
     });
+
     if (formValues) {
+      // Validar si se realizaron cambios
+      const newLecciones = formValues.lecciones
+        .split(",")
+        .map((l) => l.trim())
+        .filter((l) => l !== "")
+        .join(", ");
+      const oldLecciones = Array.isArray(asistencia.lecciones)
+        ? asistencia.lecciones.join(", ")
+        : asistencia.lecciones;
+
+      if (formValues.estado === asistencia.estado && newLecciones === oldLecciones) {
+        Swal.fire({
+          icon: "warning",
+          title: "Sin cambios",
+          text: "No se detectaron cambios en la asistencia.",
+          confirmButtonColor: "#2563EB",
+        });
+        return;
+      }
+
       const updatedData = {
         estado: formValues.estado,
         lecciones: formValues.lecciones
@@ -115,6 +190,7 @@ export const GestionAsistencia = () => {
           .map((l) => l.trim())
           .filter((l) => l !== ""),
       };
+
       try {
         await actualizarAsistencia(asistencia.asistencia_id, updatedData);
         setAsistencias(
@@ -130,10 +206,15 @@ export const GestionAsistencia = () => {
           confirmButtonColor: "#2563EB",
         });
       } catch (err) {
+        const errorMessage = parseError(
+          err,
+          "Error al actualizar la asistencia. Por favor, intente de nuevo."
+        );
         console.error(err);
         Swal.fire({
           icon: "error",
           title: "Error al actualizar la asistencia",
+          text: errorMessage,
           confirmButtonColor: "#2563EB",
         });
       }
@@ -150,24 +231,27 @@ export const GestionAsistencia = () => {
       cancelButtonText: "Cancelar",
       confirmButtonColor: "#2563EB",
     });
+
     if (result.isConfirmed) {
       try {
         await eliminarAsistencia(id);
-        setAsistencias((prev) =>
-          prev.filter((a) => a.asistencia_id !== id)
-        );
+        setAsistencias((prev) => prev.filter((a) => a.asistencia_id !== id));
         Swal.fire({
           icon: "success",
           title: "Eliminado",
-          text: "La asistencia ha sido eliminada.",
+          text: "La asistencia ha sido eliminada correctamente.",
           confirmButtonColor: "#2563EB",
         });
       } catch (err) {
-        setError("Error al eliminar la asistencia");
+        const errorMessage = parseError(
+          err,
+          "Error al eliminar la asistencia. Por favor, intente de nuevo."
+        );
+        setError(errorMessage);
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: "Error al eliminar la asistencia",
+          text: errorMessage,
           confirmButtonColor: "#2563EB",
         });
       }
@@ -184,6 +268,11 @@ export const GestionAsistencia = () => {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Gestión de Asistencias</h1>
+
+      {/* Texto explicativo para el usuario */}
+      <p className="mb-2 text-sm text-gray-700">
+        Por favor seleccione Periodo, Grado, Materia y Sección antes de realizar la búsqueda.
+      </p>
 
       <div className="mb-4 grid grid-cols-1 md:grid-cols-5 gap-4">
         <select

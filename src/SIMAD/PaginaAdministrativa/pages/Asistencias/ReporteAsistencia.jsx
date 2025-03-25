@@ -26,50 +26,122 @@ export const ReporteAsistencia = () => {
   } = useReporteAsistencia();
 
   const { periodos } = usePeriodos();
-  const [showErrorModal, setShowErrorModal] = useState(false);
+
+  // Indica si el usuario ya presionó "Buscar"
   const [hasSearched, setHasSearched] = useState(false);
 
+  // Construye el nombre completo del estudiante si hay datos
   const estudianteNombre =
     asistencias.length > 0
       ? `${asistencias[0]?.id_Estudiante?.nombre_Estudiante} ${asistencias[0]?.id_Estudiante?.apellido1_Estudiante} ${asistencias[0]?.id_Estudiante?.apellido2_Estudiante || ""}`
       : "";
 
+  /**
+   * Validaciones del formulario antes de buscar
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // 1) Validar cédula no vacía
+    if (!cedula.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Validación",
+        text: "Por favor, ingresa la cédula o el nombre del estudiante.",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
+    // 2) Validar rango de fechas
+    if (fechaInicio && fechaFin && fechaInicio > fechaFin) {
+      Swal.fire({
+        icon: "warning",
+        title: "Rango de fechas inválido",
+        text: "La fecha de inicio no puede ser mayor que la fecha final.",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
+    // Marcamos que el usuario hizo una búsqueda
     setHasSearched(true);
-    setAsistencias([]); // Limpiar asistencias antes de nueva búsqueda
-    setShowErrorModal(false);
+
+    // Limpiamos asistencias anteriores
+    setAsistencias([]);
+
+    // Disparamos la búsqueda
     try {
       await buscarAsistencias();
     } catch (err) {
       console.error("Error en la búsqueda:", err);
-      setShowErrorModal(true);
+      // Si ocurre un error real, se manejará en el useEffect
     }
   };
 
+  /**
+   * Evita mostrar modales mientras el usuario edita
+   */
+  const handleChangeCedula = (e) => {
+    setCedula(e.target.value);
+    setHasSearched(false);
+  };
+  const handleChangeFechaInicio = (e) => {
+    setFechaInicio(e.target.value);
+    setHasSearched(false);
+  };
+  const handleChangeFechaFin = (e) => {
+    setFechaFin(e.target.value);
+    setHasSearched(false);
+  };
+  const handleChangePeriodo = (e) => {
+    setIdPeriodo(e.target.value);
+    setHasSearched(false);
+  };
+
+  /**
+   * useEffect para mostrar SweetAlerts sólo si se presionó "Buscar"
+   * (hasSearched = true) y ya no estamos cargando (loading = false).
+   */
   useEffect(() => {
-    if (hasSearched && !loading) {
-      if (error) {
-        setShowErrorModal(true);
-      } else if (cedula.trim().length > 0 && asistencias.length === 0) {
-        setShowErrorModal(true);
-      } else {
-        setShowErrorModal(false);
+    if (!hasSearched || loading) return;
+
+    // Distinguimos según el valor de "error"
+    if (error === "not-found") {
+      // Sin resultados => warning
+      Swal.fire({
+        icon: "warning",
+        title: "Sin resultados",
+        text: "No se encontraron asistencias con los criterios ingresados. Por favor, verifica la información.",
+        confirmButtonColor: "#2563EB",
+      });
+      setHasSearched(false);
+    } else if (error === "server-error") {
+      // Error real => icono error
+      Swal.fire({
+        icon: "error",
+        title: "Ocurrió un problema",
+        text: "Error al obtener las asistencias. Por favor, intenta de nuevo.",
+        confirmButtonColor: "#2563EB",
+      });
+      setHasSearched(false);
+    } else {
+      // Si no hay error pero tampoco hay asistencias => sin resultados
+      if (cedula.trim() && asistencias.length === 0) {
+        Swal.fire({
+          icon: "warning",
+          title: "Sin resultados",
+          text: "No se encontraron asistencias con los criterios ingresados. Verifica la información.",
+          confirmButtonColor: "#2563EB",
+        });
+        setHasSearched(false);
       }
     }
   }, [hasSearched, loading, error, cedula, asistencias]);
 
-  useEffect(() => {
-    if (showErrorModal) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No se encontraron asistencias para el criterio de búsqueda ingresado o ocurrió un error. Por favor, verifica la información e inténtalo de nuevo.',
-        confirmButtonColor: '#2563EB',
-      }).then(() => setShowErrorModal(false));
-    }
-  }, [showErrorModal]);
-
+  /**
+   * Generar PDF con html2canvas + jsPDF
+   */
   const handleExportPDF = () => {
     const input = document.getElementById("reporte-asistencias");
     html2canvas(input)
@@ -99,6 +171,9 @@ export const ReporteAsistencia = () => {
       });
   };
 
+  /**
+   * Función para traducir el estado (P, A, E, J)
+   */
   const traducirEstado = (estado) => {
     switch (estado) {
       case "P":
@@ -118,15 +193,19 @@ export const ReporteAsistencia = () => {
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Encabezado */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Gestión de Reportes de Asistencia</h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          Gestión de Reportes de Asistencia
+        </h1>
         <p className="text-gray-600">
-          Consulta y gestiona los reportes de asistencia por cédula o nombre de estudiante y fechas.
+          Consulta y gestiona los reportes de asistencia por cédula o nombre del
+          estudiante y fechas.
         </p>
       </div>
 
       {/* Formulario de búsqueda */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
         <form className="grid grid-cols-1 md:grid-cols-3 gap-4" onSubmit={handleSubmit}>
+          {/* Cédula */}
           <div>
             <label htmlFor="cedula" className="block text-sm font-medium text-gray-700">
               Cédula o Nombre del Estudiante
@@ -136,15 +215,19 @@ export const ReporteAsistencia = () => {
               id="cedula"
               name="cedula"
               value={cedula}
-              onChange={(e) => setCedula(e.target.value)}
+              onChange={handleChangeCedula}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
               placeholder="Ingresa la cédula o el nombre del estudiante"
               required
             />
           </div>
 
+          {/* Fecha de Inicio */}
           <div>
-            <label htmlFor="fechaInicio" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="fechaInicio"
+              className="block text-sm font-medium text-gray-700"
+            >
               Fecha de Inicio
             </label>
             <input
@@ -152,11 +235,12 @@ export const ReporteAsistencia = () => {
               id="fechaInicio"
               name="fechaInicio"
               value={fechaInicio}
-              onChange={(e) => setFechaInicio(e.target.value)}
+              onChange={handleChangeFechaInicio}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
             />
           </div>
 
+          {/* Fecha Final */}
           <div>
             <label htmlFor="fechaFin" className="block text-sm font-medium text-gray-700">
               Fecha Final
@@ -166,11 +250,12 @@ export const ReporteAsistencia = () => {
               id="fechaFin"
               name="fechaFin"
               value={fechaFin}
-              onChange={(e) => setFechaFin(e.target.value)}
+              onChange={handleChangeFechaFin}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
             />
           </div>
 
+          {/* Periodo */}
           <div>
             <label htmlFor="idPeriodo" className="block text-sm font-medium text-gray-700">
               Periodo
@@ -178,7 +263,7 @@ export const ReporteAsistencia = () => {
             <select
               name="idPeriodo"
               value={idPeriodo}
-              onChange={(e) => setIdPeriodo(e.target.value)}
+              onChange={handleChangePeriodo}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
             >
               <option value="">Seleccionar Periodo</option>
@@ -190,6 +275,7 @@ export const ReporteAsistencia = () => {
             </select>
           </div>
 
+          {/* Botón Buscar */}
           <div className="flex items-end">
             <button
               type="submit"
@@ -200,11 +286,21 @@ export const ReporteAsistencia = () => {
           </div>
         </form>
       </div>
-      
+
+      {/* Mostrar un texto mientras loading = true */}
+      {loading && (
+        <p className="text-blue-600 font-semibold mb-4">
+          Buscando asistencias...
+        </p>
+      )}
+
       {/* Resultados */}
       {asistencias.length > 0 && (
         <>
-          <div id="reporte-asistencias" className="bg-white p-4 rounded-lg shadow overflow-x-auto">
+          <div
+            id="reporte-asistencias"
+            className="bg-white p-4 rounded-lg shadow overflow-x-auto"
+          >
             <div className="mb-4">
               <h3 className="text-lg font-semibold">Grado: {grado}</h3>
               <h3 className="text-lg font-semibold">Sección: {seccion}</h3>
@@ -279,5 +375,3 @@ export const ReporteAsistencia = () => {
     </div>
   );
 };
-
-export default ReporteAsistencia;

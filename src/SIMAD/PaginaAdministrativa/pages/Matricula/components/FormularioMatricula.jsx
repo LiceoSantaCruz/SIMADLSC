@@ -36,9 +36,81 @@ export const FormularioMatricula = () => {
     handleChange(edadEvent);
   };
 
-  // Wrapper del submit para mostrar modales con SweetAlert2
+  // Validaciones antes de enviar el formulario.
+  // Se verifica que los campos obligatorios estén completos, que la cédula tenga el formato correcto
+  // y que el correo estudiantil sea obligatorio y válido.
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+
+    // Lista para almacenar los errores
+    let missingFields = [];
+
+    // Validación de campos obligatorios
+    if (!formData.periodo || formData.periodo.trim() === "") {
+      missingFields.push("Periodo");
+    }
+    if (
+      !formData.estudiante.gradoId ||
+      formData.estudiante.gradoId.toString().trim() === ""
+    ) {
+      missingFields.push("Grado");
+    }
+    if (
+      !formData.estudiante.nombre_Estudiante ||
+      formData.estudiante.nombre_Estudiante.trim() === ""
+    ) {
+      missingFields.push("Nombre del estudiante");
+    }
+    if (
+      !formData.estudiante.apellido1_Estudiante ||
+      formData.estudiante.apellido1_Estudiante.trim() === ""
+    ) {
+      missingFields.push("Primer apellido del estudiante");
+    }
+    if (
+      !formData.estudiante.cedula ||
+      formData.estudiante.cedula.trim() === ""
+    ) {
+      missingFields.push("Cédula del estudiante");
+    } else {
+      // Validar formato de cédula: Ejemplo: 5-0442-0911
+      const cedulaRegex = /^\d-\d{4}-\d{4}$/;
+      if (!cedulaRegex.test(formData.estudiante.cedula.trim())) {
+        missingFields.push("Cédula (formato válido: 5-0442-0911)");
+      }
+    }
+    // Validar que el correo estudiantil sea obligatorio y tenga formato correcto
+    if (
+      !formData.estudiante.correo_estudiantil ||
+      formData.estudiante.correo_estudiantil.trim() === ""
+    ) {
+      missingFields.push("Correo estudiantil");
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.estudiante.correo_estudiantil.trim())) {
+        missingFields.push("Correo estudiantil (debe ser un email válido)");
+      }
+    }
+
+    // Validación de fecha de nacimiento (opcional)
+    if (formData.estudiante.fecha_nacimiento) {
+      const birthDate = new Date(formData.estudiante.fecha_nacimiento);
+      if (isNaN(birthDate.getTime())) {
+        missingFields.push("Fecha de nacimiento (formato inválido)");
+      }
+    }
+
+    // Si hay errores, se muestra un modal y se detiene el envío
+    if (missingFields.length > 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Campos obligatorios incompletos o inválidos",
+        text: "Por favor, complete o corrija: " + missingFields.join(", "),
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
     try {
       await handleSubmit(e);
       Swal.fire({
@@ -47,11 +119,13 @@ export const FormularioMatricula = () => {
         text: "Formulario enviado correctamente",
         confirmButtonColor: "#2563EB",
       });
+      // Opcional: puedes resetear el formulario si es lo deseado
     } catch (error) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "Hubo un error al enviar el formulario",
+        text:
+          error.message || "Hubo un error al enviar el formulario. Intente nuevamente.",
         confirmButtonColor: "#2563EB",
       });
     }
@@ -64,7 +138,10 @@ export const FormularioMatricula = () => {
       </h1>
       <p className="text-center text-gray-600 mb-6">
         Por favor, complete todos los campos solicitados con datos verídicos.
-        Verifique la información antes de enviar el formulario.
+        Verifique la información antes de enviar el formulario. Recuerde que el campo{" "}
+        <strong>Cédula del estudiante</strong> debe tener el formato{" "}
+        <strong>"5-0442-0911"</strong> y el{" "}
+        <strong>Correo Estudiantil</strong> es obligatorio.
       </p>
 
       <form className="space-y-6" onSubmit={onSubmitHandler}>
@@ -85,10 +162,7 @@ export const FormularioMatricula = () => {
                   >
                     <option value="">Seleccione un periodo</option>
                     {periodos.map((periodo) => (
-                      <option
-                        key={periodo.id_Periodo}
-                        value={periodo.id_Periodo}
-                      >
+                      <option key={periodo.id_Periodo} value={periodo.id_Periodo}>
                         {periodo.nombre_Periodo}
                       </option>
                     ))}
@@ -163,7 +237,7 @@ export const FormularioMatricula = () => {
                   name="estudiante.cedula"
                   value={formData.estudiante.cedula}
                   onChange={handleChange}
-                  placeholder="5-0123-0456"
+                  placeholder="5-0442-0911"
                   className="border p-2 rounded-md w-full"
                 />
               </div>
@@ -184,7 +258,9 @@ export const FormularioMatricula = () => {
                   name="estudiante.correo_estudiantil"
                   value={formData.estudiante.correo_estudiantil}
                   onChange={handleChange}
+                  placeholder="ejemplo@correo.com"
                   className="border p-2 rounded-md w-full"
+                  required
                 />
               </div>
             </div>
@@ -261,7 +337,7 @@ export const FormularioMatricula = () => {
               </div>
             </div>
 
-            {/* Se agregan los campos de Condición Migratoria y Repite alguna materia */}
+            {/* Campos adicionales */}
             <div className="flex space-x-4">
               <label className="block text-gray-700">Condición Migratoria:</label>
               <label className="inline-flex items-center">

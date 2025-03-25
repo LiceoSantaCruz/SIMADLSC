@@ -115,6 +115,79 @@ export const AsistenciaEst = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validaciones
+    if (!formData.fecha) {
+      Swal.fire({
+        icon: "warning",
+        title: "Advertencia",
+        text: "Por favor, selecciona una fecha.",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
+    if (!formData.id_Materia) {
+      Swal.fire({
+        icon: "warning",
+        title: "Advertencia",
+        text: "Por favor, selecciona una materia.",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
+    if (!formData.id_grado) {
+      Swal.fire({
+        icon: "warning",
+        title: "Advertencia",
+        text: "Por favor, selecciona un grado.",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
+    if (!formData.id_Seccion) {
+      Swal.fire({
+        icon: "warning",
+        title: "Advertencia",
+        text: "Por favor, selecciona una sección.",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
+    if (!formData.id_Profesor) {
+      Swal.fire({
+        icon: "warning",
+        title: "Advertencia",
+        text: "Por favor, selecciona un profesor.",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
+    if (!formData.id_Periodo) {
+      Swal.fire({
+        icon: "warning",
+        title: "Advertencia",
+        text: "Por favor, selecciona un periodo.",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
+    if (formData.lecciones.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Advertencia",
+        text: "Por favor, selecciona al menos una lección.",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
+    
+    
     const asistenciasData = estudiantes.map((estudiante) => ({
       fecha: formData.fecha,
       estado: estudiante.estado,

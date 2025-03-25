@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { useReporteAsistenciaSeccion } from './Hook/useReporteAsistenciaSeccion';
@@ -7,92 +7,176 @@ import Swal from 'sweetalert2';
 import '@sweetalert2/theme-bulma/bulma.css';
 
 const ReporteAsistenciaSeccion = () => {
-  const [nombreSeccion, setNombreSeccion] = useState('');
-  const [fechaInicio, setFechaInicio] = useState('');
-  const [fechaFin, setFechaFin] = useState('');
+  const [nombreSeccion, setNombreSeccion] = useState("");
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin, setFechaFin] = useState("");
 
+  // Obtenemos la lógica para buscar el reporte
   const { reporte, loading, error, buscarReporteSeccion } = useReporteAsistenciaSeccion();
+
+  // Hook para obtener todas las secciones
   const { secciones, loadingSecciones, errorSecciones } = useAllSecciones();
 
+  // Para controlar si el usuario ya presionó "Consultar"
+  const [hasSearched, setHasSearched] = useState(false);
+
+  /**
+   * handleSubmit:
+   * Validamos campos antes de buscar, y si todo está bien,
+   * marcamos hasSearched = true y llamamos a buscarReporteSeccion.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // 1) Validar que el campo nombreSeccion no esté vacío
+    if (!nombreSeccion.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Advertencia",
+        text: "Por favor, ingresa la sección (ej: 7-1).",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
+    // 2) Validar formato "7-1"
+    if (!/^\d+-\d+$/.test(nombreSeccion)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Advertencia",
+        text: 'El formato de la sección es incorrecto. Debe ser algo como "7-1".',
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
+    // 3) Validar fechas
+    if (!fechaInicio || !fechaFin) {
+      Swal.fire({
+        icon: "warning",
+        title: "Advertencia",
+        text: "Por favor, ingresa las fechas de inicio y fin.",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
     if (new Date(fechaInicio) > new Date(fechaFin)) {
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'La fecha de inicio no puede ser mayor que la fecha de fin.',
-        confirmButtonColor: '#2563EB',
+        icon: "warning",
+        title: "Rango de fechas inválido",
+        text: "La fecha de inicio no puede ser mayor que la fecha de fin.",
+        confirmButtonColor: "#2563EB",
       });
       return;
     }
 
-    if (!nombreSeccion.match(/^\d+-\d+$/)) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Advertencia',
-        text: 'El formato de la sección es incorrecto. Debe ser algo como "7-1".',
-        confirmButtonColor: '#2563EB',
-      });
-      return;
-    }
-
-    if (!nombreSeccion || !fechaInicio || !fechaFin) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Advertencia',
-        text: 'Por favor completa todos los campos.',
-        confirmButtonColor: '#2563EB',
-      });
-      return;
-    }
-
+    // Buscamos la sección en el array secciones
     const seccionEncontrada = secciones.find(
       (sec) => sec.nombre_Seccion.toLowerCase() === nombreSeccion.toLowerCase()
     );
-
     if (!seccionEncontrada) {
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
+        icon: "warning",
+        title: "Advertencia",
         text: `No se encontró la sección "${nombreSeccion}". Verifica el nombre.`,
-        confirmButtonColor: '#2563EB',
+        confirmButtonColor: "#2563EB",
       });
       return;
     }
 
+    // 4) Marcamos que el usuario hizo una búsqueda
+    setHasSearched(true);
+
+    // 5) Disparamos la búsqueda
     const idSeccion = seccionEncontrada.id_Seccion;
     try {
       await buscarReporteSeccion({ idSeccion, fechaInicio, fechaFin });
     } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Ocurrió un error al buscar el reporte. Por favor intenta nuevamente.',
-        confirmButtonColor: '#2563EB',
-      });
+      // Cualquier error adicional se manejará en el useEffect
+      console.error("Error al buscar reporte de sección:", error);
     }
   };
 
+  /**
+   * handleChange: Reseteamos hasSearched a false para
+   * evitar mostrar modales mientras el usuario edita
+   */
+  const handleChangeSeccion = (e) => {
+    setNombreSeccion(e.target.value);
+    setHasSearched(false);
+  };
+  const handleChangeFechaInicio = (e) => {
+    setFechaInicio(e.target.value);
+    setHasSearched(false);
+  };
+  const handleChangeFechaFin = (e) => {
+    setFechaFin(e.target.value);
+    setHasSearched(false);
+  };
+
+  /**
+   * useEffect para mostrar SweetAlerts solo si hasSearched = true
+   * y ya no está loading (loading = false).
+   */
+  useEffect(() => {
+    if (!hasSearched || loading) return;
+
+    if (error === "not-found") {
+      // Mostramos un warning de "Sin resultados"
+      Swal.fire({
+        icon: "warning",
+        title: "Sin resultados",
+        text: "No se encontraron datos para la sección y fechas ingresadas. Verifica la información.",
+        confirmButtonColor: "#2563EB",
+      });
+      setHasSearched(false);
+    } else if (error === "server-error") {
+      // Error real
+      Swal.fire({
+        icon: "error",
+        title: "Ocurrió un problema",
+        text: "No fue posible obtener el reporte de asistencia. Por favor, inténtalo de nuevo.",
+        confirmButtonColor: "#2563EB",
+      });
+      setHasSearched(false);
+    }
+    // Caso: no hay error, pero el reporte es nulo o no hay datos
+    else if (!error && !reporte) {
+      Swal.fire({
+        icon: "warning",
+        title: "Sin resultados",
+        text: "No se encontraron datos para la sección y fechas ingresadas.",
+        confirmButtonColor: "#2563EB",
+      });
+      setHasSearched(false);
+    }
+  }, [hasSearched, loading, error, reporte]);
+
+  /**
+   * handleExportPDF:
+   * Genera un PDF con la info del reporte
+   */
   const handleExportPDF = () => {
-    const input = document.getElementById('reporte-seccion');
+    const input = document.getElementById("reporte-seccion");
     if (!input) return;
 
     html2canvas(input).then((canvas) => {
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
       const pageWidth = 210;
       const pageHeight = 297;
       const imgWidth = pageWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
       let position = 0;
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
+
       while (heightLeft > 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
       pdf.save(`Reporte_Asistencia_Seccion_${nombreSeccion}.pdf`);
@@ -107,62 +191,72 @@ const ReporteAsistenciaSeccion = () => {
       <div className="bg-white p-4 rounded-lg shadow mb-6">
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Sección (ej: 7-1)</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Sección (ej: 7-1)
+            </label>
             <input
               type="text"
               value={nombreSeccion}
-              onChange={(e) => setNombreSeccion(e.target.value)}
+              onChange={handleChangeSeccion}
               className="mt-1 block w-full p-2 border rounded-md"
               placeholder="7-1, 10-2, 11-8, etc."
-              required
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700">Fecha de Inicio</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Fecha de Inicio
+            </label>
             <input
               type="date"
               value={fechaInicio}
-              onChange={(e) => setFechaInicio(e.target.value)}
+              onChange={handleChangeFechaInicio}
               className="mt-1 block w-full p-2 border rounded-md"
-              required
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700">Fecha Final</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Fecha Final
+            </label>
             <input
               type="date"
               value={fechaFin}
-              onChange={(e) => setFechaFin(e.target.value)}
+              onChange={handleChangeFechaFin}
               className="mt-1 block w-full p-2 border rounded-md"
-              required
             />
           </div>
+
           <div className="flex items-end">
             <button
               type="submit"
               className="w-full bg-blue-500 text-white p-2 rounded-md shadow hover:bg-blue-600"
               disabled={loadingSecciones}
             >
-              {loadingSecciones ? 'Cargando secciones...' : 'Consultar'}
+              {loadingSecciones ? "Cargando secciones..." : "Consultar"}
             </button>
           </div>
         </form>
       </div>
 
-      {errorSecciones && <p className="text-red-500">Error: {errorSecciones}</p>}
-      {loading && <p>Cargando reporte...</p>}
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          <p className="font-bold">Error:</p>
-          <p>{error}</p>
-        </div>
+      {/* Error al cargar secciones (si existiera) */}
+      {errorSecciones && (
+        <p className="text-red-500">
+          Error al cargar las secciones: {errorSecciones}
+        </p>
       )}
+
+      {/* Indicador de carga */}
+      {loading && <p className="text-blue-600 font-semibold mb-4">Cargando reporte...</p>}
 
       {/* Renderizar reporte */}
       {reporte && (
-        <div id="reporte-seccion" className="bg-white p-4 rounded-lg shadow overflow-x-auto mb-6">
+        <div
+          id="reporte-seccion"
+          className="bg-white p-4 rounded-lg shadow overflow-x-auto mb-6"
+        >
           <h2 className="text-xl font-semibold mb-4">
-            Sección: {reporte.nombre_Seccion} 
+            Sección: {reporte.nombre_Seccion}
           </h2>
           <div className="mb-4">
             <h3 className="font-bold">Estadísticas Generales</h3>
@@ -174,17 +268,29 @@ const ReporteAsistenciaSeccion = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estudiante</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Asistencias</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ausencias</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Escapados</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Justificados</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Estudiante
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Asistencias
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Ausencias
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Escapados
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Justificados
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {reporte.estudiantes.map((est) => (
                 <tr key={est.id_Estudiante}>
-                  <td className="px-6 py-4 whitespace-nowrap">{est.nombre_completo}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {est.nombre_completo}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">{est.asistencias}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{est.ausencias}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{est.escapados}</td>
