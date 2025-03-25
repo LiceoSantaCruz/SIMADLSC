@@ -48,8 +48,8 @@ export const AdminRoutes = () => {
   }, []);
 
   return (
-    <div className="flex-grow p-6 bg-gray-100 min-h-screen overflow-auto">
-      <Routes>
+<div className="flex-grow w-full p-4 md:p-6 min-h-screen bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100 overflow-y-auto overflow-x-hidden transition-colors duration-300">
+<Routes>
 
         <Route path="/" element={<Navigate to="/info" replace />} />
          {/* Rutas de inicio personalizadas según el rol */}

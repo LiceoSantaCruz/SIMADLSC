@@ -5,11 +5,13 @@ import { WelcomeMessage } from "../components/WelcomeMessage"
 
 export const InfoAdminPage = () => {
   return (
-    <div className="p-6">
-      <WelcomeMessage/>
-        <Estadisticas/>
-        <GraficaSeccionesPorGrado/>
-        <EventList/>
+    <div className="p-4 md:p-6 min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300 overflow-x-hidden">
+      <div className="w-full space-y-12">
+        <WelcomeMessage />
+        <Estadisticas />
+        <GraficaSeccionesPorGrado />
+        <EventList />
+      </div>
     </div>
   )
 }

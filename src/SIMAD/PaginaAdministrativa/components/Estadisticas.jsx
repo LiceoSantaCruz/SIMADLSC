@@ -24,10 +24,9 @@ export const Estadisticas = () => {
     fetchEstudiantes();
   }, []);
 
-  if (loading) return <p className="text-center text-blue-600">Cargando estadísticas...</p>;
-  if (error) return <p className="text-center text-red-500">{error}</p>;
+  if (loading) return <p className="text-center text-blue-600 dark:text-blue-300">Cargando estadísticas...</p>;
+  if (error) return <p className="text-center text-red-500 dark:text-red-400">{error}</p>;
 
-  // **Cálculos de estadísticas**
   const totalEstudiantes = estudiantes.length;
   const totalHombres = estudiantes.filter(est => est.sexo === "Masculino").length;
   const totalMujeres = estudiantes.filter(est => est.sexo === "Femenino").length;
@@ -36,37 +35,39 @@ export const Estadisticas = () => {
   const porcentajeMujeres = ((totalMujeres / totalEstudiantes) * 100).toFixed(1);
 
   return (
-    <div className="p-12 bg-gradient-to-r from-blue-50 to-pink-50 min-h-full ">
-      <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">📊 Estadísticas del Colegio</h2>
-      
+    <div className="p-12 bg-gradient-to-r from-blue-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 min-h-full transition-colors duration-300">
+      <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-gray-100 mb-12">
+        📊 Estadísticas del Colegio
+      </h2>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
         {/* Total de Estudiantes */}
-        <div className="p-6 border border-gray-200 rounded-xl shadow-md bg-white flex flex-col items-center">
-          <Users className="text-gray-700 w-12 h-12 mb-2" />
-          <h3 className="text-xl font-semibold text-gray-700">Total Estudiantes</h3>
-          <p className="text-5xl font-bold text-gray-900">
+        <div className="p-6 border border-gray-200 dark:border-gray-700 rounded-xl shadow-md bg-white dark:bg-gray-900 flex flex-col items-center">
+          <Users className="text-gray-700 dark:text-gray-200 w-12 h-12 mb-2" />
+          <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300">Total Estudiantes</h3>
+          <p className="text-5xl font-bold text-gray-900 dark:text-white">
             <CountUp end={totalEstudiantes} duration={2.5} />
           </p>
         </div>
 
         {/* Hombres */}
-        <div className="p-6 border border-blue-300 rounded-xl shadow-md bg-white flex flex-col items-center">
-          <Mars className="text-blue-500 w-12 h-12 mb-2" />
-          <h3 className="text-xl font-semibold text-blue-500">Hombres</h3>
-          <p className="text-5xl font-bold text-blue-600">
+        <div className="p-6 border border-blue-300 dark:border-blue-500 rounded-xl shadow-md bg-white dark:bg-gray-900 flex flex-col items-center">
+          <Mars className="text-blue-500 dark:text-blue-400 w-12 h-12 mb-2" />
+          <h3 className="text-xl font-semibold text-blue-500 dark:text-blue-400">Hombres</h3>
+          <p className="text-5xl font-bold text-blue-600 dark:text-blue-300">
             <CountUp end={totalHombres} duration={2.5} />
           </p>
-          <p className="text-sm text-gray-500">{porcentajeHombres}% del total</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{porcentajeHombres}% del total</p>
         </div>
 
         {/* Mujeres */}
-        <div className="p-6 border border-pink-300 rounded-xl shadow-md bg-white flex flex-col items-center">
-          <Venus className="text-pink-500 w-12 h-12 mb-2" />
-          <h3 className="text-xl font-semibold text-pink-500">Mujeres</h3>
-          <p className="text-5xl font-bold text-pink-600">
+        <div className="p-6 border border-pink-300 dark:border-pink-500 rounded-xl shadow-md bg-white dark:bg-gray-900 flex flex-col items-center">
+          <Venus className="text-pink-500 dark:text-pink-400 w-12 h-12 mb-2" />
+          <h3 className="text-xl font-semibold text-pink-500 dark:text-pink-400">Mujeres</h3>
+          <p className="text-5xl font-bold text-pink-600 dark:text-pink-300">
             <CountUp end={totalMujeres} duration={2.5} />
           </p>
-          <p className="text-sm text-gray-500">{porcentajeMujeres}% del total</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{porcentajeMujeres}% del total</p>
         </div>
       </div>
     </div>

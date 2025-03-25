@@ -12,7 +12,6 @@ import {
   Legend,
 } from "chart.js";
 
-// Registramos los componentes de Chart.js que necesitamos
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const API_BASE_URL =
@@ -25,7 +24,6 @@ export const GraficaSeccionesPorGrado = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Mapeo de gradoId a nombre de grado (1 -> 7°, 2 -> 8°, 3 -> 9°, 4 -> 10°, 5 -> 11°)
   const gradeMap = {
     1: "7°",
     2: "8°",
@@ -34,7 +32,6 @@ export const GraficaSeccionesPorGrado = () => {
     5: "11°",
   };
 
-  // Contadores iniciales para cada grado
   const initialGradeCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
   useEffect(() => {
@@ -53,13 +50,13 @@ export const GraficaSeccionesPorGrado = () => {
   }, []);
 
   if (loading) {
-    return <p className="text-center text-blue-600">Cargando gráfica...</p>;
-  }
-  if (error) {
-    return <p className="text-center text-red-500">{error}</p>;
+    return <p className="text-center text-blue-600 dark:text-blue-300">Cargando gráfica...</p>;
   }
 
-  // Contar cuántas secciones hay para cada gradoId
+  if (error) {
+    return <p className="text-center text-red-500 dark:text-red-400">{error}</p>;
+  }
+
   const gradeCounts = { ...initialGradeCounts };
   secciones.forEach((sec) => {
     const grade = Number(sec.gradoId);
@@ -68,9 +65,8 @@ export const GraficaSeccionesPorGrado = () => {
     }
   });
 
-  // Convertimos el objeto de contadores en datos para la gráfica
-  const gradeIds = Object.keys(gradeMap).map(Number); // [1,2,3,4,5]
-  const labels = gradeIds.map((id) => gradeMap[id]);   // ["7°","8°","9°","10°","11°"]
+  const gradeIds = Object.keys(gradeMap).map(Number);
+  const labels = gradeIds.map((id) => gradeMap[id]);
   const dataCounts = gradeIds.map((id) => gradeCounts[id]);
 
   const data = {
@@ -86,21 +82,37 @@ export const GraficaSeccionesPorGrado = () => {
     ],
   };
 
-  // Opciones para quitar decimales tanto en el eje y como en los tooltips
   const options = {
     responsive: true,
     scales: {
       y: {
         ticks: {
-          precision: 0, // Elimina decimales en el eje y
+          precision: 0,
+          color: "#9ca3af", // gray-400 para modo oscuro también
+        },
+        grid: {
+          color: "#e5e7eb", // gray-200 para modo claro
+        },
+      },
+      x: {
+        ticks: {
+          color: "#9ca3af",
+        },
+        grid: {
+          color: "#e5e7eb",
         },
       },
     },
     plugins: {
-      legend: { position: "top" },
+      legend: {
+        labels: {
+          color: "#4b5563", // text-gray-700
+        },
+      },
       title: {
         display: true,
         text: "Secciones por Grado (7° - 11°)",
+        color: "#111827", // gray-900
       },
       tooltip: {
         callbacks: {
@@ -114,26 +126,24 @@ export const GraficaSeccionesPorGrado = () => {
     },
   };
 
-  // Calcular total de secciones
   const totalSecciones = secciones.length;
 
   return (
-    <div className="p-4 bg-gradient-to-r from-blue-50 to-pink-50 min-h-full">
-      <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
+    <div className="p-4 bg-gradient-to-r from-blue-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 min-h-full">
+      <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-gray-100 mb-6">
         📊 Gráfica de Secciones por Grado
       </h2>
-      
-      {/* Mostrar el total de secciones */}
+
       <div className="mb-8 text-center">
-        <p className="text-xl font-medium text-gray-700">
+        <p className="text-xl font-medium text-gray-700 dark:text-gray-300">
           Total de Secciones:
         </p>
-        <p className="text-5xl font-bold text-gray-900">
+        <p className="text-5xl font-bold text-gray-900 dark:text-white">
           <CountUp end={totalSecciones} duration={2.5} />
         </p>
       </div>
 
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto bg-white dark:bg-gray-900 p-4 rounded-xl shadow">
         <Bar data={data} options={options} />
       </div>
     </div>
