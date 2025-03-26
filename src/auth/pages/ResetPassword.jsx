@@ -36,7 +36,7 @@ export const ResetPassword = () => {
         text: 'Tu contraseña ha sido restablecida con éxito. Ahora puedes iniciar sesión.',
         confirmButtonText: 'Aceptar',
       }).then(() => {
-        navigate('/auth/login'); // Redirigir a la página de inicio de sesión
+        navigate('/paginainformativa/login'); // Redirigir a la página de inicio de sesión
       });
     } catch (error) {
       // Mostrar alerta de error y no avanzar

@@ -6,7 +6,7 @@ import useAllSecciones from './Hook/seAllSecciones';
 import Swal from 'sweetalert2';
 import '@sweetalert2/theme-bulma/bulma.css';
 
-const ReporteAsistenciaSeccion = () => {
+export const ReporteAsistenciaSeccion = () => {
   const [nombreSeccion, setNombreSeccion] = useState("");
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
