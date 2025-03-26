@@ -172,10 +172,12 @@ export const SideBar = () => {
               </button>
               {isOpen && openSection === 'horarios' && (
                 <div className="ml-8 text-sm text-black dark:text-white space-y-1">
-                  {(role !== 'estudiante') && (
+                  {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
                     <Link to="/horario-profesores" className="block hover:text-green-400">Horario de profesores</Link>
                   )}
-                  <Link to="/horario-estudiantes" className="block hover:text-green-400">Horario de estudiantes</Link>
+                  {(role === 'admin' || role === 'superadmin' || role === 'estudiante') && (
+                    <Link to="/horario-estudiantes" className="block hover:text-green-400">Horario de estudiantes</Link>
+                  )}
                   {(role === 'admin' || role === 'superadmin') && (
                     <Link to="/gestion-horario" className="block hover:text-green-400">Gestión Horario</Link>
                   )}
@@ -241,54 +243,54 @@ export const SideBar = () => {
           )}
       
           {/* Gestión Académica */}
-          {(role === 'admin' || role === 'superadmin' || role === 'estudiante') && (
-            <div>
-              <button
-                onClick={() => toggleSection('gestionAcademica')}
-                className="flex items-center w-full px-2 py-2 rounded-md hover:bg-cyan-500/10 transition group"
-                aria-label="Abrir menú de gestión académica"
-                aria-expanded={openSection === 'gestionAcademica'}
-                aria-controls="submenu-gestionAcademica"
-              >
-                <FaSchool className="text-cyan-400" aria-hidden="true" />
-                {isOpen && <span className="ml-3" id="gestionAcademica-label">Gestión académica</span>}
-                {isOpen && (
-                  <FaChevronDown
+          {(role === 'admin' || role === 'superadmin') && (
+    <div>
+        <button
+            onClick={() => toggleSection('gestionAcademica')}
+            className="flex items-center w-full px-2 py-2 rounded-md hover:bg-cyan-500/10 transition group"
+            aria-label="Abrir menú de gestión académica"
+            aria-expanded={openSection === 'gestionAcademica'}
+            aria-controls="submenu-gestionAcademica"
+        >
+            <FaSchool className="text-cyan-400" aria-hidden="true" />
+            {isOpen && <span className="ml-3" id="gestionAcademica-label">Gestión académica</span>}
+            {isOpen && (
+                <FaChevronDown
                     className={`ml-auto transform transition-transform ${openSection === 'gestionAcademica' ? 'rotate-180' : ''}`}
                     size={12}
-                  />
-                )}
-              </button>
-              {isOpen && openSection === 'gestionAcademica' && (
-                <div
-                  id="submenu-gestionAcademica"
-                  role="region"
-                  aria-labelledby="gestionAcademica-label"
-                  className="ml-8 text-sm text-black dark:text-white space-y-1"
-                >
-                  <Link to="/Gestion-grados" className="flex items-center gap-2 hover:text-cyan-400 transition">
+                />
+            )}
+        </button>
+        {isOpen && openSection === 'gestionAcademica' && (
+            <div
+                id="submenu-gestionAcademica"
+                role="region"
+                aria-labelledby="gestionAcademica-label"
+                className="ml-8 text-sm text-black dark:text-white space-y-1"
+            >
+                <Link to="/Gestion-grados" className="flex items-center gap-2 hover:text-cyan-400 transition">
                     <FaListOl className="text-cyan-400" /> Grados
-                  </Link>
-      
-                  <Link to="/secciones" className="flex items-center gap-2 hover:text-cyan-400 transition">
+                </Link>
+
+                <Link to="/secciones" className="flex items-center gap-2 hover:text-cyan-400 transition">
                     <FaThLarge className="text-cyan-400" /> Secciones
-                  </Link>
-      
-                  <Link to="/Gestion-aulas" className="flex items-center gap-2 hover:text-cyan-400 transition">
+                </Link>
+
+                <Link to="/Gestion-aulas" className="flex items-center gap-2 hover:text-cyan-400 transition">
                     <FaDoorOpen className="text-cyan-400" /> Aulas
-                  </Link>
-      
-                  <Link to="/Gestion-materias" className="flex items-center gap-2 hover:text-cyan-400 transition">
+                </Link>
+
+                <Link to="/Gestion-materias" className="flex items-center gap-2 hover:text-cyan-400 transition">
                     <FaBookOpen className="text-cyan-400" /> Materias
-                  </Link>
-      
-                  <Link to="/busqueda-estudiantes" className="flex items-center gap-2 hover:text-cyan-400 transition">
+                </Link>
+
+                <Link to="/busqueda-estudiantes" className="flex items-center gap-2 hover:text-cyan-400 transition">
                     <FaUserGraduate className="text-cyan-400" /> Estudiantes
-                  </Link>
-                </div>
-              )}
+                </Link>
             </div>
-          )}
+        )}
+    </div>
+)}
         </nav>
       
         {/* Footer */}
