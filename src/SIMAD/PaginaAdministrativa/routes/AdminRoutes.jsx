@@ -51,7 +51,7 @@ export const AdminRoutes = () => {
 <div className="flex-grow w-full p-4 md:p-6 min-h-screen bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100 overflow-y-auto overflow-x-hidden transition-colors duration-300">
 <Routes>
 
-        <Route path="/" element={<Navigate to="/info" replace />} />
+        <Route path="/" element={<Navigate to="/paginainformativa" replace />} />
          {/* Rutas de inicio personalizadas según el rol */}
          {role === 'admin' || role === 'superadmin' ? (
           <Route path="/info" element={<InfoAdminPage />} />
