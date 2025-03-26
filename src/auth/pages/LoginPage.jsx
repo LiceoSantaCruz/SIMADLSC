@@ -114,9 +114,9 @@ export default function LoginPage() {
 
       // Redirigir al usuario a la página principal o una específica según el rol
       if (role === "profesor") {
-        navigate("/horarios/profesor"); // Redirigir a la página de horarios del profesor
+        navigate("/Usuario"); // Redirigir a la página de horarios del profesor
       } else if (role === "estudiante") {
-        navigate("/horarios/estudiante"); // Redirigir a la página de horarios del estudiante
+        navigate("/Usuario"); // Redirigir a la página de horarios del estudiante
       } else {
         navigate("/"); // Redirigir a la página principal
       }
