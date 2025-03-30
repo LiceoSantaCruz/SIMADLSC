@@ -1,6 +1,7 @@
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import getCloudinaryUrl from "../PaginaInformativa/utils/cloudinary";// Ajusta la ruta según tu estructura
 
 export const Eventos = () => {
   const sliderSettings = {
@@ -33,7 +34,10 @@ export const Eventos = () => {
 
   return (
     <div>
-      <section className="py-12 md:py-16 bg-gradient-to-b from-gray-100 to-blue-50" data-aos="fade-up">
+      <section
+        className="py-12 md:py-16 bg-gradient-to-b from-gray-100 to-blue-50"
+        data-aos="fade-up"
+      >
         <div className="container mx-auto px-4 text-center">
           <h3 className="text-3xl md:text-4xl font-bold mb-8 text-blue-900">
             Eventos anuales
@@ -43,7 +47,9 @@ export const Eventos = () => {
             <div className="p-4">
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
                 <div
-                  style={{ backgroundImage: "url('/images/IMG_6505.JPG')" }}
+                  style={{
+                    backgroundImage: `url(${getCloudinaryUrl("IMG_6505_qlxkrp.jpg", "w_800,c_scale")})`,
+                  }}
                   className="bg-center bg-cover rounded-t-lg relative h-40 md:h-44 lg:h-48"
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
@@ -64,7 +70,9 @@ export const Eventos = () => {
             <div className="p-4">
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
                 <div
-                  style={{ backgroundImage: "url('/images/IMG_0675.JPG')" }}
+                  style={{
+                    backgroundImage: `url(${getCloudinaryUrl("IMG_0675_s2joui.jpg", "w_800,c_scale")})`,
+                  }}
                   className="bg-center bg-cover rounded-t-lg relative h-40 md:h-44 lg:h-48"
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
@@ -85,7 +93,9 @@ export const Eventos = () => {
             <div className="p-4">
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
                 <div
-                  style={{ backgroundImage: "url('/images/IMG_8001.JPG')" }}
+                  style={{
+                    backgroundImage: `url(${getCloudinaryUrl("IMG_8001_qmbaum.jpg", "w_800,c_scale")})`,
+                  }}
                   className="bg-center bg-cover rounded-t-lg relative h-40 md:h-44 lg:h-48"
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
@@ -106,7 +116,9 @@ export const Eventos = () => {
             <div className="p-4">
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
                 <div
-                  style={{ backgroundImage: "url('/images/IMG_9317.JPG')" }}
+                  style={{
+                    backgroundImage: `url(${getCloudinaryUrl("IMG_9317_bipf5k.jpg", "w_800,c_scale")})`,
+                  }}
                   className="bg-center bg-cover rounded-t-lg relative h-40 md:h-44 lg:h-48"
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
@@ -127,7 +139,9 @@ export const Eventos = () => {
             <div className="p-4">
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
                 <div
-                  style={{ backgroundImage: "url('/images/IMG_1767.JPG')" }}
+                  style={{
+                    backgroundImage: `url(${getCloudinaryUrl("IMG_1767_pdvxyc.jpg", "w_800,c_scale")})`,
+                  }}
                   className="bg-center bg-cover rounded-t-lg relative h-40 md:h-44 lg:h-48"
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>

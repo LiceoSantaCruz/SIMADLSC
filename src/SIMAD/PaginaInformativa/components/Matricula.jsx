@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import 'aos/dist/aos.css';
 import AOS from 'aos';
+import getCloudinaryUrl from '../utils/cloudinary';
 
 export const Matricula = () => {
   useEffect(() => {
@@ -11,7 +12,9 @@ export const Matricula = () => {
   return (
     <section
       className="py-12 md:py-16 bg-cover bg-center"
-      style={{ backgroundImage: "url('/images/IMG_2947.JPG')" }}
+      style={{
+        backgroundImage: `url(${getCloudinaryUrl("IMG_2947_khx3v1.jpg", "w_1920,c_scale")})`,
+      }}
       aria-labelledby="matricula-title"
     >
       <div className="container mx-auto px-4 md:px-12 lg:px-24">
@@ -20,8 +23,15 @@ export const Matricula = () => {
           data-aos="fade-up"
         >
           {/* Columna Izquierda: Información de Matrícula */}
-          <div className="w-full md:w-1/2 p-4 md:p-8" data-aos="fade-right" data-aos-delay="200">
-            <h2 id="matricula-title" className="text-2xl md:text-3xl font-bold text-blue-900 mb-4">
+          <div
+            className="w-full md:w-1/2 p-4 md:p-8"
+            data-aos="fade-right"
+            data-aos-delay="200"
+          >
+            <h2
+              id="matricula-title"
+              className="text-2xl md:text-3xl font-bold text-blue-900 mb-4"
+            >
               ¿Por qué matricular con nosotros?
             </h2>
             <p className="text-gray-700 mb-4 leading-relaxed text-sm md:text-base">

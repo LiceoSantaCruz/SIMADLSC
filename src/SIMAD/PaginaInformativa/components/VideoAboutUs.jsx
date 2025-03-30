@@ -1,6 +1,11 @@
 import { useEffect } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import getCloudinaryUrl from '../utils/cloudinary';
+
+// Genera la URL optimizada para el video usando Cloudinary
+// Asegúrate de que "video-de-presentacion-liceo-santa-cruz.mp4" sea el publicId del video en Cloudinary
+const videoUrl = getCloudinaryUrl("Liceo_Santa_Cruz_bxs0ix.mp4", "w_1920,q_auto,f_auto", "video");
 
 export const VideoAboutUs = () => {
   useEffect(() => {
@@ -21,13 +26,12 @@ export const VideoAboutUs = () => {
             data-aos="fade-right"
             data-aos-delay="200"
           >
-            <video className="w-full rounded-lg shadow-lg" controls>
-              <source
-                src="Video/video-de-presentacion-liceo-santa-cruz.mp4"
-                type="video/mp4"
-              />
-              Tu navegador no soporta el elemento de video.
-            </video>
+            <div className="relative pb-[56.25%] overflow-hidden rounded-lg shadow-lg">
+              <video className="absolute inset-0 w-full h-full object-cover" controls>
+                <source src={videoUrl} type="video/mp4" />
+                Tu navegador no soporta el elemento de video.
+              </video>
+            </div>
           </div>
           {/* Título y Texto descriptivo */}
           <div
