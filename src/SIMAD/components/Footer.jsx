@@ -21,23 +21,23 @@ export const Footer = () => {
 
         {/* Columna 2: Contactos */}
         <div className="text-center md:text-left">
-          <h4 className="text-lg font-semibold mb-2">Contactos</h4>
+          <h2 className="text-lg font-semibold mb-2">Contactos</h2>
           <p className="text-sm">Teléfono: 2680-0219</p>
           <p className="text-sm">
             Correo electrónico:
             <a
               href="mailto:lic.santacruz@mep.go.cr"
               className="text-blue-400 hover:text-blue-600"
+              aria-label="Enviar correo a lic.santacruz@mep.go.cr"
             >
-              {" "}
-              lic.santacruz@mep.go.cr
+              {" "}lic.santacruz@mep.go.cr
             </a>
           </p>
         </div>
 
         {/* Columna 3: Ubicación */}
         <div className="text-center md:text-left">
-          <h4 className="text-lg font-semibold mb-2">Ubicación</h4>
+          <h2 className="text-lg font-semibold mb-2">Ubicación</h2>
           <p className="text-sm">
             Santa Cruz, Santa Cruz, Guanacaste del Hotel la Calle de Alcalá 100 mts este.
           </p>
@@ -45,17 +45,19 @@ export const Footer = () => {
 
         {/* Columna 4: Redes Sociales */}
         <div className="text-center md:text-left">
-          <h4 className="text-lg font-semibold mb-2">Redes Sociales</h4>
+          <h2 className="text-lg font-semibold mb-2">Redes Sociales</h2>
           <div className="flex justify-center md:justify-start space-x-4">
             <a
               href="https://www.facebook.com/share/mJmkXV7p48J7Zs89/"
               className="text-white hover:text-blue-400"
+              aria-label="Visitar la página de Facebook del Liceo Santa Cruz"
             >
               <FaFacebook size="1.5em" />
             </a>
             <a
               href="https://www.instagram.com/liceosantacruz_oficial?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
               className="text-white hover:text-blue-400"
+              aria-label="Visitar el perfil de Instagram del Liceo Santa Cruz"
             >
               <FaInstagram size="1.5em" />
             </a>
