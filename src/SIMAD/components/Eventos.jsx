@@ -1,7 +1,7 @@
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import getCloudinaryUrl from "../PaginaInformativa/utils/cloudinary";// Ajusta la ruta según tu estructura
+import ResponsiveCardImage from "./ResponsiveCardImage";
 
 export const Eventos = () => {
   const sliderSettings = {
@@ -19,15 +19,11 @@ export const Eventos = () => {
     responsive: [
       {
         breakpoint: 1024,
-        settings: {
-          slidesToShow: 2,
-        },
+        settings: { slidesToShow: 2 },
       },
       {
         breakpoint: 768,
-        settings: {
-          slidesToShow: 1,
-        },
+        settings: { slidesToShow: 1 },
       },
     ],
   };
@@ -46,14 +42,10 @@ export const Eventos = () => {
             {/* Card 1 */}
             <div className="p-4">
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
-                <div
-                  style={{
-                    backgroundImage: `url(${getCloudinaryUrl("IMG_6505_qlxkrp.jpg", "w_800,c_scale")})`,
-                  }}
-                  className="bg-center bg-cover rounded-t-lg relative h-40 md:h-44 lg:h-48"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
-                </div>
+                <ResponsiveCardImage
+                  publicId="IMG_6505_qlxkrp.jpg"
+                  altText="Semana de la guanacastequidad"
+                />
                 <div className="bg-white p-4 md:p-6 h-48 flex flex-col justify-between rounded-b-lg">
                   <div>
                     <h4 className="text-lg md:text-xl font-bold text-red-600">
@@ -66,17 +58,14 @@ export const Eventos = () => {
                 </div>
               </div>
             </div>
+
             {/* Card 2 */}
             <div className="p-4">
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
-                <div
-                  style={{
-                    backgroundImage: `url(${getCloudinaryUrl("IMG_0675_s2joui.jpg", "w_800,c_scale")})`,
-                  }}
-                  className="bg-center bg-cover rounded-t-lg relative h-40 md:h-44 lg:h-48"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
-                </div>
+                <ResponsiveCardImage
+                  publicId="IMG_0675_s2joui.jpg"
+                  altText="Gran bingo millonario Liceo Santa Cruz"
+                />
                 <div className="bg-white p-4 md:p-6 h-48 flex flex-col justify-between rounded-b-lg">
                   <div>
                     <h4 className="text-lg md:text-xl font-bold text-red-600">
@@ -89,17 +78,14 @@ export const Eventos = () => {
                 </div>
               </div>
             </div>
+
             {/* Card 3 */}
             <div className="p-4">
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
-                <div
-                  style={{
-                    backgroundImage: `url(${getCloudinaryUrl("IMG_8001_qmbaum.jpg", "w_800,c_scale")})`,
-                  }}
-                  className="bg-center bg-cover rounded-t-lg relative h-40 md:h-44 lg:h-48"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
-                </div>
+                <ResponsiveCardImage
+                  publicId="IMG_8001_qmbaum.jpg"
+                  altText="Festival estudiantil de las artes (FEA)"
+                />
                 <div className="bg-white p-4 md:p-6 h-48 flex flex-col justify-between rounded-b-lg">
                   <div>
                     <h4 className="text-lg md:text-xl font-bold text-red-600">
@@ -112,17 +98,14 @@ export const Eventos = () => {
                 </div>
               </div>
             </div>
+
             {/* Card 4 */}
             <div className="p-4">
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
-                <div
-                  style={{
-                    backgroundImage: `url(${getCloudinaryUrl("IMG_9317_bipf5k.jpg", "w_800,c_scale")})`,
-                  }}
-                  className="bg-center bg-cover rounded-t-lg relative h-40 md:h-44 lg:h-48"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
-                </div>
+                <ResponsiveCardImage
+                  publicId="IMG_9317_bipf5k.jpg"
+                  altText="Torneos deportivos regionales y nacionales"
+                />
                 <div className="bg-white p-4 md:p-6 h-48 flex flex-col justify-between rounded-b-lg">
                   <div>
                     <h4 className="text-lg md:text-xl font-bold text-red-600">
@@ -135,17 +118,14 @@ export const Eventos = () => {
                 </div>
               </div>
             </div>
+
             {/* Card 5 */}
             <div className="p-4">
               <div className="event-card rounded-xl shadow-lg hover:shadow-2xl transition-transform duration-500 transform hover:scale-105 overflow-hidden">
-                <div
-                  style={{
-                    backgroundImage: `url(${getCloudinaryUrl("IMG_1767_pdvxyc.jpg", "w_800,c_scale")})`,
-                  }}
-                  className="bg-center bg-cover rounded-t-lg relative h-40 md:h-44 lg:h-48"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-t-lg"></div>
-                </div>
+                <ResponsiveCardImage
+                  publicId="IMG_1767_pdvxyc.jpg"
+                  altText="Talleres y ferias"
+                />
                 <div className="bg-white p-4 md:p-6 h-48 flex flex-col justify-between rounded-b-lg">
                   <div>
                     <h4 className="text-lg md:text-xl font-bold text-red-600">
@@ -164,3 +144,5 @@ export const Eventos = () => {
     </div>
   );
 };
+
+export default Eventos;
