@@ -202,7 +202,7 @@ export const FormularioMatriculaUnificado = () => {
         Por favor, complete todos los campos solicitados con datos verídicos.
         Verifique la información antes de enviar el formulario. Recuerde que el campo{" "}
         <strong>Cédula del estudiante</strong> debe tener el formato{" "}
-        <strong>"5-0442-0911"</strong> y el <strong>Correo Estudiantil</strong> es obligatorio.
+        <strong>"5-0421-0921"</strong> y el <strong>Correo Estudiantil</strong> es obligatorio.
       </p>
 
       <form className="space-y-6" onSubmit={onSubmitHandler}>

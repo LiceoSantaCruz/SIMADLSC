@@ -225,7 +225,7 @@ export const FormularioMatricula = () => {
         Por favor, complete todos los campos solicitados con datos verídicos.
         Verifique la información antes de enviar el formulario. Recuerde que el campo{" "}
         <strong>Cédula del estudiante</strong> debe tener el formato{" "}
-        <strong>"5-0442-0911"</strong> y el{" "}
+        <strong>"5-0421-0921"</strong> y el{" "}
         <strong>Correo Estudiantil</strong> es obligatorio.
       </p>
 
@@ -274,8 +274,19 @@ export const FormularioMatricula = () => {
                     className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                   >
                     <option value="">Seleccione un grado</option>
+                    {/* 
+                      Si deseas mostrar todos los grados sin filtro, usa simplemente:
+                      
+                      {grados.map((grado) => (
+                        <option key={grado.id_grado} value={grado.id_grado}>
+                          {grado.nivel}
+                        </option>
+                      ))}
+                      
+                      Si deseas omitir solo "Sétimo", aplica un filter como se ve abajo.
+                    */}
                     {grados
-                      .filter((grado) => Number(grado.nivel) >= 8)
+                      .filter((grado) => grado.nivel !== "Sétimo")
                       .map((grado) => (
                         <option key={grado.id_grado} value={grado.id_grado}>
                           {grado.nivel}
