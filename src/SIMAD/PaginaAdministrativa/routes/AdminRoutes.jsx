@@ -9,7 +9,6 @@ import { GestionHorario } from '../pages/Horarios/GestionHorario';
 import { HorarioEstu } from '../pages/Horarios/Vistas/HorarioEstu';
 import { HorarioProf } from '../pages/Horarios/Vistas/HorarioProf';
 import { FormularioMatricula } from '../pages/Matricula/components/FormularioMatricula';
-import { MatriculaExtraordinaria } from '../pages/Matricula/pages/MatriculaExtraordinaria';
 import GestionUsuarios from '../pages/Usuarios/GestionUsuarios';
 import CrearUsuario from '../pages/Usuarios/CrearUsuario';
 import { MiPerfil } from '../pages/Perfil/MiPerfil';
@@ -28,7 +27,7 @@ import GestionAulas from '../pages/Modulos academicos/Aulas/pages/GestionAulas';
 import GestionMaterias from '../pages/Modulos academicos/Materias/pages/GestionMaterias';
 import AsignaSeccionPage from '../pages/Matricula/pages/AsignaSeccionPage';
 import ReporteAsistenciaSeccion from '../pages/Asistencias/ReporteAsistenciaSeccion';
-import { MatriculaOrdinaria } from '../pages/Matricula/pages/MatriculaOrdinaria';
+import FormularioMatriculaUnificado from '../pages/Matricula/pages/FormularioMatriculaUnificado';
  
 export const AdminRoutes = () => {
   const [role, setRole] = useState(localStorage.getItem('role'));
@@ -107,8 +106,7 @@ export const AdminRoutes = () => {
           <>
             <Route path="/formulario-matricula" element={<FormularioMatricula />} />
             <Route path="/gestion-matricula" element={<GestionMatriculas />} />
-            <Route path="/matricula-ordinaria" element={<MatriculaOrdinaria/>} />
-            <Route path="/matricula-extraordinaria" element={<MatriculaExtraordinaria />} /> 
+            <Route path="/matricula-ordinaria-extraordinaria" element={<FormularioMatriculaUnificado/>} />
             <Route path="/asignar-seccion" element={<AsignaSeccionPage />} /> 
           </>
         )}

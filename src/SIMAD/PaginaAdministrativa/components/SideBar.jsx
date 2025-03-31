@@ -207,8 +207,7 @@ export const SideBar = () => {
                   <Link to="/formulario-matricula" className="block hover:text-purple-400">Formulario</Link>
                   {(role === 'admin' || role === 'superadmin') && (
                     <>
-                      <Link to="/matricula-ordinaria" className="block hover:text-purple-400">Matricula ordinaria</Link>
-                      <Link to="/matricula-extraordinaria" className="block hover:text-purple-400"> Matricula Extraordinaria</Link>
+                      <Link to="/matricula-ordinaria-extraordinaria" className="block hover:text-purple-400">Matricula Ordinaria - Extraordinaria</Link>
                       <Link to="/asignar-seccion" className="block hover:text-purple-400">Asignar sección</Link>
                       <Link to="/gestion-matricula" className="block hover:text-purple-400">Gestión matricula</Link>
                     </>
