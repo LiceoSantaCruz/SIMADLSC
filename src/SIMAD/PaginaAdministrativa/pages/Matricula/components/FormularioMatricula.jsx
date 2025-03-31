@@ -132,11 +132,11 @@ export const FormularioMatricula = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-4 bg-white shadow-md">
-      <h1 className="text-center text-2xl font-bold mb-2">
+    <div className="max-w-3xl mx-auto p-4 bg-white dark:bg-gray-800 shadow-md">
+      <h1 className="text-center text-2xl font-bold mb-2 dark:text-white">
         Boleta de Matrícula Año 2025
       </h1>
-      <p className="text-center text-gray-600 mb-6">
+      <p className="text-center text-gray-600 dark:text-gray-300 mb-6">
         Por favor, complete todos los campos solicitados con datos verídicos.
         Verifique la información antes de enviar el formulario. Recuerde que el campo{" "}
         <strong>Cédula del estudiante</strong> debe tener el formato{" "}
@@ -150,7 +150,7 @@ export const FormularioMatricula = () => {
             {/* Página 1: Datos del Estudiante */}
             <div className="flex justify-between">
               <div>
-                <label className="block text-gray-700">Periodo:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Periodo:</label>
                 {periodos.length === 0 ? (
                   <p>Cargando periodos...</p>
                 ) : (
@@ -158,7 +158,7 @@ export const FormularioMatricula = () => {
                     name="periodo"
                     value={formData.periodo}
                     onChange={handleChange}
-                    className="border p-2 rounded-md w-full"
+                    className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                   >
                     <option value="">Seleccione un periodo</option>
                     {periodos.map((periodo) => (
@@ -171,7 +171,7 @@ export const FormularioMatricula = () => {
               </div>
 
               <div>
-                <label className="block text-gray-700">Grado:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Grado:</label>
                 {grados.length === 0 ? (
                   <p>Cargando grados...</p>
                 ) : (
@@ -179,7 +179,7 @@ export const FormularioMatricula = () => {
                     name="estudiante.gradoId"
                     value={formData.estudiante.gradoId}
                     onChange={handleChange}
-                    className="border p-2 rounded-md w-full"
+                    className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                   >
                     <option value="">Seleccione un grado</option>
                     {grados.map((grado) => (
@@ -192,44 +192,44 @@ export const FormularioMatricula = () => {
               </div>
             </div>
 
-            <h2 className="text-lg font-semibold">Datos del Estudiante</h2>
-            <p className="text-sm text-gray-500 mb-2">
+            <h2 className="text-lg font-semibold dark:text-white">Datos del Estudiante</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-300 mb-2">
               Complete la información personal del estudiante. Asegúrese de que los datos sean correctos.
             </p>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-700">Nombre Completo:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Nombre Completo:</label>
                 <input
                   type="text"
                   name="estudiante.nombre_Estudiante"
                   value={formData.estudiante.nombre_Estudiante}
                   onChange={handleChange}
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700">1º Apellido:</label>
+                <label className="block text-gray-700 dark:text-gray-200">1º Apellido:</label>
                 <input
                   type="text"
                   name="estudiante.apellido1_Estudiante"
                   value={formData.estudiante.apellido1_Estudiante}
                   onChange={handleChange}
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700">2º Apellido:</label>
+                <label className="block text-gray-700 dark:text-gray-200">2º Apellido:</label>
                 <input
                   type="text"
                   name="estudiante.apellido2_Estudiante"
                   value={formData.estudiante.apellido2_Estudiante}
                   onChange={handleChange}
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700">
+                <label className="block text-gray-700 dark:text-gray-200">
                   Nº Cédula o Pasaporte:
                 </label>
                 <input
@@ -238,35 +238,35 @@ export const FormularioMatricula = () => {
                   value={formData.estudiante.cedula}
                   onChange={handleChange}
                   placeholder="5-0442-0911"
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700">Teléfono:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Teléfono:</label>
                 <input
                   type="text"
                   name="estudiante.telefono"
                   value={formData.estudiante.telefono}
                   onChange={handleChange}
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700">Correo Estudiantil:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Correo Estudiantil:</label>
                 <input
                   type="email"
                   name="estudiante.correo_estudiantil"
                   value={formData.estudiante.correo_estudiantil}
                   onChange={handleChange}
                   placeholder="ejemplo@correo.com"
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                   required
                 />
               </div>
             </div>
 
             <div className="flex space-x-4">
-              <label className="block text-gray-700">Sexo:</label>
+              <label className="block text-gray-700 dark:text-gray-200">Sexo:</label>
               <label className="inline-flex items-center">
                 <input
                   type="radio"
@@ -293,53 +293,53 @@ export const FormularioMatricula = () => {
 
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-gray-700">Lugar de Nacimiento:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Lugar de Nacimiento:</label>
                 <input
                   type="text"
                   name="estudiante.lugar_de_nacimiento"
                   value={formData.estudiante.lugar_de_nacimiento}
                   onChange={handleChange}
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700">Fecha de Nacimiento:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Fecha de Nacimiento:</label>
                 <input
                   type="date"
                   name="estudiante.fecha_nacimiento"
                   value={formData.estudiante.fecha_nacimiento}
                   onChange={handleFechaNacimientoChange}
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-700">Nacionalidad:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Nacionalidad:</label>
                 <input
                   type="text"
                   name="estudiante.nacionalidad"
                   value={formData.estudiante.nacionalidad}
                   onChange={handleChange}
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700">Edad:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Edad:</label>
                 <input
                   type="number"
                   name="estudiante.edad"
                   value={formData.estudiante.edad}
                   readOnly
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
             </div>
 
             {/* Campos adicionales */}
             <div className="flex space-x-4">
-              <label className="block text-gray-700">Condición Migratoria:</label>
+              <label className="block text-gray-700 dark:text-gray-200">Condición Migratoria:</label>
               <label className="inline-flex items-center">
                 <input
                   type="radio"
@@ -376,36 +376,36 @@ export const FormularioMatricula = () => {
             </div>
 
             <div>
-              <label className="block text-gray-700">Repite alguna materia:</label>
+              <label className="block text-gray-700 dark:text-gray-200">Repite alguna materia:</label>
               <input
                 type="text"
                 name="estudiante.Repite_alguna_materia"
                 value={formData.estudiante.Repite_alguna_materia}
                 onChange={handleChange}
-                className="border p-2 rounded-md w-full mt-1"
+                className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white mt-1"
                 placeholder="Si repite alguna materia, ingrese el nombre; de lo contrario, déjelo en blanco."
               />
             </div>
 
             <div>
-              <label className="block text-gray-700">Institución de Procedencia:</label>
+              <label className="block text-gray-700 dark:text-gray-200">Institución de Procedencia:</label>
               <input
                 type="text"
                 name="estudiante.institucion_de_procedencia"
                 value={formData.estudiante.institucion_de_procedencia}
                 onChange={handleChange}
-                className="border p-2 rounded-md w-full"
+                className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-700">Tipo de Adecuación:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Tipo de Adecuación:</label>
                 <select
                   name="estudiante.tipo_de_adecuacion"
                   value={formData.estudiante.tipo_de_adecuacion}
                   onChange={handleChange}
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 >
                   <option value="">Seleccione una opción</option>
                   <option value="N">No presenta</option>
@@ -416,7 +416,7 @@ export const FormularioMatricula = () => {
               </div>
 
               <div>
-                <label className="block text-gray-700">Recibe Religión:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Recibe Religión:</label>
                 <div className="flex space-x-4">
                   <label className="inline-flex items-center">
                     <input
@@ -446,7 +446,7 @@ export const FormularioMatricula = () => {
 
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-gray-700">Presenta Carta:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Presenta Carta:</label>
                 <div className="flex space-x-4">
                   <label className="inline-flex items-center">
                     <input
@@ -474,41 +474,41 @@ export const FormularioMatricula = () => {
               </div>
             </div>
 
-            <h2 className="text-lg font-semibold">Enfermedades y Medicamentos</h2>
-            <p className="text-sm text-gray-500 mb-2">
+            <h2 className="text-lg font-semibold dark:text-white">Enfermedades y Medicamentos</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-300 mb-2">
               Si el estudiante presenta alguna condición médica o necesita medicación específica, indíquelo aquí.
             </p>
 
             <div>
-              <label className="block text-gray-700">Presenta alguna enfermedad:</label>
+              <label className="block text-gray-700 dark:text-gray-200">Presenta alguna enfermedad:</label>
               <input
                 type="text"
                 name="estudiante.Presenta_alguna_enfermedad"
                 value={formData.estudiante.Presenta_alguna_enfermedad}
                 onChange={handleChange}
-                className="border p-2 rounded-md w-full"
+                className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
               />
             </div>
 
             <div>
-              <label className="block text-gray-700">Medicamentos que debe tomar:</label>
+              <label className="block text-gray-700 dark:text-gray-200">Medicamentos que debe tomar:</label>
               <input
                 type="text"
                 name="estudiante.medicamentos_que_debe_tomar"
                 value={formData.estudiante.medicamentos_que_debe_tomar}
                 onChange={handleChange}
-                className="border p-2 rounded-md w-full"
+                className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
               />
             </div>
 
             <div>
-              <label className="block text-gray-700">Ruta que viaja el estudiante:</label>
+              <label className="block text-gray-700 dark:text-gray-200">Ruta que viaja el estudiante:</label>
               <input
                 type="text"
                 name="estudiante.Ruta_de_viaje"
                 value={formData.estudiante.Ruta_de_viaje}
                 onChange={handleChange}
-                className="border p-2 rounded-md w-full"
+                className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
               />
             </div>
 
@@ -524,111 +524,111 @@ export const FormularioMatricula = () => {
           </>
         ) : (
           <>
-            <h2 className="text-lg font-semibold">Datos del Encargado Legal</h2>
-            <p className="text-sm text-gray-500 mb-2">
+            <h2 className="text-lg font-semibold dark:text-white">Datos del Encargado Legal</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-300 mb-2">
               Ingrese la información del encargado legal o tutor del estudiante. Asegúrese de completar todos los campos.
             </p>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-700">Nombre Completo:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Nombre Completo:</label>
                 <input
                   type="text"
                   name="encargadoLegal.nombre_Encargado_Legal"
                   value={formData.encargadoLegal.nombre_Encargado_Legal}
                   onChange={handleChange}
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700">1º Apellido:</label>
+                <label className="block text-gray-700 dark:text-gray-200">1º Apellido:</label>
                 <input
                   type="text"
                   name="encargadoLegal.apellido1_Encargado_Legal"
                   value={formData.encargadoLegal.apellido1_Encargado_Legal}
                   onChange={handleChange}
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700">2º Apellido:</label>
+                <label className="block text-gray-700 dark:text-gray-200">2º Apellido:</label>
                 <input
                   type="text"
                   name="encargadoLegal.apellido2_Encargado_Legal"
                   value={formData.encargadoLegal.apellido2_Encargado_Legal}
                   onChange={handleChange}
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700">Nº Cédula:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Nº Cédula:</label>
                 <input
                   type="text"
                   name="encargadoLegal.N_Cedula"
                   value={formData.encargadoLegal.N_Cedula}
                   onChange={handleChange}
                   placeholder="5-0123-0456"
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700">Ocupación:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Ocupación:</label>
                 <input
                   type="text"
                   name="encargadoLegal.ocupacion"
                   value={formData.encargadoLegal.ocupacion}
                   onChange={handleChange}
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700">Nacionalidad:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Nacionalidad:</label>
                 <input
                   type="text"
                   name="encargadoLegal.nacionalidad"
                   value={formData.encargadoLegal.nacionalidad}
                   onChange={handleChange}
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700">Dirección:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Dirección:</label>
                 <input
                   type="text"
                   name="encargadoLegal.direccion"
                   value={formData.encargadoLegal.direccion}
                   onChange={handleChange}
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700">Teléfono Celular:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Teléfono Celular:</label>
                 <input
                   type="text"
                   name="encargadoLegal.telefono_celular"
                   value={formData.encargadoLegal.telefono_celular}
                   onChange={handleChange}
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700">Habitación:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Habitación:</label>
                 <input
                   type="text"
                   name="encargadoLegal.habitacion"
                   value={formData.encargadoLegal.habitacion}
                   onChange={handleChange}
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700">Correo:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Correo:</label>
                 <input
                   type="email"
                   name="encargadoLegal.correo"
                   value={formData.encargadoLegal.correo}
                   onChange={handleChange}
-                  className="border p-2 rounded-md w-full"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
             </div>

@@ -17,28 +17,29 @@ export const useReporteAsistencia = () => {
       setError(null);
       try {
         const data = await obtenerReporteAsistencias(cedula, fechaInicio, fechaFin, idPeriodo);
-  
-        if (data && data.length > 0) {
-          setAsistencias(data);
-          setGrado(data[0].id_grado.nivel);
-          setSeccion(data[0].id_Seccion.nombre_Seccion);
+        
+        // Si data es un objeto que contiene la propiedad "asistencias"
+        const asistenciasArray = Array.isArray(data)
+          ? data
+          : data?.asistencias || [];
+    
+        if (asistenciasArray.length > 0) {
+          setAsistencias(asistenciasArray);
+          setGrado(asistenciasArray[0].id_grado.nivel);
+          setSeccion(asistenciasArray[0].id_Seccion.nombre_Seccion);
         } else {
-          // Arreglo vacío sin 404 => interpretamos como sin resultados
           setAsistencias([]);
           setGrado("");
           setSeccion("");
           setError("not-found");
         }
       } catch (err) {
-        // Distinguimos según el mensaje de error
         if (err.message === "NOT_FOUND") {
-          // Sin resultados (404)
           setAsistencias([]);
           setGrado("");
           setSeccion("");
           setError("not-found");
         } else {
-          // Error de servidor (500, 403, etc.)
           setAsistencias([]);
           setGrado("");
           setSeccion("");
