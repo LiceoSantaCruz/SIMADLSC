@@ -17,7 +17,7 @@ import {
 } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
+import getCloudinaryUrl from '../../PaginaInformativa/utils/cloudinary';
 
 export const SideBar = () => {
     const [isOpen, setIsOpen] = useState(true);
@@ -72,11 +72,12 @@ export const SideBar = () => {
       >
       <div className="border-b border-gray-700 px-4 py-4 flex items-center gap-3">
   <Link to="/" className="flex items-center gap-3">
-    <img
-      src="/images/IMG_4153.JPG"
-      alt="Logo"
-      className="w-8 h-8 rounded-full object-cover"
-    />
+  <img
+            src={getCloudinaryUrl("364228843_669464341867218_3303264254839208450_n_f2ehi6.jpg", "w_40,h_40,c_fill")}
+            alt="Liceo Santa Cruz"
+            style={{ width: "40px", height: "40px" }}
+            className="w-8 h-8 rounded-full object-cover"
+          />
     {isOpen && (
       <span className="text-lg font-semibold text-blue-400">SIMADLSC</span>
     )}

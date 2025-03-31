@@ -11,7 +11,7 @@ export const Footer = () => {
             src={getCloudinaryUrl("364228843_669464341867218_3303264254839208450_n_f2ehi6.jpg", "w_40,h_40,c_fill")}
             alt="Liceo Santa Cruz"
             style={{ width: "40px", height: "40px" }}
-            className="mx-auto md:mx-0 mb-4"
+            className="w-8 h-8 rounded-full object-cover"
           />
           <p className="text-sm">
             Liceo Santa Cruz Clímaco A. Pérez. <br />
