@@ -3,6 +3,8 @@ import { useMatriculaForm } from "../Hooks/useMatriculaForm";
 import { usePeriodos } from "../Hooks/usePeriodos";
 import Swal from "sweetalert2";
 import "@sweetalert2/theme-bulma/bulma.css";
+import ActivarFormularioButton from "./ActivarFormularioButton";
+import { useEffect, useState } from "react";
 
 export const FormularioMatricula = () => {
   const {
@@ -17,6 +19,51 @@ export const FormularioMatricula = () => {
 
   const { periodos } = usePeriodos();
   const { grados } = useGrados();
+
+  // Obtenemos role y userId del localStorage (o de donde corresponda)
+  const role = localStorage.getItem("role");
+  const userId = localStorage.getItem("userId") || "default";
+
+  // Estados para controlar la activación del formulario, el deadline y envío único
+  const [isFormActive, setIsFormActive] = useState(false);
+  const [deadline, setDeadline] = useState(null);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+
+  // Cargamos el estado del formulario y el deadline desde localStorage al montar
+  useEffect(() => {
+    const formActiveLS = localStorage.getItem("formActive");
+    setIsFormActive(formActiveLS === "true");
+
+    const deadlineLS = localStorage.getItem("formDeadline");
+    if (deadlineLS) {
+      setDeadline(Number(deadlineLS));
+    }
+  }, []);
+
+  // Escuchamos cambios en localStorage para mantener la actualización en tiempo real
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const formActiveLS = localStorage.getItem("formActive");
+      setIsFormActive(formActiveLS === "true");
+
+      const deadlineLS = localStorage.getItem("formDeadline");
+      if (deadlineLS) {
+        setDeadline(Number(deadlineLS));
+      } else {
+        setDeadline(null);
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // Verificamos si el usuario ya envió el formulario (envío único)
+  useEffect(() => {
+    const submitted = localStorage.getItem(`matricula-submitted-${userId}`);
+    if (submitted) {
+      setHasSubmitted(true);
+    }
+  }, [userId]);
 
   // Función para calcular la edad a partir de la fecha de nacimiento
   const handleFechaNacimientoChange = (e) => {
@@ -36,16 +83,34 @@ export const FormularioMatricula = () => {
     handleChange(edadEvent);
   };
 
-  // Validaciones antes de enviar el formulario.
-  // Se verifica que los campos obligatorios estén completos, que la cédula tenga el formato correcto
-  // y que el correo estudiantil sea obligatorio y válido.
+  // Validaciones antes de enviar el formulario
   const onSubmitHandler = async (e) => {
     e.preventDefault();
 
-    // Lista para almacenar los errores
+    // Si ya se envió, mostramos aviso
+    if (hasSubmitted) {
+      Swal.fire({
+        icon: "info",
+        title: "Ya enviaste el formulario",
+        text: "No puedes enviar más de una vez.",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
+    // Si el formulario está inactivo, no se permite el envío
+    if (!isFormActive) {
+      Swal.fire({
+        icon: "warning",
+        title: "Formulario Inactivo",
+        text: "No puedes enviar el formulario porque está deshabilitado actualmente.",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
     let missingFields = [];
 
-    // Validación de campos obligatorios
     if (!formData.periodo || formData.periodo.trim() === "") {
       missingFields.push("Periodo");
     }
@@ -79,7 +144,6 @@ export const FormularioMatricula = () => {
         missingFields.push("Cédula (formato válido: 5-0442-0911)");
       }
     }
-    // Validar que el correo estudiantil sea obligatorio y tenga formato correcto
     if (
       !formData.estudiante.correo_estudiantil ||
       formData.estudiante.correo_estudiantil.trim() === ""
@@ -91,16 +155,12 @@ export const FormularioMatricula = () => {
         missingFields.push("Correo estudiantil (debe ser un email válido)");
       }
     }
-
-    // Validación de fecha de nacimiento (opcional)
     if (formData.estudiante.fecha_nacimiento) {
       const birthDate = new Date(formData.estudiante.fecha_nacimiento);
       if (isNaN(birthDate.getTime())) {
         missingFields.push("Fecha de nacimiento (formato inválido)");
       }
     }
-
-    // Si hay errores, se muestra un modal y se detiene el envío
     if (missingFields.length > 0) {
       Swal.fire({
         icon: "warning",
@@ -113,26 +173,51 @@ export const FormularioMatricula = () => {
 
     try {
       await handleSubmit(e);
+      localStorage.setItem(`matricula-submitted-${userId}`, "true");
+      setHasSubmitted(true);
       Swal.fire({
         icon: "success",
         title: "Éxito",
         text: "Formulario enviado correctamente",
         confirmButtonColor: "#2563EB",
       });
-      // Opcional: puedes resetear el formulario si es lo deseado
     } catch (error) {
       Swal.fire({
         icon: "error",
         title: "Error",
         text:
-          error.message || "Hubo un error al enviar el formulario. Intente nuevamente.",
+          error.message ||
+          "Hubo un error al enviar el formulario. Intente nuevamente.",
         confirmButtonColor: "#2563EB",
       });
     }
   };
 
+  if (hasSubmitted) {
+    return (
+      <div className="max-w-3xl mx-auto p-4 bg-white dark:bg-gray-800 shadow-md">
+        <h1 className="text-center text-2xl font-bold mb-4 dark:text-white">
+          Boleta de Matrícula Año 2025
+        </h1>
+        <p className="text-center text-green-600 dark:text-green-300">
+          ¡Ya has enviado tu formulario de matrícula! No es posible enviar más de una vez.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-3xl mx-auto p-4 bg-white dark:bg-gray-800 shadow-md">
+      {/* Se muestra siempre el componente para controlar la activación y el contador.
+          Se le pasa el role para que solo los admin/superadmin vean los botones */}
+      <ActivarFormularioButton
+        isFormActive={isFormActive}
+        setIsFormActive={setIsFormActive}
+        deadline={deadline}
+        setDeadline={setDeadline}
+        role={role}
+      />
+
       <h1 className="text-center text-2xl font-bold mb-2 dark:text-white">
         Boleta de Matrícula Año 2025
       </h1>
@@ -143,6 +228,13 @@ export const FormularioMatricula = () => {
         <strong>"5-0442-0911"</strong> y el{" "}
         <strong>Correo Estudiantil</strong> es obligatorio.
       </p>
+
+      {/* Mensaje de aviso si el formulario está inactivo */}
+      {!isFormActive && (
+        <div className="bg-red-100 text-red-800 p-3 rounded-md mb-4">
+          <strong>El formulario está inactivo.</strong> No podrás enviarlo hasta que sea habilitado.
+        </div>
+      )}
 
       <form className="space-y-6" onSubmit={onSubmitHandler}>
         {page === 1 ? (
@@ -182,11 +274,13 @@ export const FormularioMatricula = () => {
                     className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                   >
                     <option value="">Seleccione un grado</option>
-                    {grados.map((grado) => (
-                      <option key={grado.id_grado} value={grado.id_grado}>
-                        {grado.nivel}
-                      </option>
-                    ))}
+                    {grados
+                      .filter((grado) => Number(grado.nivel) >= 8)
+                      .map((grado) => (
+                        <option key={grado.id_grado} value={grado.id_grado}>
+                          {grado.nivel}
+                        </option>
+                      ))}
                   </select>
                 )}
               </div>
@@ -229,9 +323,7 @@ export const FormularioMatricula = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">
-                  Nº Cédula o Pasaporte:
-                </label>
+                <label className="block text-gray-700 dark:text-gray-200">Nº Cédula o Pasaporte:</label>
                 <input
                   type="text"
                   name="estudiante.cedula"
@@ -503,13 +595,22 @@ export const FormularioMatricula = () => {
 
             <div>
               <label className="block text-gray-700 dark:text-gray-200">Ruta que viaja el estudiante:</label>
-              <input
-                type="text"
+              <select
                 name="estudiante.Ruta_de_viaje"
                 value={formData.estudiante.Ruta_de_viaje}
                 onChange={handleChange}
                 className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
-              />
+              >
+                <option value="">Seleccione una ruta</option>
+                <option value="San Juan - Guayabal - Santa Cruz">San Juan - Guayabal - Santa Cruz</option>
+                <option value="Río Cañas - Barrio Limón - Santa Cruz">Río Cañas - Barrio Limón - Santa Cruz</option>
+                <option value="Bolsón - Ortega - Oriente - Santa Cruz">Bolsón - Ortega - Oriente - Santa Cruz</option>
+                <option value="Guaitil - Santa Bárbara - Santa Cruz">Guaitil - Santa Bárbara - Santa Cruz</option>
+                <option value="Bernabela - El Cacao - Santa Cruz">Bernabela - El Cacao - Santa Cruz</option>
+                <option value="Arado - Hato Viejo - Santa Cruz">Arado - Hato Viejo - Santa Cruz</option>
+                <option value="Lagunilla - San Pedro - Santa Cruz">Lagunilla - San Pedro - Santa Cruz</option>
+                <option value="San José de la montaña - Santa Cruz">San José de la montaña - Santa Cruz</option>
+              </select>
             </div>
 
             <div className="flex justify-center mt-6">

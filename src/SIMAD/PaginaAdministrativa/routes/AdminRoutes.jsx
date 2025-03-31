@@ -110,7 +110,7 @@ export const AdminRoutes = () => {
             <Route path="/asignar-seccion" element={<AsignaSeccionPage />} /> 
           </>
         )}
-        {role === 'Estudiante' && (
+        {role === 'estudiante' && (
           <Route path="/formulario-matricula" element={<FormularioMatricula />} />
         )}
 

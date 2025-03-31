@@ -194,7 +194,8 @@ export const FormularioMatriculaUnificado = () => {
       </div>
 
       <h1 className="text-center text-2xl font-bold mb-2">
-        Boleta de Matrícula Año 2025
+        Boleta de Matrícula 
+        {matriculaType === "ordinaria" && " Ordinaria"}
         {matriculaType === "extraordinaria" && " Extraordinaria"}
       </h1>
       <p className="text-center text-gray-600 mb-6 dark:text-gray-400">
