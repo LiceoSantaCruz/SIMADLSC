@@ -23,7 +23,7 @@ export const generarPDF = ({
   pdf.setFontSize(12);
   pdf.setFont("helvetica", "normal");
   pdf.text(
-    " Dirección: Santa Cruz, Santa Cruz, Guanacaste del Hotel la Calle de Alcalá 100 mts este.",
+    "Dirección: Santa Cruz, Santa Cruz, Guanacaste del Hotel la Calle de Alcalá 100 mts este.",
     25,
     currentY + 18
   );
