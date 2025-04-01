@@ -28,6 +28,7 @@ import GestionMaterias from '../pages/Modulos academicos/Materias/pages/GestionM
 import AsignaSeccionPage from '../pages/Matricula/pages/AsignaSeccionPage';
 import ReporteAsistenciaSeccion from '../pages/Asistencias/ReporteAsistenciaSeccion';
 import FormularioMatriculaUnificado from '../pages/Matricula/pages/FormularioMatriculaUnificado';
+import MiAsistencia from '../pages/Asistencias/MiAsistencia';
  
 export const AdminRoutes = () => {
   const [role, setRole] = useState(localStorage.getItem('role'));
@@ -58,6 +59,9 @@ export const AdminRoutes = () => {
             <Route path="/reporte-asistencia" element={<ReporteAsistencia />} />
             <Route path="/reporte-asistencia-seccion" element={<ReporteAsistenciaSeccion />} />
           </>
+        )}
+                {role === 'estudiante' && (
+          <Route path="/mi-asistencia" element={<MiAsistencia />} />
         )}
 
         <Route path="/eventos" element={<Eventos />} />
