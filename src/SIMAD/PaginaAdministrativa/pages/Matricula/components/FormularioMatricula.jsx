@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import "@sweetalert2/theme-bulma/bulma.css";
 import ActivarFormularioButton from "./ActivarFormularioButton";
 import { useEffect, useState } from "react";
+import axios from "axios"; // Asegúrate de importar axios si no está ya importado
 
 export const FormularioMatricula = () => {
   const {
@@ -28,6 +29,7 @@ export const FormularioMatricula = () => {
   const [isFormActive, setIsFormActive] = useState(false);
   const [deadline, setDeadline] = useState(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [isEditable, setIsEditable] = useState(false); // Controla si los campos son editables
 
   // Cargamos el estado del formulario y el deadline desde localStorage al montar
   useEffect(() => {
@@ -64,6 +66,12 @@ export const FormularioMatricula = () => {
       setHasSubmitted(true);
     }
   }, [userId]);
+  // URL base de la API
+
+const API_BASE_URL =
+process.env.NODE_ENV === 'production'
+  ? 'https://simadlsc-backend-production.up.railway.app'
+  : 'http://localhost:3000';
 
   // Función para calcular la edad a partir de la fecha de nacimiento
   const handleFechaNacimientoChange = (e) => {
@@ -83,94 +91,115 @@ export const FormularioMatricula = () => {
     handleChange(edadEvent);
   };
 
+  const buscarEstudiantePorCedula = async (cedula) => {
+    if (!cedula || cedula.trim() === "") {
+      // Mostrar advertencia si el campo de cédula está vacío
+      Swal.fire({
+        icon: "warning",
+        title: "Campo vacío",
+        text: "Por favor, ingrese un número de cédula antes de buscar.",
+        confirmButtonColor: "#2563EB",
+      });
+      return; // Detener la ejecución si el campo está vacío
+    }
+  
+    try {
+      const response = await axios.get(`${API_BASE_URL}/estudiantes/cedula/${cedula}`);
+      const estudiante = response.data;
+  
+      if (estudiante) {
+        // Actualizar los datos del formulario con los datos del estudiante
+        handleChange({
+          target: { name: "estudiante.nombre_Estudiante", value: estudiante.nombre_Estudiante },
+        });
+        handleChange({
+          target: { name: "estudiante.apellido1_Estudiante", value: estudiante.apellido1_Estudiante },
+        });
+        handleChange({
+          target: { name: "estudiante.apellido2_Estudiante", value: estudiante.apellido2_Estudiante },
+        });
+        handleChange({
+          target: { name: "estudiante.fecha_nacimiento", value: estudiante.fecha_nacimiento },
+        });
+        handleChange({
+          target: { name: "estudiante.correo_estudiantil", value: estudiante.correo_estudiantil },
+        });
+        handleChange({
+          target: { name: "estudiante.telefono", value: estudiante.telefono },
+        });
+        setIsEditable(false); // Bloquear los campos
+        Swal.fire({
+          icon: "success",
+          title: "Estudiante encontrado",
+          text: "Los datos del estudiante han sido rellenados automáticamente.",
+          confirmButtonColor: "#2563EB",
+        });
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        // Manejar específicamente el error 404 como un warning
+        setIsEditable(true); // Permitir la edición manual
+        const errorMessage = typeof error.response.data.message === "string"
+          ? error.response.data.message
+          : `No se encontró un estudiante con la cédula: ${cedula}. Por favor, ingrese los datos manualmente.`;
+        Swal.fire({
+          icon: "warning",
+          title: "Estudiante no encontrado",
+          text: errorMessage, // Mostrar el mensaje correctamente
+          confirmButtonColor: "#2563EB",
+        });
+      } else {
+        // Manejar otros errores como errores generales
+        console.error("Error al buscar el estudiante:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Hubo un problema al buscar el estudiante. Intente nuevamente.",
+          confirmButtonColor: "#2563EB",
+        });
+      }
+    }
+  };
+
   // Validaciones antes de enviar el formulario
   const onSubmitHandler = async (e) => {
     e.preventDefault();
 
-    // Si ya se envió, mostramos aviso
-    if (hasSubmitted) {
-      Swal.fire({
-        icon: "info",
-        title: "Ya enviaste el formulario",
-        text: "No puedes enviar más de una vez.",
-        confirmButtonColor: "#2563EB",
-      });
-      return;
+    // Validar campos vacíos
+    const missingFields = [];
+    if (!formData.estudiante.cedula || formData.estudiante.cedula.trim() === "") {
+      missingFields.push("Cédula");
+    }
+    if (!formData.estudiante.nombre_Estudiante || formData.estudiante.nombre_Estudiante.trim() === "") {
+      missingFields.push("Nombre Completo");
+    }
+    if (!formData.estudiante.apellido1_Estudiante || formData.estudiante.apellido1_Estudiante.trim() === "") {
+      missingFields.push("Primer Apellido");
+    }
+    if (!formData.estudiante.apellido2_Estudiante || formData.estudiante.apellido2_Estudiante.trim() === "") {
+      missingFields.push("Segundo Apellido");
+    }
+    if (!formData.estudiante.fecha_nacimiento || formData.estudiante.fecha_nacimiento.trim() === "") {
+      missingFields.push("Fecha de Nacimiento");
+    }
+    if (!formData.estudiante.correo_estudiantil || formData.estudiante.correo_estudiantil.trim() === "") {
+      missingFields.push("Correo Estudiantil");
+    }
+    if (!formData.estudiante.telefono || formData.estudiante.telefono.trim() === "") {
+      missingFields.push("Teléfono");
     }
 
-    // Si el formulario está inactivo, no se permite el envío
-    if (!isFormActive) {
-      Swal.fire({
-        icon: "warning",
-        title: "Formulario Inactivo",
-        text: "No puedes enviar el formulario porque está deshabilitado actualmente.",
-        confirmButtonColor: "#2563EB",
-      });
-      return;
-    }
-
-    let missingFields = [];
-
-    if (!formData.periodo || formData.periodo.trim() === "") {
-      missingFields.push("Periodo");
-    }
-    if (
-      !formData.estudiante.gradoId ||
-      formData.estudiante.gradoId.toString().trim() === ""
-    ) {
-      missingFields.push("Grado");
-    }
-    if (
-      !formData.estudiante.nombre_Estudiante ||
-      formData.estudiante.nombre_Estudiante.trim() === ""
-    ) {
-      missingFields.push("Nombre del estudiante");
-    }
-    if (
-      !formData.estudiante.apellido1_Estudiante ||
-      formData.estudiante.apellido1_Estudiante.trim() === ""
-    ) {
-      missingFields.push("Primer apellido del estudiante");
-    }
-    if (
-      !formData.estudiante.cedula ||
-      formData.estudiante.cedula.trim() === ""
-    ) {
-      missingFields.push("Cédula del estudiante");
-    } else {
-      // Validar formato de cédula: Ejemplo: 5-0442-0911
-      const cedulaRegex = /^\d-\d{4}-\d{4}$/;
-      if (!cedulaRegex.test(formData.estudiante.cedula.trim())) {
-        missingFields.push("Cédula (formato válido: 5-0442-0911)");
-      }
-    }
-    if (
-      !formData.estudiante.correo_estudiantil ||
-      formData.estudiante.correo_estudiantil.trim() === ""
-    ) {
-      missingFields.push("Correo estudiantil");
-    } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.estudiante.correo_estudiantil.trim())) {
-        missingFields.push("Correo estudiantil (debe ser un email válido)");
-      }
-    }
-    if (formData.estudiante.fecha_nacimiento) {
-      const birthDate = new Date(formData.estudiante.fecha_nacimiento);
-      if (isNaN(birthDate.getTime())) {
-        missingFields.push("Fecha de nacimiento (formato inválido)");
-      }
-    }
     if (missingFields.length > 0) {
       Swal.fire({
         icon: "warning",
-        title: "Campos obligatorios incompletos o inválidos",
-        text: "Por favor, complete o corrija: " + missingFields.join(", "),
+        title: "Campos obligatorios incompletos",
+        text: `Por favor, complete los siguientes campos: ${missingFields.join(", ")}`,
         confirmButtonColor: "#2563EB",
       });
       return;
     }
 
+    // Si no hay campos vacíos, proceder con el envío
     try {
       await handleSubmit(e);
       localStorage.setItem(`matricula-submitted-${userId}`, "true");
@@ -182,12 +211,11 @@ export const FormularioMatricula = () => {
         confirmButtonColor: "#2563EB",
       });
     } catch (error) {
+      console.error("Error al enviar el formulario:", error);
       Swal.fire({
         icon: "error",
         title: "Error",
-        text:
-          error.message ||
-          "Hubo un error al enviar el formulario. Intente nuevamente.",
+        text: "Hubo un error al enviar el formulario. Intente nuevamente.",
         confirmButtonColor: "#2563EB",
       });
     }
@@ -223,12 +251,8 @@ export const FormularioMatricula = () => {
       </h1>
       <p className="text-center text-gray-600 dark:text-gray-300 mb-6">
         Por favor, complete todos los campos solicitados con datos verídicos.
-        Verifique la información antes de enviar el formulario. Recuerde que el campo{" "}
-        <strong>Cédula del estudiante</strong> debe tener el formato{" "}
-        <strong>"5-0421-0921"</strong> y el{" "}
-        <strong>Correo Estudiantil</strong> es obligatorio.
       </p>
-
+     
       {/* Mensaje de aviso si el formulario está inactivo */}
       {!isFormActive && (
         <div className="bg-red-100 text-red-800 p-3 rounded-md mb-4">
@@ -241,7 +265,7 @@ export const FormularioMatricula = () => {
           <>
             {/* Página 1: Datos del Estudiante */}
             <div className="flex justify-between">
-              <div>
+            <div>
                 <label className="block text-gray-700 dark:text-gray-200">Periodo:</label>
                 {periodos.length === 0 ? (
                   <p>Cargando periodos...</p>
@@ -301,6 +325,28 @@ export const FormularioMatricula = () => {
             <p className="text-sm text-gray-500 dark:text-gray-300 mb-2">
               Complete la información personal del estudiante. Asegúrese de que los datos sean correctos.
             </p>
+              {/* Campo de cédula al inicio */}
+              <div>
+              <label className="block text-gray-700 dark:text-gray-200">Nº Cédula o Pasaporte:</label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  name="estudiante.cedula"
+                  value={formData.estudiante.cedula}
+                  onChange={handleChange}
+                  onBlur={(e) => buscarEstudiantePorCedula(e.target.value)} // Llamar a la función al perder el foco
+                  placeholder="5-0442-0911"
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => buscarEstudiantePorCedula(formData.estudiante.cedula)}
+                  className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
+                >
+                  Buscar
+                </button>
+              </div>
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -310,6 +356,7 @@ export const FormularioMatricula = () => {
                   name="estudiante.nombre_Estudiante"
                   value={formData.estudiante.nombre_Estudiante}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -320,6 +367,7 @@ export const FormularioMatricula = () => {
                   name="estudiante.apellido1_Estudiante"
                   value={formData.estudiante.apellido1_Estudiante}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -330,27 +378,18 @@ export const FormularioMatricula = () => {
                   name="estudiante.apellido2_Estudiante"
                   value={formData.estudiante.apellido2_Estudiante}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Nº Cédula o Pasaporte:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Fecha de Nacimiento:</label>
                 <input
-                  type="text"
-                  name="estudiante.cedula"
-                  value={formData.estudiante.cedula}
-                  onChange={handleChange}
-                  placeholder="5-0442-0911"
-                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-200">Teléfono:</label>
-                <input
-                  type="text"
-                  name="estudiante.telefono"
-                  value={formData.estudiante.telefono}
-                  onChange={handleChange}
+                  type="date"
+                  name="estudiante.fecha_nacimiento"
+                  value={formData.estudiante.fecha_nacimiento}
+                  onChange={handleFechaNacimientoChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -361,9 +400,20 @@ export const FormularioMatricula = () => {
                   name="estudiante.correo_estudiantil"
                   value={formData.estudiante.correo_estudiantil}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   placeholder="ejemplo@correo.com"
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
-                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-200">Teléfono:</label>
+                <input
+                  type="text"
+                  name="estudiante.telefono"
+                  value={formData.estudiante.telefono}
+                  onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
+                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
             </div>
@@ -377,6 +427,7 @@ export const FormularioMatricula = () => {
                   value="Femenino"
                   checked={formData.estudiante.sexo === "Femenino"}
                   onChange={handleChange}
+                  disabled={!isEditable}
                   className="mr-2"
                 />
                 Femenino
@@ -388,6 +439,7 @@ export const FormularioMatricula = () => {
                   value="Masculino"
                   checked={formData.estudiante.sexo === "Masculino"}
                   onChange={handleChange}
+                  disabled={!isEditable}
                   className="mr-2"
                 />
                 Masculino
@@ -402,6 +454,7 @@ export const FormularioMatricula = () => {
                   name="estudiante.lugar_de_nacimiento"
                   value={formData.estudiante.lugar_de_nacimiento}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -412,6 +465,7 @@ export const FormularioMatricula = () => {
                   name="estudiante.fecha_nacimiento"
                   value={formData.estudiante.fecha_nacimiento}
                   onChange={handleFechaNacimientoChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -425,6 +479,7 @@ export const FormularioMatricula = () => {
                   name="estudiante.nacionalidad"
                   value={formData.estudiante.nacionalidad}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -450,6 +505,7 @@ export const FormularioMatricula = () => {
                   value="legal"
                   checked={formData.estudiante.condicion_migratoria === "legal"}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="mr-2"
                 />
                 Legal
@@ -461,6 +517,7 @@ export const FormularioMatricula = () => {
                   value="refugiado"
                   checked={formData.estudiante.condicion_migratoria === "refugiado"}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="mr-2"
                 />
                 Refugiado
@@ -472,6 +529,7 @@ export const FormularioMatricula = () => {
                   value="ilegal"
                   checked={formData.estudiante.condicion_migratoria === "ilegal"}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="mr-2"
                 />
                 Ilegal
@@ -485,6 +543,7 @@ export const FormularioMatricula = () => {
                 name="estudiante.Repite_alguna_materia"
                 value={formData.estudiante.Repite_alguna_materia}
                 onChange={handleChange}
+                disabled={!isEditable} // Bloquear si no es editable
                 className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white mt-1"
                 placeholder="Si repite alguna materia, ingrese el nombre; de lo contrario, déjelo en blanco."
               />
@@ -497,6 +556,7 @@ export const FormularioMatricula = () => {
                 name="estudiante.institucion_de_procedencia"
                 value={formData.estudiante.institucion_de_procedencia}
                 onChange={handleChange}
+                disabled={!isEditable} // Bloquear si no es editable
                 className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
               />
             </div>
@@ -508,6 +568,7 @@ export const FormularioMatricula = () => {
                   name="estudiante.tipo_de_adecuacion"
                   value={formData.estudiante.tipo_de_adecuacion}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 >
                   <option value="">Seleccione una opción</option>
@@ -528,6 +589,7 @@ export const FormularioMatricula = () => {
                       value="Si"
                       checked={formData.estudiante.recibe_religion === "Si"}
                       onChange={handleChange}
+                      disabled={!isEditable} // Bloquear si no es editable
                       className="mr-2"
                     />
                     Sí
@@ -539,6 +601,7 @@ export const FormularioMatricula = () => {
                       value="No"
                       checked={formData.estudiante.recibe_religion === "No"}
                       onChange={handleChange}
+                      disabled={!isEditable} // Bloquear si no es editable
                       className="mr-2"
                     />
                     No
@@ -558,6 +621,7 @@ export const FormularioMatricula = () => {
                       value="Si"
                       checked={formData.estudiante.presenta_carta === "Si"}
                       onChange={handleChange}
+                      disabled={!isEditable} // Bloquear si no es editable
                       className="mr-2"
                     />
                     Sí
@@ -569,6 +633,7 @@ export const FormularioMatricula = () => {
                       value="No"
                       checked={formData.estudiante.presenta_carta === "No"}
                       onChange={handleChange}
+                      disabled={!isEditable} // Bloquear si no es editable
                       className="mr-2"
                     />
                     No
@@ -589,6 +654,7 @@ export const FormularioMatricula = () => {
                 name="estudiante.Presenta_alguna_enfermedad"
                 value={formData.estudiante.Presenta_alguna_enfermedad}
                 onChange={handleChange}
+                disabled={!isEditable} // Bloquear si no es editable
                 className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
               />
             </div>
@@ -600,6 +666,7 @@ export const FormularioMatricula = () => {
                 name="estudiante.medicamentos_que_debe_tomar"
                 value={formData.estudiante.medicamentos_que_debe_tomar}
                 onChange={handleChange}
+                disabled={!isEditable} // Bloquear si no es editable
                 className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
               />
             </div>
@@ -610,6 +677,7 @@ export const FormularioMatricula = () => {
                 name="estudiante.Ruta_de_viaje"
                 value={formData.estudiante.Ruta_de_viaje}
                 onChange={handleChange}
+                disabled={!isEditable} // Bloquear si no es editable
                 className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
               >
                 <option value="">Seleccione una ruta</option>
@@ -649,6 +717,7 @@ export const FormularioMatricula = () => {
                   name="encargadoLegal.nombre_Encargado_Legal"
                   value={formData.encargadoLegal.nombre_Encargado_Legal}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -659,6 +728,7 @@ export const FormularioMatricula = () => {
                   name="encargadoLegal.apellido1_Encargado_Legal"
                   value={formData.encargadoLegal.apellido1_Encargado_Legal}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -669,6 +739,7 @@ export const FormularioMatricula = () => {
                   name="encargadoLegal.apellido2_Encargado_Legal"
                   value={formData.encargadoLegal.apellido2_Encargado_Legal}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -679,6 +750,7 @@ export const FormularioMatricula = () => {
                   name="encargadoLegal.N_Cedula"
                   value={formData.encargadoLegal.N_Cedula}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   placeholder="5-0123-0456"
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
@@ -690,6 +762,7 @@ export const FormularioMatricula = () => {
                   name="encargadoLegal.ocupacion"
                   value={formData.encargadoLegal.ocupacion}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -700,6 +773,7 @@ export const FormularioMatricula = () => {
                   name="encargadoLegal.nacionalidad"
                   value={formData.encargadoLegal.nacionalidad}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -710,6 +784,7 @@ export const FormularioMatricula = () => {
                   name="encargadoLegal.direccion"
                   value={formData.encargadoLegal.direccion}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -720,6 +795,7 @@ export const FormularioMatricula = () => {
                   name="encargadoLegal.telefono_celular"
                   value={formData.encargadoLegal.telefono_celular}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -730,6 +806,7 @@ export const FormularioMatricula = () => {
                   name="encargadoLegal.habitacion"
                   value={formData.encargadoLegal.habitacion}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -740,6 +817,7 @@ export const FormularioMatricula = () => {
                   name="encargadoLegal.correo"
                   value={formData.encargadoLegal.correo}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
