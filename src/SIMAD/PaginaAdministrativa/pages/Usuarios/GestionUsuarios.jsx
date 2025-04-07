@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   getAllUsers,
@@ -11,6 +11,7 @@ import { useRoles } from "./hooks/useRoles"; // Hook para obtener roles
 import ConfirmDeleteModal from "./components/ConfirmDeleteModal"; // Modal personalizado para confirmación de eliminación
 import Swal from "sweetalert2";
 import "@sweetalert2/theme-bulma/bulma.css";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const GestionUsuarios = () => {
   const [users, setUsers] = useState([]);
@@ -20,18 +21,18 @@ const GestionUsuarios = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
 
-  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false); // Estado para controlar el modal de eliminación
+  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false); // Modal de eliminación
   const [userToDelete, setUserToDelete] = useState(null); // Usuario a eliminar
 
   const { editUser } = useUserEdit();
-  const token = localStorage.getItem("token"); // Recuperar el token
+  const token = localStorage.getItem("token");
 
-  const [selectedRole, setSelectedRole] = useState(""); // Estado para el filtro por rol
-  const [currentPage, setCurrentPage] = useState(1); // Estado para la página actual
-  const usersPerPage = 7; // Número de usuarios por página
-  const [searchTerm, setSearchTerm] = useState(""); // Estado para el término de búsqueda
+  const [selectedRole, setSelectedRole] = useState(""); // Filtro por rol
+  const [currentPage, setCurrentPage] = useState(1); // Página actual
+  const usersPerPage = 7; // Usuarios por página
+  const [searchTerm, setSearchTerm] = useState(""); // Término de búsqueda
 
-  // Hook para obtener los roles
+  // Hook para obtener roles
   const { roles, loading: loadingRoles, error: rolesError } = useRoles(token);
 
   // Función para cargar usuarios
@@ -45,8 +46,6 @@ const GestionUsuarios = () => {
       console.error("Error al cargar los usuarios:", err);
       setError("Error al cargar los usuarios");
       setLoading(false);
-
-      // Mostramos alerta con SweetAlert2
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -61,13 +60,10 @@ const GestionUsuarios = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Función para bloquear o desbloquear usuarios
+  // Función para bloquear/desbloquear usuarios
   const handleBlockUser = async (id, bloqueado_Usuario) => {
     try {
-      // Realiza la petición al backend para bloquear/desbloquear
       await toggleBlockUser(id, !bloqueado_Usuario, token);
-
-      // Mensaje de éxito
       Swal.fire({
         icon: "success",
         title: "Operación exitosa",
@@ -76,8 +72,6 @@ const GestionUsuarios = () => {
           : "El usuario ha sido bloqueado correctamente.",
         confirmButtonColor: "#2563EB",
       });
-
-      // Actualizamos el estado local
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.id_usuario === id
@@ -100,16 +94,14 @@ const GestionUsuarios = () => {
   const handleDeleteUser = async (id) => {
     try {
       await deleteUser(id, token);
-
       Swal.fire({
         icon: "success",
         title: "Usuario Eliminado",
         text: "El usuario ha sido eliminado correctamente.",
         confirmButtonColor: "#2563EB",
       });
-
-      fetchUsers(); // Actualizar la lista de usuarios
-      setDeleteModalOpen(false); // Cierra el modal después de eliminar
+      fetchUsers();
+      setDeleteModalOpen(false);
     } catch (error) {
       console.error("Error al eliminar el usuario:", error);
       Swal.fire({
@@ -121,13 +113,13 @@ const GestionUsuarios = () => {
     }
   };
 
-  // Abrir el modal de confirmación de eliminación
+  // Abrir modal de eliminación
   const openDeleteModal = (user) => {
-    setUserToDelete(user); // Guardamos el usuario que se va a eliminar
-    setDeleteModalOpen(true); // Abrimos el modal
+    setUserToDelete(user);
+    setDeleteModalOpen(true);
   };
 
-  // Abrir el modal de edición de usuario
+  // Abrir modal de edición
   const handleEditUser = (user) => {
     setSelectedUser(user);
     setModalOpen(true);
@@ -156,7 +148,7 @@ const GestionUsuarios = () => {
     }
   };
 
-  // Filtrar usuarios por rol, nombre y paginación
+  // Filtrar usuarios por nombre y rol
   const filteredUsers = users
     .filter((user) =>
       `${user.nombre_Usuario} ${user.apellido1_Usuario} ${user.apellido2_Usuario}`
@@ -167,11 +159,31 @@ const GestionUsuarios = () => {
       selectedRole ? user.rol_Usuario.nombre_Rol === selectedRole : true
     );
 
+  // Paginación
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
-  // Cambiar página
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const maxButtons = 6;
+  let startPage, endPage;
+  if (totalPages <= maxButtons) {
+    startPage = 1;
+    endPage = totalPages;
+  } else {
+    if (currentPage <= Math.floor(maxButtons / 2)) {
+      startPage = 1;
+      endPage = maxButtons;
+    } else if (currentPage + Math.floor(maxButtons / 2) - 1 >= totalPages) {
+      startPage = totalPages - maxButtons + 1;
+      endPage = totalPages;
+    } else {
+      startPage = currentPage - Math.floor(maxButtons / 2) + 1;
+      endPage = startPage + maxButtons - 1;
+    }
+  }
+
+  // Función para cambiar página
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   if (loading) {
@@ -314,24 +326,40 @@ const GestionUsuarios = () => {
           )}
         </div>
 
-        {/* Paginación */}
-        <div className="flex justify-center mt-4">
-          {Array.from(
-            { length: Math.ceil(filteredUsers.length / usersPerPage) },
-            (_, index) => (
+        {/* Paginación personalizada */}
+        <div className="flex justify-center items-center mt-4 space-x-2">
+          {/* Botón anterior */}
+          <button
+            onClick={() => setCurrentPage((prev) => prev - 1)}
+            disabled={currentPage === 1}
+            className="mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-white disabled:opacity-50"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          {Array.from({ length: endPage - startPage + 1 }, (_, idx) => {
+            const pageNumber = startPage + idx;
+            return (
               <button
-                key={index + 1}
-                onClick={() => paginate(index + 1)}
-                className={`px-4 py-2 mx-1 rounded-lg ${
-                  currentPage === index + 1
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-white"
+                key={pageNumber}
+                onClick={() => paginate(pageNumber)}
+                className={`mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition font-medium ${
+                  currentPage === pageNumber
+                    ? "bg-blue-500 text-white hover:bg-blue-600"
+                    : "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-500"
                 }`}
               >
-                {index + 1}
+                {pageNumber}
               </button>
-            )
-          )}
+            );
+          })}
+          {/* Botón siguiente */}
+          <button
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+            disabled={currentPage === totalPages}
+            className="mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-white disabled:opacity-50"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
 

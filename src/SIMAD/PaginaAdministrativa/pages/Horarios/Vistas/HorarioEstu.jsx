@@ -234,101 +234,105 @@ export const HorarioEstu = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 text-gray-800 dark:text-white">
-    {role !== 'admin' && role !== 'superadmin' && (
-      <>
-        <h1 className="text-3xl font-bold mb-2">Sección: {seccion}</h1>
-        <h2 className="text-2xl font-bold mb-6">
-          Hola, {nombreEstudiante} {apellidosEstudiante}! Bienvenido al horario.
-        </h2>
-      </>
-    )}
-  
-    {(role === 'admin' || role === 'superadmin') && (
-      <div className="mb-4">
-        <label className="block text-lg font-medium mb-2">
-          Seleccionar Sección
-        </label>
-        <select
-          value={seccionSeleccionada}
-          onChange={(e) => setSeccionSeleccionada(e.target.value)}
-          className="border border-gray-300 dark:border-gray-600 p-2 rounded-lg w-full bg-white dark:bg-gray-800 dark:text-white"
-        >
-          <option value="">Seleccione una sección</option>
-          {secciones.map((sec) => (
-            <option key={sec.id_Seccion} value={sec.id_Seccion}>
-              {sec.nombre_Seccion}
-            </option>
-          ))}
-        </select>
-      </div>
-    )}
-  
-    {horarios.length > 0 ? (
-      <>
-        <button
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg mb-4 transition"
-          onClick={exportarPdf}
-        >
-          Exportar Horario como PDF
-        </button>
-  
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md overflow-x-auto">
-          <h2 className="text-2xl font-bold mb-4">Tu Horario</h2>
-          <table className="min-w-full table-auto text-sm">
-            <thead className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 sticky top-0">
-              <tr>
-                <th className="px-2 py-2 text-left">Día</th>
-                {lessons.map((lesson, i) => (
-                  <th key={i} className="px-2 py-2 text-center">
-                    <div>{lesson}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      {`${convertirHora12(lessonTimes[lesson].start)} - ${convertirHora12(
-                        lessonTimes[lesson].end
-                      )}`}
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {dias.map((dia, i) => (
-                <tr key={i} className="border-b dark:border-gray-700">
-                  <td className="px-2 py-2 font-semibold">{dia}</td>
-                  {lessons.map((lesson) => {
-                    const horario = obtenerHorario(dia, lesson);
-                    const subjectColorClass =
-                      horario &&
-                      horario.materia &&
-                      subjectColors[horario.materia.nombre_Materia]
-                        ? subjectColors[horario.materia.nombre_Materia]
-                        : 'bg-white dark:bg-gray-900';
-  
-                    return (
-                      <td
-                        key={lesson}
-                        className={`px-2 py-2 text-center cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900 transition ${subjectColorClass}`}
-                        onClick={() => mostrarDetalles(horario)}
-                      >
-                        {horario ? horario.materia?.nombre_Materia || '-' : '-'}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 text-gray-800 dark:text-white">
+      {role !== 'admin' && role !== 'superadmin' && (
+        <>
+          <h1 className="text-xl font-bold mb-1 text-center">
+            Horario {new Date().getFullYear()}
+          </h1>
+          <h2 className="text-sm font-medium mb-1 text-center">
+            {nombreEstudiante} {apellidosEstudiante}
+          </h2>
+          <h3 className="text-sm font-medium mb-4 text-center">
+            Sección: {seccion}
+          </h3>
+        </>
+      )}
+
+      {(role === 'admin' || role === 'superadmin') && (
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">
+            Seleccionar Sección
+          </label>
+          <select
+            value={seccionSeleccionada}
+            onChange={(e) => setSeccionSeleccionada(e.target.value)}
+            className="border border-gray-300 dark:border-gray-600 p-2 rounded-lg w-full bg-white dark:bg-gray-800 dark:text-white text-sm"
+          >
+            <option value="">Seleccione una sección</option>
+            {secciones.map((sec) => (
+              <option key={sec.id_Seccion} value={sec.id_Seccion}>
+                {sec.nombre_Seccion}
+              </option>
+            ))}
+          </select>
         </div>
-      </>
-    ) : (
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
-        <p className="text-lg dark:text-gray-300">
-          No se encontraron horarios para la sección seleccionada.
-        </p>
-      </div>
-    )}
-  </div>
-  
+      )}
+
+      {horarios.length > 0 ? (
+        <>
+          <button
+            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg mb-4 text-sm transition"
+            onClick={exportarPdf}
+          >
+            Exportar Horario como PDF
+          </button>
+
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md overflow-x-auto">
+            <h2 className="text-lg font-bold mb-4 text-center">Tu Horario</h2>
+            <table className="min-w-full table-auto text-xs">
+              <thead className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 sticky top-0">
+                <tr>
+                  <th className="px-2 py-1 text-left">Día</th>
+                  {lessons.map((lesson, i) => (
+                    <th key={i} className="px-2 py-1 text-center">
+                      <div>{lesson}</div>
+                      <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                        {`${convertirHora12(lessonTimes[lesson].start)} - ${convertirHora12(
+                          lessonTimes[lesson].end
+                        )}`}
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {dias.map((dia, i) => (
+                  <tr key={i} className="border-b dark:border-gray-700">
+                    <td className="px-2 py-1 font-semibold">{dia}</td>
+                    {lessons.map((lesson) => {
+                      const horario = obtenerHorario(dia, lesson);
+                      const subjectColorClass =
+                        horario &&
+                        horario.materia &&
+                        subjectColors[horario.materia.nombre_Materia]
+                          ? subjectColors[horario.materia.nombre_Materia]
+                          : 'bg-white dark:bg-gray-900';
+
+                      return (
+                        <td
+                          key={lesson}
+                          className={`px-2 py-1 text-center cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900 transition ${subjectColorClass}`}
+                          onClick={() => mostrarDetalles(horario)}
+                        >
+                          {horario ? horario.materia?.nombre_Materia || '-' : '-'}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : (
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md text-center">
+          <p className="text-sm dark:text-gray-300">
+            No se encontraron horarios para la sección seleccionada.
+          </p>
+        </div>
+      )}
+    </div>
   );
 };
 

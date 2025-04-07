@@ -4,7 +4,7 @@ import EventosService from './Service/EventosService';
 import UseFetchEventos from './Hook/UseFetchEventos';
 import Swal from 'sweetalert2';
 import '@sweetalert2/theme-bulma/bulma.css';
-import { FaInfoCircle, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaInfoCircle, FaPlus, FaEdit, FaTrash, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 // Función para formatear la hora al formato HH:MM
 const formatTime = (timeStr) => {
@@ -266,6 +266,25 @@ const GestionEventos = () => {
   const currentEventos = filteredEventos.slice(indexOfFirstEvent, indexOfLastEvent);
   const totalPages = Math.ceil(filteredEventos.length / eventsPerPage);
 
+  // Lógica para limitar la cantidad de botones a 6
+  const maxButtons = 6;
+  let startPage, endPage;
+  if (totalPages <= maxButtons) {
+    startPage = 1;
+    endPage = totalPages;
+  } else {
+    if (currentPage <= Math.floor(maxButtons / 2)) {
+      startPage = 1;
+      endPage = maxButtons;
+    } else if (currentPage + Math.floor(maxButtons / 2) - 1 >= totalPages) {
+      startPage = totalPages - maxButtons + 1;
+      endPage = totalPages;
+    } else {
+      startPage = currentPage - Math.floor(maxButtons / 2) + 1;
+      endPage = startPage + maxButtons - 1;
+    }
+  }
+
   // Función para obtener opciones únicas para "Dirigido a"
   const getUniqueDirigidoA = () => {
     const dirigidos = eventos.map((evento) => evento.dirigidoA?.nombre).filter(Boolean);
@@ -283,190 +302,208 @@ const GestionEventos = () => {
 
   return (
     <div className="p-6 bg-gray-100 dark:bg-gray-900 min-h-screen">
-  {/* Encabezado */}
-  <div className="flex items-center justify-between mb-6">
-    <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Gestión de Eventos</h1>
-    <Link
-      to="/crear-eventos"
-      className="flex items-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-      title="Crear nuevo evento"
-    >
-      <FaPlus className="mr-2" />
-      Crear Evento
-    </Link>
-  </div>
-
-  {/* Filtros por estado */}
-  <div className="mb-6 flex space-x-4">
-    {["Todos", "Pendiente", "Aprobado", "Rechazado"].map((estado) => {
-      const color =
-        estado === "Pendiente"
-          ? "bg-yellow-500"
-          : estado === "Aprobado"
-          ? "bg-green-600"
-          : estado === "Rechazado"
-          ? "bg-red-600"
-          : "bg-blue-600";
-      const isActive = filterStatus === estado;
-      return (
-        <button
-          key={estado}
-          onClick={() => setFilterStatus(estado)}
-          className={`px-4 py-2 rounded transition ${
-            isActive
-              ? `${color} text-white`
-              : "bg-white dark:bg-gray-700 dark:text-white text-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600"
-          }`}
+      {/* Encabezado */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Gestión de Eventos</h1>
+        <Link
+          to="/crear-eventos"
+          className="flex items-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+          title="Crear nuevo evento"
         >
-          {estado}
-        </button>
-      );
-    })}
-  </div>
-
-  {/* Filtros adicionales */}
-  <div className="mb-6 flex flex-wrap gap-4">
-    <select
-      name="dirigido_a"
-      value={filters.dirigido_a}
-      onChange={handleFilterChange}
-      className="border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-    >
-      <option value="">Todos los Públicos</option>
-      {getUniqueDirigidoA().map((dirigido, index) => (
-        <option key={index} value={dirigido}>
-          {dirigido}
-        </option>
-      ))}
-    </select>
-    <input
-      type="date"
-      name="fecha"
-      value={filters.fecha}
-      onChange={handleFilterChange}
-      className="border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-    />
-  </div>
-
-  {/* Tabla */}
-  {filteredEventos.length === 0 ? (
-    <div className="text-center text-gray-700 dark:text-gray-300">
-      No hay eventos que coincidan con los filtros.
-    </div>
-  ) : (
-    <>
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-          <thead className="bg-blue-500 text-white">
-            <tr>
-              {["Nombre", "Fecha", "Hora", "Dirigido a", "Estado", "Acciones"].map((th) => (
-                <th
-                  key={th}
-                  className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider"
-                >
-                  {th}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-            {currentEventos.map((evento, index) => (
-              <tr
-                key={evento.id_Evento}
-                className={`transition hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                  index % 2 === 0 ? "bg-gray-50 dark:bg-gray-800" : "bg-white dark:bg-gray-900"
-                }`}
-              >
-                <td className="px-6 py-4 text-gray-900 dark:text-white">{evento.nombre_Evento}</td>
-                <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
-                  {formatDateToDMY(evento.fecha_Evento)}
-                </td>
-                <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
-                  {formatTime(evento.hora_inicio_Evento)} - {formatTime(evento.hora_fin_Evento)}
-                </td>
-                <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
-                  {evento.dirigidoA?.nombre || "Sin Público"}
-                </td>
-                <td className="px-6 py-4">
-                  <span
-                    className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
-                      evento.estadoEvento.nombre === "Aprobado"
-                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                        : evento.estadoEvento.nombre === "Pendiente"
-                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                        : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                    }`}
-                  >
-                    {evento.estadoEvento.nombre}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap flex flex-wrap gap-2">
-                  <button
-                    onClick={() => handleViewInfo(evento)}
-                    className="flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                    title="Ver Información"
-                  >
-                    <FaInfoCircle className="mr-1" />
-                    Ver Info
-                  </button>
-                  {evento.estadoEvento.nombre.trim().toLowerCase() === "pendiente" ? (
-                    <>
-                      <button
-                        onClick={() => handleApprove(evento.id_Evento)}
-                        className="flex items-center text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
-                        title="Aprobar Evento"
-                      >
-                        <FaEdit className="mr-1" />
-                        Aprobar
-                      </button>
-                      <button
-                        onClick={() => handleReject(evento.id_Evento)}
-                        className="flex items-center text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                        title="Rechazar Evento"
-                      >
-                        <FaTrash className="mr-1" />
-                        Rechazar
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      onClick={() => handleDelete(evento.id_Evento)}
-                      className="flex items-center text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                      title="Eliminar Evento"
-                    >
-                      <FaTrash className="mr-1" />
-                      Eliminar
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          <FaPlus className="mr-2" />
+          Crear Evento
+        </Link>
       </div>
 
-      {/* Paginación */}
-      {totalPages > 1 && (
-        <div className="flex justify-center mt-4">
-          {Array.from({ length: totalPages }, (_, index) => (
+      {/* Filtros por estado */}
+      <div className="mb-6 flex space-x-4">
+        {["Todos", "Pendiente", "Aprobado", "Rechazado"].map((estado) => {
+          const color =
+            estado === "Pendiente"
+              ? "bg-yellow-500"
+              : estado === "Aprobado"
+              ? "bg-green-600"
+              : estado === "Rechazado"
+              ? "bg-red-600"
+              : "bg-blue-600";
+          const isActive = filterStatus === estado;
+          return (
             <button
-              key={index}
-              onClick={() => setCurrentPage(index + 1)}
-              className={`mx-1 px-3 py-1 rounded text-sm transition ${
-                currentPage === index + 1
-                  ? "bg-blue-600 text-white"
-                  : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+              key={estado}
+              onClick={() => setFilterStatus(estado)}
+              className={`px-4 py-2 rounded transition ${
+                isActive
+                  ? `${color} text-white`
+                  : "bg-white dark:bg-gray-700 dark:text-white text-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600"
               }`}
             >
-              {index + 1}
+              {estado}
             </button>
-          ))}
-        </div>
-      )}
-    </>
-  )}
-</div>
+          );
+        })}
+      </div>
 
+      {/* Filtros adicionales */}
+      <div className="mb-6 flex flex-wrap gap-4">
+        <select
+          name="dirigido_a"
+          value={filters.dirigido_a}
+          onChange={handleFilterChange}
+          className="border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">Todos los Públicos</option>
+          {getUniqueDirigidoA().map((dirigido, index) => (
+            <option key={index} value={dirigido}>
+              {dirigido}
+            </option>
+          ))}
+        </select>
+        <input
+          type="date"
+          name="fecha"
+          value={filters.fecha}
+          onChange={handleFilterChange}
+          className="border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      {/* Tabla */}
+      {filteredEventos.length === 0 ? (
+        <div className="text-center text-gray-700 dark:text-gray-300">
+          No hay eventos que coincidan con los filtros.
+        </div>
+      ) : (
+        <>
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+              <thead className="bg-blue-500 text-white">
+                <tr>
+                  {["Nombre", "Fecha", "Hora", "Dirigido a", "Estado", "Acciones"].map((th) => (
+                    <th
+                      key={th}
+                      className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider"
+                    >
+                      {th}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {currentEventos.map((evento, index) => (
+                  <tr
+                    key={evento.id_Evento}
+                    className={`transition hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                      index % 2 === 0 ? "bg-gray-50 dark:bg-gray-800" : "bg-white dark:bg-gray-900"
+                    }`}
+                  >
+                    <td className="px-6 py-4 text-gray-900 dark:text-white">{evento.nombre_Evento}</td>
+                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                      {formatDateToDMY(evento.fecha_Evento)}
+                    </td>
+                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                      {formatTime(evento.hora_inicio_Evento)} - {formatTime(evento.hora_fin_Evento)}
+                    </td>
+                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                      {evento.dirigidoA?.nombre || "Sin Público"}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
+                          evento.estadoEvento.nombre === "Aprobado"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                            : evento.estadoEvento.nombre === "Pendiente"
+                            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                        }`}
+                      >
+                        {evento.estadoEvento.nombre}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap flex flex-wrap gap-2">
+                      <button
+                        onClick={() => handleViewInfo(evento)}
+                        className="flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                        title="Ver Información"
+                      >
+                        <FaInfoCircle className="mr-1" />
+                        Ver Info
+                      </button>
+                      {evento.estadoEvento.nombre.trim().toLowerCase() === "pendiente" ? (
+                        <>
+                          <button
+                            onClick={() => handleApprove(evento.id_Evento)}
+                            className="flex items-center text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
+                            title="Aprobar Evento"
+                          >
+                            <FaEdit className="mr-1" />
+                            Aprobar
+                          </button>
+                          <button
+                            onClick={() => handleReject(evento.id_Evento)}
+                            className="flex items-center text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                            title="Rechazar Evento"
+                          >
+                            <FaTrash className="mr-1" />
+                            Rechazar
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => handleDelete(evento.id_Evento)}
+                          className="flex items-center text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                          title="Eliminar Evento"
+                        >
+                          <FaTrash className="mr-1" />
+                          Eliminar
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Paginación */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center mt-4 space-x-2">
+              {/* Botón de página anterior */}
+              <button
+                onClick={() => setCurrentPage((prev) => prev - 1)}
+                disabled={currentPage === 1}
+                className="mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 disabled:opacity-50"
+              >
+                <FaChevronLeft />
+              </button>
+              {Array.from({ length: endPage - startPage + 1 }, (_, idx) => {
+                const pageNumber = startPage + idx;
+                return (
+                  <button
+                    key={pageNumber}
+                    onClick={() => setCurrentPage(pageNumber)}
+                    className={`mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition font-medium ${
+                      currentPage === pageNumber
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-700"
+                    }`}
+                  >
+                    {pageNumber}
+                  </button>
+                );
+              })}
+              {/* Botón de página siguiente */}
+              <button
+                onClick={() => setCurrentPage((prev) => prev + 1)}
+                disabled={currentPage === totalPages}
+                className="mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 disabled:opacity-50"
+              >
+                <FaChevronRight />
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
   );
 };
 

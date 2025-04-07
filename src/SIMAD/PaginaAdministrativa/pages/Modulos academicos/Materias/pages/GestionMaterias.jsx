@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import MateriaService from '../Service/MateriaService';
 import { Button } from '../../../../../../Components/ui/Button';
 import { Input } from '../../../../../../Components/ui/Input';
-import { Trash2 } from 'lucide-react';
+import { Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 // Normalizar texto para evitar duplicados con tildes, mayúsculas, espacios
@@ -17,6 +17,10 @@ export const GestionMaterias = () => {
   const [nombre, setNombre] = useState('');
   const [materias, setMaterias] = useState([]);
   const [faltantes, setFaltantes] = useState([]);
+
+  // Paginación: definir el estado de la página actual y materias por página
+  const [currentPage, setCurrentPage] = useState(1);
+  const materiasPerPage = 15; // Puedes ajustar este valor según lo necesites
 
   const materiasBase = [
     'Español',
@@ -56,6 +60,31 @@ export const GestionMaterias = () => {
   useEffect(() => {
     fetchMaterias();
   }, []);
+
+  // Paginación: calcular la porción actual de materias
+  const indexOfLastMateria = currentPage * materiasPerPage;
+  const indexOfFirstMateria = indexOfLastMateria - materiasPerPage;
+  const currentMaterias = materias.slice(indexOfFirstMateria, indexOfLastMateria);
+  const totalPages = Math.ceil(materias.length / materiasPerPage);
+
+  // Lógica para limitar la cantidad de botones a 6
+  const maxButtons = 6;
+  let startPage, endPage;
+  if (totalPages <= maxButtons) {
+    startPage = 1;
+    endPage = totalPages;
+  } else {
+    if (currentPage <= Math.floor(maxButtons / 2)) {
+      startPage = 1;
+      endPage = maxButtons;
+    } else if (currentPage + Math.floor(maxButtons / 2) - 1 >= totalPages) {
+      startPage = totalPages - maxButtons + 1;
+      endPage = totalPages;
+    } else {
+      startPage = currentPage - Math.floor(maxButtons / 2) + 1;
+      endPage = startPage + maxButtons - 1;
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -175,66 +204,107 @@ export const GestionMaterias = () => {
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow-lg mt-10 space-y-6">
-  <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Gestión de Materias</h2>
+      <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Gestión de Materias</h2>
 
-  {faltantes.length > 0 && (
-    <Button
-      onClick={handleAgregarTodas}
-      className="bg-green-600 hover:bg-green-700"
-    >
-      Agregar materias faltantes
-    </Button>
-  )}
+      {faltantes.length > 0 && (
+        <Button onClick={handleAgregarTodas} className="bg-green-600 hover:bg-green-700">
+          Agregar materias faltantes
+        </Button>
+      )}
 
-  <form onSubmit={handleSubmit} className="flex items-center gap-4">
-    <Input
-      type="text"
-      placeholder="Ej: Educación Cívica"
-      value={nombre}
-      onChange={(e) => setNombre(e.target.value)}
-      required
-      className="dark:bg-gray-800 dark:text-white dark:border-gray-600"
-    />
-    <Button type="submit" disabled={!nombre.trim()}>Agregar</Button>
-  </form>
+      <form onSubmit={handleSubmit} className="flex items-center gap-4">
+        <Input
+          type="text"
+          placeholder="Ej: Educación Cívica"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          required
+          className="dark:bg-gray-800 dark:text-white dark:border-gray-600"
+        />
+        <Button type="submit" disabled={!nombre.trim()}>
+          Agregar
+        </Button>
+      </form>
 
-  <div className="overflow-x-auto mt-6">
-    <table className="min-w-full table-auto border text-sm">
-      <thead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100">
-        <tr>
-          <th className="px-4 py-2 text-left">Nombre</th>
-          <th className="px-4 py-2 text-left">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {materias.length > 0 ? (
-          materias.map((materia) => (
-            <tr
-              key={materia.id_Materia || materia.id || materia.nombre_Materia}
-              className="border-t border-gray-200 dark:border-gray-600"
-            >
-              <td className="px-4 py-2 text-gray-900 dark:text-gray-100">{materia.nombre_Materia}</td>
-              <td className="px-4 py-2">
-                <Button
-                  onClick={() => handleDelete(materia.id_Materia || materia.id)}
-                  className="bg-red-600 hover:bg-red-700"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </td>
+      <div className="overflow-x-auto mt-6">
+        <table className="min-w-full table-auto border text-sm">
+          <thead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100">
+            <tr>
+              <th className="px-4 py-2 text-left">Nombre</th>
+              <th className="px-4 py-2 text-left">Acciones</th>
             </tr>
-          ))
-        ) : (
-          <tr>
-            <td colSpan="2" className="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
-              No hay materias registradas
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
-  </div>
-</div>
+          </thead>
+          <tbody>
+            {currentMaterias.length > 0 ? (
+              currentMaterias.map((materia) => (
+                <tr
+                  key={materia.id_Materia || materia.id || materia.nombre_Materia}
+                  className="border-t border-gray-200 dark:border-gray-600"
+                >
+                  <td className="px-4 py-2 text-gray-900 dark:text-gray-100">
+                    {materia.nombre_Materia}
+                  </td>
+                  <td className="px-4 py-2">
+                    <Button
+                      onClick={() => handleDelete(materia.id_Materia || materia.id)}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan="2"
+                  className="px-4 py-4 text-center text-gray-500 dark:text-gray-400"
+                >
+                  No hay materias registradas
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center mt-4 space-x-2">
+          {/* Botón de página anterior */}
+          <button
+            onClick={() => setCurrentPage((prev) => prev - 1)}
+            disabled={currentPage === 1}
+            className="mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 disabled:opacity-50"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          {Array.from({ length: endPage - startPage + 1 }, (_, idx) => {
+            const pageNumber = startPage + idx;
+            return (
+              <button
+                key={pageNumber}
+                onClick={() => setCurrentPage(pageNumber)}
+                className={`mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition font-medium ${
+                  currentPage === pageNumber
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-700'
+                }`}
+              >
+                {pageNumber}
+              </button>
+            );
+          })}
+          {/* Botón de página siguiente */}
+          <button
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+            disabled={currentPage === totalPages}
+            className="mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 disabled:opacity-50"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+    </div>
   );
 };
 

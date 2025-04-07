@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from 'react';
 import UseFetchEventos from './Hook/UseFetchEventos';
 import Swal from 'sweetalert2';
 import '@sweetalert2/theme-bulma/bulma.css';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 // Componente para cada item (card) de evento con validación de tap
 const EventoItem = ({ evento, handleEventoClick, formatTime, formatDateToDMY }) => {
@@ -129,6 +130,25 @@ const Eventos = () => {
   const currentEvents = approvedEvents.slice(indexOfFirstEvent, indexOfLastEvent);
   const totalPages = Math.ceil(approvedEvents.length / eventsPerPage);
 
+  // Lógica para limitar la cantidad de botones a 6
+  const maxButtons = 6;
+  let startPage, endPage;
+  if (totalPages <= maxButtons) {
+    startPage = 1;
+    endPage = totalPages;
+  } else {
+    if (currentPage <= Math.floor(maxButtons / 2)) {
+      startPage = 1;
+      endPage = maxButtons;
+    } else if (currentPage + Math.floor(maxButtons / 2) - 1 >= totalPages) {
+      startPage = totalPages - maxButtons + 1;
+      endPage = totalPages;
+    } else {
+      startPage = currentPage - Math.floor(maxButtons / 2) + 1;
+      endPage = startPage + maxButtons - 1;
+    }
+  }
+
   return (
     <div className="p-6 bg-gray-100 dark:bg-gray-900 min-h-screen">
       <div className="container mx-auto">
@@ -155,20 +175,39 @@ const Eventos = () => {
             </ul>
 
             {totalPages > 1 && (
-              <div className="flex justify-center mt-4">
-                {Array.from({ length: totalPages }, (_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentPage(index + 1)}
-                    className={`mx-1 px-3 py-1 rounded text-sm transition font-medium ${
-                      currentPage === index + 1
-                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                        : 'bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-white hover:bg-blue-200 dark:hover:bg-blue-700'
-                    }`}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
+              <div className="flex justify-center items-center mt-4 space-x-2">
+                {/* Botón de página anterior */}
+                <button
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                  disabled={currentPage === 1}
+                  className="mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-white disabled:opacity-50"
+                >
+                  <FaChevronLeft />
+                </button>
+                {Array.from({ length: endPage - startPage + 1 }, (_, idx) => {
+                  const pageNumber = startPage + idx;
+                  return (
+                    <button
+                      key={pageNumber}
+                      onClick={() => setCurrentPage(pageNumber)}
+                      className={`mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition font-medium ${
+                        currentPage === pageNumber
+                          ? 'bg-blue-600 text-white hover:bg-blue-700'
+                          : 'bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-white hover:bg-blue-200 dark:hover:bg-blue-700'
+                      }`}
+                    >
+                      {pageNumber}
+                    </button>
+                  );
+                })}
+                {/* Botón de página siguiente */}
+                <button
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  disabled={currentPage === totalPages}
+                  className="mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-white disabled:opacity-50"
+                >
+                  <FaChevronRight />
+                </button>
               </div>
             )}
           </>
