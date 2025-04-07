@@ -59,19 +59,26 @@ export const FormularioMatricula = () => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // Verificamos si el usuario ya envió el formulario (envío único)
-  useEffect(() => {
-    const submitted = localStorage.getItem(`matricula-submitted-${userId}`);
-    if (submitted) {
+// Verificamos si el usuario ya envió el formulario (envío único de 24 horas)
+useEffect(() => {
+  const submittedTime = localStorage.getItem(`matricula-submitted-${userId}`);
+  if (submittedTime) {
+    const timeDiff = Date.now() - Number(submittedTime);
+    // 24 horas en milisegundos: 86400000
+    if (timeDiff < 86400000) {
       setHasSubmitted(true);
+    } else {
+      // Si han pasado 24 horas, se elimina la marca y se permite enviar de nuevo
+      localStorage.removeItem(`matricula-submitted-${userId}`);
+      setHasSubmitted(false);
     }
-  }, [userId]);
-  // URL base de la API
+  }
+}, [userId]);
 
-const API_BASE_URL =
-process.env.NODE_ENV === 'production'
+const API_BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://simadlsc-backend-production.up.railway.app'
   : 'http://localhost:3000';
+
 
   // Función para calcular la edad a partir de la fecha de nacimiento
   const handleFechaNacimientoChange = (e) => {
@@ -202,7 +209,8 @@ process.env.NODE_ENV === 'production'
     // Si no hay campos vacíos, proceder con el envío
     try {
       await handleSubmit(e);
-      localStorage.setItem(`matricula-submitted-${userId}`, "true");
+      // Guarda la hora de envío actual
+      localStorage.setItem(`matricula-submitted-${userId}`, Date.now().toString());
       setHasSubmitted(true);
       Swal.fire({
         icon: "success",
@@ -215,7 +223,7 @@ process.env.NODE_ENV === 'production'
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "Hubo un error al enviar el formulario. Intente nuevamente.",
+        text: error.message || "Hubo un error al enviar el formulario. Intente nuevamente.",
         confirmButtonColor: "#2563EB",
       });
     }
