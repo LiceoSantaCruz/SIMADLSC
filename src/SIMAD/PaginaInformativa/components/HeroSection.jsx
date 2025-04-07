@@ -1,25 +1,17 @@
-import { Helmet } from 'react-helmet';
 import getCloudinaryUrl from '../utils/cloudinary';
 
 // Versión para móviles (600px de ancho)
-const heroBg_mobile = getCloudinaryUrl("copia_para_banner_f3meci.jpg", "w_600,q_auto,f_auto");
+const heroBg_mobile = getCloudinaryUrl("copia_para_banner_f3meci", "w_600,q_auto,f_auto");
 // Versión para pantallas pequeñas (768px)
-const heroBg_768 = getCloudinaryUrl("copia_para_banner_f3meci.jpg", "w_768,q_auto,f_auto");
+const heroBg_768 = getCloudinaryUrl("copia_para_banner_f3meci", "w_768,q_auto,f_auto");
 // Versión para pantallas medianas (1024px)
-const heroBg_1024 = getCloudinaryUrl("copia_para_banner_f3meci.jpg", "w_1024,q_auto,f_auto");
+const heroBg_1024 = getCloudinaryUrl("copia_para_banner_f3meci", "w_1024,q_auto,f_auto");
 // Versión para pantallas grandes (1600px)
-const heroBg_1600 = getCloudinaryUrl("copia_para_banner_f3meci.jpg", "w_1600,q_auto,f_auto");
+const heroBg_1600 = getCloudinaryUrl("copia_para_banner_f3meci", "w_1600,q_auto,f_auto");
 
 export const HeroSection = () => {
   return (
     <>
-      <Helmet>
-        <link
-          rel="preload"
-          as="image"
-          href={heroBg_1024}
-        />
-      </Helmet>
 
       <div className="relative h-[70vh]">
         {/* Imagen de fondo responsiva con srcSet y sizes */}
