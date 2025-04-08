@@ -20,6 +20,12 @@ export const FormularioMatriculaUnificado = () => {
   const { grados } = useGrados();
 
   const [matriculaType, setMatriculaType] = useState("ordinaria");
+  const [isEditable, setIsEditable] = useState(false); // Controla si los campos son editables
+
+  const API_BASE_URL =
+    process.env.NODE_ENV === "production"
+      ? "https://simadlsc-backend-production.up.railway.app"
+      : "http://localhost:3000";
 
   const handleMatriculaTypeChange = (e) => {
     setMatriculaType(e.target.value);
@@ -39,6 +45,76 @@ export const FormularioMatriculaUnificado = () => {
       target: { name: "estudiante.edad", value: age },
     };
     handleChange(edadEvent);
+  };
+
+  const buscarEstudiantePorCedula = async (cedula) => {
+    if (!cedula || cedula.trim() === "") {
+      // Mostrar advertencia si el campo de cédula está vacío
+      Swal.fire({
+        icon: "warning",
+        title: "Campo vacío",
+        text: "Por favor, ingrese un número de cédula antes de buscar.",
+        confirmButtonColor: "#2563EB",
+      });
+      return; // Detener la ejecución si el campo está vacío
+    }
+
+    try {
+      const response = await axios.get(`${API_BASE_URL}/estudiantes/cedula/${cedula}`);
+      const estudiante = response.data;
+
+      if (estudiante) {
+        // Actualizar los datos del formulario con los datos del estudiante
+        handleChange({
+          target: { name: "estudiante.nombre_Estudiante", value: estudiante.nombre_Estudiante },
+        });
+        handleChange({
+          target: { name: "estudiante.apellido1_Estudiante", value: estudiante.apellido1_Estudiante },
+        });
+        handleChange({
+          target: { name: "estudiante.apellido2_Estudiante", value: estudiante.apellido2_Estudiante },
+        });
+        handleChange({
+          target: { name: "estudiante.fecha_nacimiento", value: estudiante.fecha_nacimiento },
+        });
+        handleChange({
+          target: { name: "estudiante.correo_estudiantil", value: estudiante.correo_estudiantil },
+        });
+        handleChange({
+          target: { name: "estudiante.telefono", value: estudiante.telefono },
+        });
+        setIsEditable(false); // Bloquear los campos
+        Swal.fire({
+          icon: "success",
+          title: "Estudiante encontrado",
+          text: "Los datos del estudiante han sido rellenados automáticamente.",
+          confirmButtonColor: "#2563EB",
+        });
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        // Manejar específicamente el error 404 como un warning
+        setIsEditable(true); // Permitir la edición manual
+        const errorMessage = typeof error.response.data.message === "string"
+          ? error.response.data.message
+          : `No se encontró un estudiante con la cédula: ${cedula}. Por favor, ingrese los datos manualmente.`;
+        Swal.fire({
+          icon: "warning",
+          title: "Estudiante no encontrado",
+          text: errorMessage, // Mostrar el mensaje correctamente
+          confirmButtonColor: "#2563EB",
+        });
+      } else {
+        // Manejar otros errores como errores generales
+        console.error("Error al buscar el estudiante:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Hubo un problema al buscar el estudiante. Intente nuevamente.",
+          confirmButtonColor: "#2563EB",
+        });
+      }
+    }
   };
 
   const onSubmitHandler = async (e) => {
@@ -298,6 +374,13 @@ export const FormularioMatriculaUnificado = () => {
                   placeholder="5-0442-0911"
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 />
+                <button
+                  type="button"
+                  onClick={() => buscarEstudiantePorCedula(formData.estudiante.cedula)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md mt-2"
+                >
+                  Buscar Estudiante
+                </button>
               </div>
               <div>
                 <label className="block text-gray-700 dark:text-gray-100">Teléfono:</label>
