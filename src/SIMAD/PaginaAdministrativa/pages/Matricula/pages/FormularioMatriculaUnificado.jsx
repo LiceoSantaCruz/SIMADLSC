@@ -84,7 +84,82 @@ export const FormularioMatriculaUnificado = () => {
         handleChange({
           target: { name: "estudiante.telefono", value: estudiante.telefono },
         });
-        setIsEditable(false); // Bloquear los campos
+        handleChange({
+          target: { name: "estudiante.sexo", value: estudiante.sexo },
+        });
+        handleChange({
+          target: { name: "estudiante.lugar_de_nacimiento", value: estudiante.lugar_de_nacimiento },
+        });
+        handleChange({
+          target: { name: "estudiante.cedula", value: estudiante.cedula },
+        });
+        handleChange({
+          target: { name: "estudiante.edad", value: estudiante.edad },
+        });
+        handleChange({
+          target: { name: "estudiante.nacionalidad", value: estudiante.nacionalidad },
+        });
+        handleChange({
+          target: { name: "estudiante.condicion_migratoria", value: estudiante.condicion_migratoria },
+        });
+        handleChange({
+          target: { name: "estudiante.repite_alguna_materia", value: estudiante.Repite_alguna_materia },
+        });
+        handleChange({
+          target: { name: "estudiante.institucion_de_procedencia", value: estudiante.institucion_de_procedencia },
+        });
+        handleChange({
+          target: { name: "estudiante.tipo_de_adecuacion", value: estudiante.tipo_de_adecuacion },
+        });
+        handleChange({
+          target: { name: "estudiante.recibe_religion", value: estudiante.recibe_religion },
+        });
+        handleChange({
+          target: { name: "estudiante.presenta_carta", value: estudiante.presenta_carta },
+        });
+        handleChange({
+          target: { name: "estudiante.presenta_alguna_enfermedad", value: estudiante.Presenta_alguna_enfermedad },
+        }); 
+        handleChange({
+          target: { name: "estudiante.medicamentos_que_debe_tomar", value: estudiante.medicamentos_que_debe_tomar },
+        });
+        handleChange({
+          target: { name: "estudiante.ruta_de_viaje", value: estudiante.Ruta_de_viaje },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.nombre_Encargado_Legal", value: estudiante.encargadoLegal.nombre_Encargado_Legal },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.apellido1_Encargado_Legal", value: estudiante.encargadoLegal.apellido1_Encargado_Legal },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.apellido2_Encargado_Legal", value: estudiante.encargadoLegal.apellido2_Encargado_Legal },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.N_Cedula", value: estudiante.encargadoLegal.N_Cedula },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.ocupacion", value: estudiante.encargadoLegal.ocupacion },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.nacionalidad", value: estudiante.encargadoLegal.nacionalidad },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.direccion", value: estudiante.encargadoLegal.direccion },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.telefono_celular", value: estudiante.encargadoLegal.telefono_celular },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.habitacion", value: estudiante.encargadoLegal.habitacion },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.correo", value: estudiante.encargadoLegal.correo },
+        });
+        
+
+
+        setIsEditable(true); // Bloquear los campos
         Swal.fire({
           icon: "success",
           title: "Estudiante encontrado",
@@ -280,7 +355,7 @@ export const FormularioMatriculaUnificado = () => {
         Por favor, complete todos los campos solicitados con datos verídicos.
         Verifique la información antes de enviar el formulario. Recuerde que el campo{" "}
         <strong>Cédula del estudiante</strong> debe tener el formato{" "}
-        <strong>"5-0421-0921"</strong> y el <strong>Correo Estudiantil</strong> es obligatorio.
+        <strong>`5-0421-0921`</strong> y el <strong>Correo Estudiantil</strong> es obligatorio.
       </p>
 
       <form className="space-y-6" onSubmit={onSubmitHandler}>
@@ -296,7 +371,7 @@ export const FormularioMatriculaUnificado = () => {
                     name="periodo"
                     value={formData.periodo}
                     onChange={handleChange}
-                    disabled={!isEditable} // Bloquear si no es editable
+                    
 
                     className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                   >
