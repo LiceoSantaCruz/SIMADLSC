@@ -4,6 +4,7 @@ import "@sweetalert2/theme-bulma/bulma.css";
 import { useMatriculaForm } from "../Hooks/useMatriculaForm";
 import { usePeriodos } from "../Hooks/usePeriodos";
 import useGrados from "../../Asistencias/Hook/useGrados";
+import axios from "axios"; // Asegúrate de importar axios si no está ya importado
 
 export const FormularioMatriculaUnificado = () => {
   const {
@@ -58,11 +59,11 @@ export const FormularioMatriculaUnificado = () => {
       });
       return; // Detener la ejecución si el campo está vacío
     }
-
+  
     try {
       const response = await axios.get(`${API_BASE_URL}/estudiantes/cedula/${cedula}`);
       const estudiante = response.data;
-
+  
       if (estudiante) {
         // Actualizar los datos del formulario con los datos del estudiante
         handleChange({
@@ -83,7 +84,82 @@ export const FormularioMatriculaUnificado = () => {
         handleChange({
           target: { name: "estudiante.telefono", value: estudiante.telefono },
         });
-        setIsEditable(false); // Bloquear los campos
+        handleChange({
+          target: { name: "estudiante.sexo", value: estudiante.sexo },
+        });
+        handleChange({
+          target: { name: "estudiante.lugar_de_nacimiento", value: estudiante.lugar_de_nacimiento },
+        });
+        handleChange({
+          target: { name: "estudiante.cedula", value: estudiante.cedula },
+        });
+        handleChange({
+          target: { name: "estudiante.edad", value: estudiante.edad },
+        });
+        handleChange({
+          target: { name: "estudiante.nacionalidad", value: estudiante.nacionalidad },
+        });
+        handleChange({
+          target: { name: "estudiante.condicion_migratoria", value: estudiante.condicion_migratoria },
+        });
+        handleChange({
+          target: { name: "estudiante.repite_alguna_materia", value: estudiante.Repite_alguna_materia },
+        });
+        handleChange({
+          target: { name: "estudiante.institucion_de_procedencia", value: estudiante.institucion_de_procedencia },
+        });
+        handleChange({
+          target: { name: "estudiante.tipo_de_adecuacion", value: estudiante.tipo_de_adecuacion },
+        });
+        handleChange({
+          target: { name: "estudiante.recibe_religion", value: estudiante.recibe_religion },
+        });
+        handleChange({
+          target: { name: "estudiante.presenta_carta", value: estudiante.presenta_carta },
+        });
+        handleChange({
+          target: { name: "estudiante.presenta_alguna_enfermedad", value: estudiante.Presenta_alguna_enfermedad },
+        }); 
+        handleChange({
+          target: { name: "estudiante.medicamentos_que_debe_tomar", value: estudiante.medicamentos_que_debe_tomar },
+        });
+        handleChange({
+          target: { name: "estudiante.ruta_de_viaje", value: estudiante.Ruta_de_viaje },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.nombre_Encargado_Legal", value: estudiante.encargadoLegal.nombre_Encargado_Legal },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.apellido1_Encargado_Legal", value: estudiante.encargadoLegal.apellido1_Encargado_Legal },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.apellido2_Encargado_Legal", value: estudiante.encargadoLegal.apellido2_Encargado_Legal },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.N_Cedula", value: estudiante.encargadoLegal.N_Cedula },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.ocupacion", value: estudiante.encargadoLegal.ocupacion },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.nacionalidad", value: estudiante.encargadoLegal.nacionalidad },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.direccion", value: estudiante.encargadoLegal.direccion },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.telefono_celular", value: estudiante.encargadoLegal.telefono_celular },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.habitacion", value: estudiante.encargadoLegal.habitacion },
+        });
+        handleChange({
+          target: { name: "encargadoLegal.correo", value: estudiante.encargadoLegal.correo },
+        });
+        
+
+
+        setIsEditable(true); // Bloquear los campos
         Swal.fire({
           icon: "success",
           title: "Estudiante encontrado",
@@ -116,6 +192,7 @@ export const FormularioMatriculaUnificado = () => {
       }
     }
   };
+
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
@@ -278,7 +355,7 @@ export const FormularioMatriculaUnificado = () => {
         Por favor, complete todos los campos solicitados con datos verídicos.
         Verifique la información antes de enviar el formulario. Recuerde que el campo{" "}
         <strong>Cédula del estudiante</strong> debe tener el formato{" "}
-        <strong>"5-0421-0921"</strong> y el <strong>Correo Estudiantil</strong> es obligatorio.
+        <strong>`5-0421-0921`</strong> y el <strong>Correo Estudiantil</strong> es obligatorio.
       </p>
 
       <form className="space-y-6" onSubmit={onSubmitHandler}>
@@ -294,6 +371,8 @@ export const FormularioMatriculaUnificado = () => {
                     name="periodo"
                     value={formData.periodo}
                     onChange={handleChange}
+                    
+
                     className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                   >
                     <option value="">Seleccione un periodo</option>
@@ -332,39 +411,7 @@ export const FormularioMatriculaUnificado = () => {
             <p className="text-sm text-gray-500 mb-2 dark:text-gray-400">
               Complete la información personal del estudiante. Asegúrese de que los datos sean correctos.
             </p>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-gray-700 dark:text-gray-100">Nombre Completo:</label>
-                <input
-                  type="text"
-                  name="estudiante.nombre_Estudiante"
-                  value={formData.estudiante.nombre_Estudiante}
-                  onChange={handleChange}
-                  className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-100">1º Apellido:</label>
-                <input
-                  type="text"
-                  name="estudiante.apellido1_Estudiante"
-                  value={formData.estudiante.apellido1_Estudiante}
-                  onChange={handleChange}
-                  className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-100">2º Apellido:</label>
-                <input
-                  type="text"
-                  name="estudiante.apellido2_Estudiante"
-                  value={formData.estudiante.apellido2_Estudiante}
-                  onChange={handleChange}
-                  className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
-                />
-              </div>
-              <div>
+            <div>
                 <label className="block text-gray-700 dark:text-gray-100">Nº Cédula o Pasaporte:</label>
                 <input
                   type="text"
@@ -382,6 +429,41 @@ export const FormularioMatriculaUnificado = () => {
                   Buscar Estudiante
                 </button>
               </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-gray-700 dark:text-gray-100">Nombre Completo:</label>
+                <input
+                  type="text"
+                  name="estudiante.nombre_Estudiante"
+                  value={formData.estudiante.nombre_Estudiante}
+                  onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
+                  className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-100">1º Apellido:</label>
+                <input
+                  type="text"
+                  name="estudiante.apellido1_Estudiante"
+                  value={formData.estudiante.apellido1_Estudiante}
+                  onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
+                  className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-100">2º Apellido:</label>
+                <input
+                  type="text"
+                  name="estudiante.apellido2_Estudiante"
+                  value={formData.estudiante.apellido2_Estudiante}
+                  onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
+                  className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
+                />
+              </div>
+              
               <div>
                 <label className="block text-gray-700 dark:text-gray-100">Teléfono:</label>
                 <input
@@ -389,6 +471,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="estudiante.telefono"
                   value={formData.estudiante.telefono}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 />
               </div>
@@ -399,6 +482,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="estudiante.correo_estudiantil"
                   value={formData.estudiante.correo_estudiantil}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   placeholder="ejemplo@correo.com"
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                   required
@@ -415,6 +499,7 @@ export const FormularioMatriculaUnificado = () => {
                   value="Femenino"
                   checked={formData.estudiante.sexo === "Femenino"}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="mr-2"
                 />
                 Femenino
@@ -426,6 +511,7 @@ export const FormularioMatriculaUnificado = () => {
                   value="Masculino"
                   checked={formData.estudiante.sexo === "Masculino"}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="mr-2"
                 />
                 Masculino
@@ -440,6 +526,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="estudiante.lugar_de_nacimiento"
                   value={formData.estudiante.lugar_de_nacimiento}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 />
               </div>
@@ -450,6 +537,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="estudiante.fecha_nacimiento"
                   value={formData.estudiante.fecha_nacimiento}
                   onChange={handleFechaNacimientoChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 />
               </div>
@@ -463,6 +551,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="estudiante.nacionalidad"
                   value={formData.estudiante.nacionalidad}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 />
               </div>
@@ -487,6 +576,7 @@ export const FormularioMatriculaUnificado = () => {
                   value="legal"
                   checked={formData.estudiante.condicion_migratoria === "legal"}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="mr-2"
                 />
                 Legal
@@ -498,6 +588,7 @@ export const FormularioMatriculaUnificado = () => {
                   value="refugiado"
                   checked={formData.estudiante.condicion_migratoria === "refugiado"}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="mr-2"
                 />
                 Refugiado
@@ -509,6 +600,7 @@ export const FormularioMatriculaUnificado = () => {
                   value="ilegal"
                   checked={formData.estudiante.condicion_migratoria === "ilegal"}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="mr-2"
                 />
                 Ilegal
@@ -522,6 +614,7 @@ export const FormularioMatriculaUnificado = () => {
                 name="estudiante.Repite_alguna_materia"
                 value={formData.estudiante.Repite_alguna_materia}
                 onChange={handleChange}
+                disabled={!isEditable} // Bloquear si no es editable
                 className="border p-2 rounded-md w-full mt-1 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 placeholder="Si repite alguna materia, ingrese el nombre; de lo contrario, déjelo en blanco."
               />
@@ -533,6 +626,7 @@ export const FormularioMatriculaUnificado = () => {
                 name="estudiante.institucion_de_procedencia"
                 value={formData.estudiante.institucion_de_procedencia}
                 onChange={handleChange}
+                disabled={!isEditable} // Bloquear si no es editable
                 className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
               />
             </div>
@@ -544,6 +638,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="estudiante.tipo_de_adecuacion"
                   value={formData.estudiante.tipo_de_adecuacion}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 >
                   <option value="">Seleccione una opción</option>
@@ -563,6 +658,7 @@ export const FormularioMatriculaUnificado = () => {
                       value="Si"
                       checked={formData.estudiante.recibe_religion === "Si"}
                       onChange={handleChange}
+                      disabled={!isEditable} // Bloquear si no es editable
                       className="mr-2"
                     />
                     Sí
@@ -574,6 +670,7 @@ export const FormularioMatriculaUnificado = () => {
                       value="No"
                       checked={formData.estudiante.recibe_religion === "No"}
                       onChange={handleChange}
+                      disabled={!isEditable} // Bloquear si no es editable
                       className="mr-2"
                     />
                     No
@@ -593,6 +690,7 @@ export const FormularioMatriculaUnificado = () => {
                       value="Si"
                       checked={formData.estudiante.presenta_carta === "Si"}
                       onChange={handleChange}
+                      disabled={!isEditable} // Bloquear si no es editable
                       className="mr-2"
                     />
                     Sí
@@ -604,6 +702,7 @@ export const FormularioMatriculaUnificado = () => {
                       value="No"
                       checked={formData.estudiante.presenta_carta === "No"}
                       onChange={handleChange}
+                      disabled={!isEditable} // Bloquear si no es editable
                       className="mr-2"
                     />
                     No
@@ -620,6 +719,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="estudiante.motivo_matricula"
                   value={formData.estudiante.motivo_matricula || ""}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 />
               </div>
@@ -637,6 +737,7 @@ export const FormularioMatriculaUnificado = () => {
                 name="estudiante.Presenta_alguna_enfermedad"
                 value={formData.estudiante.Presenta_alguna_enfermedad}
                 onChange={handleChange}
+                disabled={!isEditable} // Bloquear si no es editable
                 className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
               />
             </div>
@@ -648,6 +749,7 @@ export const FormularioMatriculaUnificado = () => {
                 name="estudiante.medicamentos_que_debe_tomar"
                 value={formData.estudiante.medicamentos_que_debe_tomar}
                 onChange={handleChange}
+                disabled={!isEditable} // Bloquear si no es editable
                 className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
               />
             </div>
@@ -658,6 +760,7 @@ export const FormularioMatriculaUnificado = () => {
                 name="estudiante.Ruta_de_viaje"
                 value={formData.estudiante.Ruta_de_viaje}
                 onChange={handleChange}
+                disabled={!isEditable} // Bloquear si no es editable
                 className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
               >
                 <option value="">Seleccione una ruta</option>
@@ -697,6 +800,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="encargadoLegal.nombre_Encargado_Legal"
                   value={formData.encargadoLegal.nombre_Encargado_Legal}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 />
               </div>
@@ -707,6 +811,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="encargadoLegal.apellido1_Encargado_Legal"
                   value={formData.encargadoLegal.apellido1_Encargado_Legal}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 />
               </div>
@@ -717,6 +822,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="encargadoLegal.apellido2_Encargado_Legal"
                   value={formData.encargadoLegal.apellido2_Encargado_Legal}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 />
               </div>
@@ -727,6 +833,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="encargadoLegal.N_Cedula"
                   value={formData.encargadoLegal.N_Cedula}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   placeholder="5-0123-0456"
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 />
@@ -738,6 +845,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="encargadoLegal.ocupacion"
                   value={formData.encargadoLegal.ocupacion}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 />
               </div>
@@ -748,6 +856,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="encargadoLegal.nacionalidad"
                   value={formData.encargadoLegal.nacionalidad}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 />
               </div>
@@ -758,6 +867,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="encargadoLegal.direccion"
                   value={formData.encargadoLegal.direccion}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 />
               </div>
@@ -768,6 +878,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="encargadoLegal.telefono_celular"
                   value={formData.encargadoLegal.telefono_celular}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 />
               </div>
@@ -778,6 +889,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="encargadoLegal.habitacion"
                   value={formData.encargadoLegal.habitacion}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 />
               </div>
@@ -788,6 +900,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="encargadoLegal.correo"
                   value={formData.encargadoLegal.correo}
                   onChange={handleChange}
+                  disabled={!isEditable} // Bloquear si no es editable
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 />
               </div>

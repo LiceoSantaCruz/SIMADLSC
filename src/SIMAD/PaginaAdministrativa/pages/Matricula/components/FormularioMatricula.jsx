@@ -11,8 +11,6 @@ export const FormularioMatricula = () => {
   const {
     page,
     setPage,
-    formData,
-    handleChange,
     handleSubmit,
     handleDownloadPDF,
     isSubmitting,
@@ -30,6 +28,48 @@ export const FormularioMatricula = () => {
   const [deadline, setDeadline] = useState(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isEditable, setIsEditable] = useState(false); // Controla si los campos son editables
+
+  const initialFormData = {
+    estudiante: {
+      cedula: "",
+      nombre_Estudiante: "",
+      apellido1_Estudiante: "",
+      apellido2_Estudiante: "",
+      // Otros campos del estudiante...
+    },
+    encargadoLegal: {
+      nombre_Encargado_Legal: "",
+      apellido1_Encargado_Legal: "",
+      apellido2_Encargado_Legal: "",
+      N_Cedula: "",
+      ocupacion: "",
+      nacionalidad: "",
+      direccion: "",
+      telefono_celular: "",
+      habitacion: "",
+      correo: "",
+    },
+  };
+  const [formData, setFormData] = useState(initialFormData);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    const keys = name.split(".");
+    if (keys.length === 2) {
+      setFormData((prevData) => ({
+        ...prevData,
+        [keys[0]]: {
+          ...prevData[keys[0]],
+          [keys[1]]: value,
+        },
+      }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
+  };
 
   // Cargamos el estado del formulario y el deadline desde localStorage al montar
   useEffect(() => {
@@ -100,14 +140,13 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
 
   const buscarEstudiantePorCedula = async (cedula) => {
     if (!cedula || cedula.trim() === "") {
-      // Mostrar advertencia si el campo de cédula está vacío
       Swal.fire({
         icon: "warning",
         title: "Campo vacío",
         text: "Por favor, ingrese un número de cédula antes de buscar.",
         confirmButtonColor: "#2563EB",
       });
-      return; // Detener la ejecución si el campo está vacío
+      return;
     }
   
     try {
@@ -115,49 +154,68 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
       const estudiante = response.data;
   
       if (estudiante) {
-        // Actualizar los datos del formulario con los datos del estudiante
-        handleChange({
-          target: { name: "estudiante.nombre_Estudiante", value: estudiante.nombre_Estudiante },
-        });
-        handleChange({
-          target: { name: "estudiante.apellido1_Estudiante", value: estudiante.apellido1_Estudiante },
-        });
-        handleChange({
-          target: { name: "estudiante.apellido2_Estudiante", value: estudiante.apellido2_Estudiante },
-        });
-        handleChange({
-          target: { name: "estudiante.fecha_nacimiento", value: estudiante.fecha_nacimiento },
-        });
-        handleChange({
-          target: { name: "estudiante.correo_estudiantil", value: estudiante.correo_estudiantil },
-        });
-        handleChange({
-          target: { name: "estudiante.telefono", value: estudiante.telefono },
-        });
-        setIsEditable(false); // Bloquear los campos
+        // Actualizar los datos del estudiante y del encargado legal
+        setFormData((prevData) => ({
+          ...prevData,
+          estudiante: {
+            ...prevData.estudiante, // Mantener los valores existentes del estudiante
+            cedula: estudiante.cedula,
+            nombre_Estudiante: estudiante.nombre_Estudiante,
+            apellido1_Estudiante: estudiante.apellido1_Estudiante,
+            apellido2_Estudiante: estudiante.apellido2_Estudiante,
+            fecha_nacimiento: estudiante.fecha_nacimiento,
+            correo_estudiantil: estudiante.correo_estudiantil,
+            telefono: estudiante.telefono,
+            sexo: estudiante.sexo,
+            lugar_de_nacimiento: estudiante.lugar_de_nacimiento,
+            nacionalidad: estudiante.nacionalidad,
+            edad: estudiante.edad,
+            condicion_migratoria: estudiante.condicion_migratoria,
+            Repite_alguna_materia: estudiante.Repite_alguna_materia,
+            institucion_de_procedencia: estudiante.institucion_de_procedencia,
+            tipo_de_adecuacion: estudiante.tipo_de_adecuacion,
+            recibe_religion: estudiante.recibe_religion,
+            presenta_carta: estudiante.presenta_carta,
+            Presenta_alguna_enfermedad: estudiante.Presenta_alguna_enfermedad,
+            medicamentos_que_debe_tomar: estudiante.medicamentos_que_debe_tomar,
+            Ruta_de_viaje: estudiante.Ruta_de_viaje,
+          },
+          encargadoLegal: {
+            ...prevData.encargadoLegal, // Mantener los valores existentes del encargado legal
+            nombre_Encargado_Legal: estudiante.encargadoLegal.nombre_Encargado_Legal,
+            apellido1_Encargado_Legal: estudiante.encargadoLegal.apellido1_Encargado_Legal,
+            apellido2_Encargado_Legal: estudiante.encargadoLegal.apellido2_Encargado_Legal,
+            N_Cedula: estudiante.encargadoLegal.N_Cedula,
+            ocupacion: estudiante.encargadoLegal.ocupacion,
+            nacionalidad: estudiante.encargadoLegal.nacionalidad,
+            direccion: estudiante.encargadoLegal.direccion,
+            telefono_celular: estudiante.encargadoLegal.telefono_celular,
+            habitacion: estudiante.encargadoLegal.habitacion,
+            correo: estudiante.encargadoLegal.correo,
+          },
+        }));
+  
+        // Permitir la edición si los datos son correctos
+        setIsEditable(true);
+  
         Swal.fire({
           icon: "success",
           title: "Estudiante encontrado",
-          text: "Los datos del estudiante han sido rellenados automáticamente.",
+          text: "Los datos del estudiante y del encargado legal han sido rellenados automáticamente. Ahora puedes editarlos.",
           confirmButtonColor: "#2563EB",
         });
       }
     } catch (error) {
       if (error.response && error.response.status === 404) {
-        // Manejar específicamente el error 404 como un warning
-        setIsEditable(true); // Permitir la edición manual
-        const errorMessage = typeof error.response.data.message === "string"
-          ? error.response.data.message
-          : `No se encontró un estudiante con la cédula: ${cedula}. Por favor, ingrese los datos manualmente.`;
+        // Permitir la edición manual si no se encuentra el estudiante
+        setIsEditable(true);
         Swal.fire({
           icon: "warning",
           title: "Estudiante no encontrado",
-          text: errorMessage, // Mostrar el mensaje correctamente
+          text: `No se encontró un estudiante con la cédula: ${cedula}. Por favor, ingrese los datos manualmente.`,
           confirmButtonColor: "#2563EB",
         });
       } else {
-        // Manejar otros errores como errores generales
-        console.error("Error al buscar el estudiante:", error);
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -195,7 +253,78 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
     if (!formData.estudiante.telefono || formData.estudiante.telefono.trim() === "") {
       missingFields.push("Teléfono");
     }
-
+   
+    if (!formData.estudiante.sexo || formData.estudiante.sexo.trim() === "") {
+      missingFields.push("Sexo");
+    }
+    if (!formData.estudiante.lugar_de_nacimiento || formData.estudiante.lugar_de_nacimiento.trim() === "") {
+      missingFields.push("Lugar de Nacimiento");
+    }
+    if (!formData.estudiante.nacionalidad || formData.estudiante.nacionalidad.trim() === "") {
+      missingFields.push("Nacionalidad");
+    }
+    
+    if (!formData.estudiante.edad || formData.estudiante.edad.toString().trim() === "") {
+      missingFields.push("Edad");
+    }
+    if (!formData.estudiante.condicion_migratoria || formData.estudiante.condicion_migratoria.trim() === "") {
+      missingFields.push("Condición Migratoria");
+    }
+    if (!formData.estudiante.Repite_alguna_materia || formData.estudiante.Repite_alguna_materia.toString().trim() === "") {
+      missingFields.push("Repite alguna materia");
+    }
+    if (!formData.estudiante.institucion_de_procedencia || formData.estudiante.institucion_de_procedencia.toString().trim() === "") {
+      missingFields.push("Institución de Procedencia");
+    }
+    if (!formData.estudiante.tipo_de_adecuacion || formData.estudiante.tipo_de_adecuacion.toString().trim() === "") {
+      missingFields.push("Tipo de Adecuación");
+    }
+    if (!formData.estudiante.recibe_religion || formData.estudiante.recibe_religion.toString().trim() === "") {
+      missingFields.push("Recibe Religión");
+    }
+    if (!formData.estudiante.presenta_carta || formData.estudiante.presenta_carta.toString().trim() === "") { 
+      missingFields.push("Presenta Carta");    
+    } 
+    if (!formData.estudiante.Presenta_alguna_enfermedad || formData.estudiante.Presenta_alguna_enfermedad.toString().trim() === "") { 
+      missingFields.push("Presenta alguna enfermedad");    
+    }
+    if (!formData.estudiante.medicamentos_que_debe_tomar || formData.estudiante.medicamentos_que_debe_tomar.toString().trim() === "") { 
+      missingFields.push("Medicamentos que debe tomar");  
+    } 
+    if (!formData.estudiante.Ruta_de_viaje || formData.estudiante.Ruta_de_viaje.toString().trim() === "") { 
+      missingFields.push("Ruta de Viaje");  
+    }
+ 
+    if (!formData.estudiante.nombres || formData.estudiante.nombres.trim() === "") {
+      missingFields.push("Nombres del encargado Legal");
+    }
+    if (!formData.estudiante.apellido1_Encargado_Legal || formData.estudiante.apellido1_Encargado_Legal.trim() === "") {
+      missingFields.push("Apellidos 1 del encargado Legal");
+    }
+    if (!formData.estudiante.apellido2_Encargado_Legal || formData.estudiante.apellido2_Encargado_Legal.trim() === "") {
+      missingFields.push("Apellidos 2 del encargado Legal");
+    }
+    if (!formData.estudiante.cedula || formData.estudiante.cedula.trim() === "") {
+      missingFields.push("Cédula del encargado Legal");
+    }
+    if (!formData.estudiante.ocupacion || formData.estudiante.ocupacion.trim() === "") {
+      missingFields.push("ocupación del encargado Legal");
+    }
+    if (!formData.estudiante.nacionalidad || formData.estudiante.nacionalidad.trim() === "") {
+      missingFields.push("nacionalidad del encargado Legal");
+    }
+    if (!formData.estudiante.direccion || formData.estudiante.direccion.trim() === "") {
+      missingFields.push("dirección del encargado Legal");
+    }
+    if (!formData.estudiante.telefono_celular || formData.estudiante.telefono_celular.trim() === "") {
+      missingFields.push("teléfono celular del encargado Legal");
+    }
+    if (!formData.estudiante.habitacion || formData.estudiante.habitacion.trim() === "") {
+      missingFields.push("habitación del encargado Legal");
+    }
+    if (!formData.estudiante.correo || formData.estudiante.correo.trim() === "") {
+      missingFields.push("correo del encargado Legal");
+    }
     if (missingFields.length > 0) {
       Swal.fire({
         icon: "warning",
@@ -390,17 +519,7 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-200">Fecha de Nacimiento:</label>
-                <input
-                  type="date"
-                  name="estudiante.fecha_nacimiento"
-                  value={formData.estudiante.fecha_nacimiento}
-                  onChange={handleFechaNacimientoChange}
-                  disabled={!isEditable} // Bloquear si no es editable
-                  className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
-                />
-              </div>
+              
               <div>
                 <label className="block text-gray-700 dark:text-gray-200">Correo Estudiantil:</label>
                 <input
