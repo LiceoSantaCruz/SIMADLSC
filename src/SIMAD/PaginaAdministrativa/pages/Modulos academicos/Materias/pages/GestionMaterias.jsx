@@ -23,15 +23,34 @@ export const GestionMaterias = () => {
   const materiasPerPage = 15; // Puedes ajustar este valor según lo necesites
 
   const materiasBase = [
-    'Español',
-    'Matemática',
-    'Estudios Sociales',
-    'Ciencias',
-    'Inglés',
-    'Educación Física',
-    'Cívica',
     'Religión',
-  ];
+    'Español',
+    'Estudios Sociales',
+    'Matemática',
+    'Inglés',
+    'Ciencias',
+    'Química',
+    'Biología',
+    'Física',
+    'Educación Física',
+    'Educación para el Hogar',
+    'Psicología',
+    'Turismo',
+    'Francés',
+    'Artes Plásticas',
+    'Música',
+    'Informática - Cómputo',
+    'Emprendedurismo',
+    'Sexualidad y Afectividad',
+    'Filosofía',
+    'Coordinación de Departamento',
+    'Comité de Evaluación',
+    'Educación Cívica',
+    'Formación Tecnológica',
+    'Guía',
+    'Orientación',
+    'Artes Industriales',
+];
 
   const fetchMaterias = async () => {
     try {
