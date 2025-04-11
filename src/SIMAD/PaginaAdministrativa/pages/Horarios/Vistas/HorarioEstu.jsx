@@ -119,26 +119,35 @@ export const HorarioEstu = () => {
 
   const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
-  const subjectColors = {
-    'Religion': 'bg-indigo-200',
+ const subjectColors = {
+    'Religión': 'bg-indigo-200',
     'Español': 'bg-yellow-200',
-    'Estudios sociales': 'bg-purple-200',
-    'Matematica': 'bg-blue-200',
-    'Ingles': 'bg-pink-200',
+    'Estudios Sociales': 'bg-purple-200',
+    'Matemática': 'bg-blue-200',
+    'Inglés': 'bg-pink-200',
     'Ciencias': 'bg-green-200',
-    'Quimica': 'bg-teal-200',
-    'Biologia': 'bg-lime-200',
-    'Fisica matematica': 'bg-orange-200',
-    'Educacion fisica': 'bg-rose-200',
-    'Educacion para el hogar': 'bg-cyan-200',
-    'Psicologia': 'bg-fuchsia-200',
+    'Química': 'bg-teal-200',
+    'Biología': 'bg-lime-200',
+    'Física': 'bg-orange-200',
+    'Educación Física': 'bg-rose-200',
+    'Educación para el Hogar': 'bg-cyan-200',
+    'Psicología': 'bg-fuchsia-200',
     'Turismo': 'bg-violet-200',
-    'Frances': 'bg-emerald-200',
-    'Artes plasticas': 'bg-red-200',
-    'Musica': 'bg-indigo-300',
-    'Informatica': 'bg-blue-300',
+    'Francés': 'bg-emerald-200',
+    'Artes Plásticas': 'bg-red-200',
+    'Música': 'bg-indigo-300',
+    'Informática - Cómputo': 'bg-blue-300',
     'Emprendedurismo': 'bg-amber-300',
-  };
+    'Sexualidad y Afectividad': 'bg-pink-300',
+    'Filosofía': 'bg-gray-300',
+    'Coordinación de Departamento': 'bg-yellow-300',
+    'Comité de Evaluación': 'bg-purple-300',
+    'Educación Cívica': 'bg-green-300',
+    'Formación Tecnológica': 'bg-teal-300',
+    'Guía': 'bg-lime-300',
+    'Orientación': 'bg-orange-300',
+    'Artes Industriales': 'bg-red-300',
+};
 
   const obtenerHorario = (dia, lesson) => {
     const lessonStart = lessonTimes[lesson].start;
