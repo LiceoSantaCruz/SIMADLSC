@@ -3,9 +3,10 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
 const API_BASE_URL =
-  process.env.NODE_ENV === 'production'
-    ? 'https://simadlsc-backend-production.up.railway.app'
-    : 'http://localhost:3000';
+  import.meta.env.MODE === 'production'
+    ? import.meta.env.VITE_API_URL_PROD
+    : import.meta.env.VITE_API_URL_DEV;
+
 
 const lessonTimes = {
   "1": { start: "07:00", end: "07:40" },
@@ -73,6 +74,7 @@ export const HorarioProf = () => {
   
     return resultado;
   };
+  
   
 
   useEffect(() => {
@@ -274,13 +276,14 @@ export const HorarioProf = () => {
             h.hora_inicio_Horario.substring(0, 5) === lessonTimes[lesson].start
         );
   
-        if (!horario) return '-';
+        if (!horario) return 'Libre';
   
-        const materia = horario.materia?.nombre_Materia || '-';
-        const seccion = horario.seccion?.nombre_Seccion || '-';
-        const aula = horario.aula?.nombre_Aula || '-';
+        const materia = horario.materia?.nombre_Materia || 'Libre';
+        const seccion = horario.seccion?.nombre_Seccion || '';
+        const aula = horario.aula?.nombre_Aula || '';
   
-        return `${materia}|${seccion}|${aula}`;
+        // Si es libre, solo retornamos "Libre", sino toda la info
+        return materia === 'Libre' ? 'Libre' : `${materia}|${seccion}|${aula}`;
       });
   
       bloques[dia] = agruparCeldas(columnasPorLeccion);
@@ -288,6 +291,7 @@ export const HorarioProf = () => {
   
     return bloques;
   }, [horarios, lessons]);
+  
   
 
   return (
@@ -356,26 +360,40 @@ export const HorarioProf = () => {
         </div>
       </td>
       {diasSemana.map((dia) => {
-        const celda = bloquesPorDia[dia]?.[rowIndex];
-        if (!celda?.mostrar) return null;
+  const celda = bloquesPorDia[dia]?.[rowIndex];
+  if (!celda?.mostrar) return null;
 
-        const [materia, seccion, aula] = celda.contenido.split('|');
+  const contenido = celda.contenido;
 
-        return (
-          <td
-            key={`${dia}-${rowIndex}`}
-            rowSpan={celda.rowSpan}
-            className="align-top border px-2 py-1 dark:border-gray-600"
-          >
-            <div className="text-sm font-semibold text-blue-600 dark:text-blue-300">
-              {materia}
-            </div>
-            <div className="text-[11px] text-gray-600 dark:text-gray-300">
-              Sección: {seccion} | Aula: {aula}
-            </div>
-          </td>
-        );
-      })}
+  if (contenido === 'Libre') {
+    return (
+      <td
+        key={`${dia}-${rowIndex}`}
+        rowSpan={celda.rowSpan}
+        className="align-top border px-2 py-1 text-gray-500 italic dark:border-gray-600"
+      >
+        Libre
+      </td>
+    );
+  }
+
+  const [materia, seccion, aula] = contenido.split('|');
+
+  return (
+    <td
+      key={`${dia}-${rowIndex}`}
+      rowSpan={celda.rowSpan}
+      className="align-top border px-2 py-1 dark:border-gray-600"
+    >
+      <div className="text-sm font-semibold text-blue-600 dark:text-blue-300">
+        {materia}
+      </div>
+      <div className="text-[11px] text-gray-600 dark:text-gray-300">
+        Sección: {seccion} | Aula: {aula}
+      </div>
+    </td>
+  );
+})}
     </tr>
   ))}
 </tbody>
