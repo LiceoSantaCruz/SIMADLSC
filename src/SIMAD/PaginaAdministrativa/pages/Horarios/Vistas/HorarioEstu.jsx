@@ -81,7 +81,6 @@ export const HorarioEstu = () => {
         const responseHorarios = await axios.get(
           `${API_BASE_URL}/horarios/seccion/${seccionSeleccionada}`
         );
-        // Ordenar los horarios por hora de inicio
         const horariosOrdenados = responseHorarios.data.sort((a, b) =>
           a.hora_inicio_Horario.localeCompare(b.hora_inicio_Horario)
         );
@@ -104,8 +103,6 @@ export const HorarioEstu = () => {
     horaNum = horaNum % 12 || 12;
     return `${horaNum}:${minuto} ${ampm}`;
   };
-
-
 
 
   if (error) {
@@ -161,7 +158,6 @@ export const HorarioEstu = () => {
     );
   };
 
-
   const agruparMateriasPorLeccion = (dia) => {
     const bloques = [];
     let actual = null;
@@ -194,12 +190,10 @@ export const HorarioEstu = () => {
     horarios.forEach((h, index) => {
       const horaInicio = convertirHora12(h?.hora_inicio_Horario);
 
-      // Si no llega desde backend, buscar en lessonTimes
       let horaFin = 'Sin hora fin';
       if (h?.hora_final_Horario) {
         horaFin = convertirHora12(h.hora_final_Horario);
       } else {
-        // Buscar en lessonTimes por hora_inicio
         const found = Object.entries(lessonTimes).find(
           ([, value]) => value.start === h?.hora_inicio_Horario?.substring(0, 5)
         );
@@ -233,94 +227,93 @@ export const HorarioEstu = () => {
     });
   };
 
-
   const exportarPdf = () => {
     const doc = new jsPDF({
       orientation: 'landscape',
       unit: 'pt',
       format: 'a4',
     });
-  
+
     const margin = 20;
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-  
-   
+
+
     const seccionActual = secciones.find(
       (s) => String(s.id_Seccion) === String(seccionSeleccionada)
     );
 
-    
+
     const title =
       role === 'estudiante'
         ? `Horario de ${nombreEstudiante} ${apellidosEstudiante}`
         : `Horario por Sección`;
-  
-        const subTitle =
-        role === 'admin' || role === 'superadmin'
-          ? `Sección seleccionada: ${seccionActual?.nombre_Seccion || 'N/D'}`
-          : `Sección: ${seccion}`;
+
+    const subTitle =
+      role === 'admin' || role === 'superadmin'
+        ? `Sección seleccionada: ${seccionActual?.nombre_Seccion || 'N/D'}`
+        : `Sección: ${seccion}`;
     const fecha = new Date().toLocaleDateString('es-CR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     });
-  
+
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
     const titleWidth = doc.getTextWidth(title);
     const titleX = (pageWidth - titleWidth) / 2;
     doc.text(title, titleX, margin);
-  
-    // Subtítulo
+
+
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
     const subTitleWidth = doc.getTextWidth(subTitle);
     const subTitleX = (pageWidth - subTitleWidth) / 2;
     doc.text(subTitle, subTitleX, margin + 16);
-  
-    // Fecha de generación (esquina superior derecha)
+
+ 
     doc.setFontSize(9);
     doc.text(`Generado: ${fecha}`, pageWidth - margin, margin, { align: 'right' });
-  
-  
+
+
     const lessonsOrdenadas = Object.entries(lessonTimes)
       .sort(([, a], [, b]) => a.start.localeCompare(b.start))
       .map(([key]) => key);
-  
+
     const tableColumns = ['Lección', ...dias];
-  
+
     const tableRows = lessonsOrdenadas.map((lessonKey) => {
       const row = [lessonKey];
       const startHora = lessonTimes[lessonKey].start;
       const endHora = lessonTimes[lessonKey].end;
-  
+
       dias.forEach((dia) => {
         const horario = horarios.find(
           (h) =>
             h.dia_semana_Horario === dia &&
             h.hora_inicio_Horario?.substring(0, 5) === startHora
         );
-  
+
         if (horario) {
           const materia = horario.materia?.nombre_Materia || '-';
-          const prof = 
+          const prof =
             horario.profesor?.nombre_Profesor &&
-            horario.profesor?.apellido1_Profesor
+              horario.profesor?.apellido1_Profesor
               ? `${horario.profesor.nombre_Profesor} ${horario.profesor.apellido1_Profesor} ${horario.profesor.apellido2_Profesor}`
               : 'Sin prof.';
           const aula = `Aula: ` + horario.aula?.nombre_Aula || 'Aula N/D';
           const hora = `${convertirHora12(startHora)} - ${convertirHora12(endHora)}`;
-  
+
           row.push(`${materia}\n${prof}\n${aula}\n${hora}`);
         } else {
           row.push('-');
         }
       });
-  
+
       return row;
     });
-  
+
     doc.autoTable({
       head: [tableColumns],
       body: tableRows,
@@ -342,10 +335,10 @@ export const HorarioEstu = () => {
         overflow: 'linebreak',
       },
       columnStyles: {
-        0: { cellWidth: 50 }, // columna de lección
+        0: { cellWidth: 50 },
       },
     });
-  
+
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -357,18 +350,16 @@ export const HorarioEstu = () => {
         { align: 'right' }
       );
     }
-  
-    const nombreArchivo =
-    role === 'estudiante'
-      ? `Horario_${nombreEstudiante}_${apellidosEstudiante}.pdf`
-      : `Horario_${seccionActual?.nombre_Seccion || 'SeccionDesconocida'}.pdf`;
 
-  doc.save(nombreArchivo);
-  
+    const nombreArchivo =
+      role === 'estudiante'
+        ? `Horario_${nombreEstudiante}_${apellidosEstudiante}.pdf`
+        : `Horario_${seccionActual?.nombre_Seccion || 'SeccionDesconocida'}.pdf`;
+
+    doc.save(nombreArchivo);
+
   };
-  
-  
-  
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 text-gray-800 dark:text-white">
       {role !== 'admin' && role !== 'superadmin' && (
@@ -448,8 +439,11 @@ export const HorarioEstu = () => {
                     key={lessonIndex}
                     className="border-b dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition duration-200"
                   >
-                    <td className="px-2 py-2 font-medium bg-gray-100 dark:bg-gray-800 sticky left-0 z-10 whitespace-nowrap">
-                      {lesson}
+                    <td className="px-2 py-2 font-medium bg-gray-100 dark:bg-gray-800 sticky left-0 z-10 whitespace-nowrap text-left">
+                      <div className="text-[12px] font-semibold">{lesson}</div>
+                      <div className="text-[10px] text-gray-600 dark:text-gray-300">
+                        {convertirHora12(lessonTimes[lesson].start)} - {convertirHora12(lessonTimes[lesson].end)}
+                      </div>
                     </td>
 
                     {dias.map((dia) => {
@@ -516,8 +510,6 @@ export const HorarioEstu = () => {
       )}
     </div>
   );
-
-
 
 };
 
