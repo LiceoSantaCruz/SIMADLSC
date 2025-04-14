@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect,useMemo } from 'react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
@@ -47,6 +47,33 @@ export const HorarioProf = () => {
     return `${horaNum}:${minuto} ${ampm}`;
   };
 
+  const agruparCeldas = (filas) => {
+    const resultado = [];
+    let filaAnterior = null;
+    let span = 0;
+  
+    for (let i = 0; i < filas.length; i++) {
+      const actual = filas[i];
+      if (actual === filaAnterior) {
+        resultado.push({ mostrar: false, rowSpan: 0 });
+        span++;
+      } else {
+        if (span > 0) {
+          resultado[i - span - 1].rowSpan = span + 1;
+        }
+        resultado.push({ mostrar: true, rowSpan: 1, contenido: actual });
+        filaAnterior = actual;
+        span = 0;
+      }
+    }
+  
+    if (span > 0) {
+      resultado[resultado.length - span - 1].rowSpan = span + 1;
+    }
+  
+    return resultado;
+  };
+  
 
   useEffect(() => {
     const obtenerProfesores = async () => {
@@ -214,7 +241,7 @@ export const HorarioProf = () => {
         overflow: 'linebreak',
       },
       columnStyles: {
-        0: { cellWidth: 70 }, // primera columna (Lección)
+        0: { cellWidth: 70 }, 
       },
     });
 
@@ -235,6 +262,33 @@ export const HorarioProf = () => {
 
     doc.save(nombreArchivo);
   };
+
+  const bloquesPorDia = useMemo(() => {
+    const bloques = {};
+  
+    diasSemana.forEach((dia) => {
+      const columnasPorLeccion = lessons.map((lesson) => {
+        const horario = horarios.find(
+          (h) =>
+            h.dia_semana_Horario === dia &&
+            h.hora_inicio_Horario.substring(0, 5) === lessonTimes[lesson].start
+        );
+  
+        if (!horario) return '-';
+  
+        const materia = horario.materia?.nombre_Materia || '-';
+        const seccion = horario.seccion?.nombre_Seccion || '-';
+        const aula = horario.aula?.nombre_Aula || '-';
+  
+        return `${materia}|${seccion}|${aula}`;
+      });
+  
+      bloques[dia] = agruparCeldas(columnasPorLeccion);
+    });
+  
+    return bloques;
+  }, [horarios, lessons]);
+  
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 text-gray-800 dark:text-white">
@@ -272,6 +326,7 @@ export const HorarioProf = () => {
           Exportar Horario como PDF
         </button>
       </div>
+      
 
       {horarios.length > 0 ? (
         <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md overflow-x-auto">
@@ -292,44 +347,39 @@ export const HorarioProf = () => {
               </tr>
             </thead>
             <tbody>
-              {lessons.map((lesson, i) => {
-                const horaInicio = convertirHora12(lessonTimes[lesson].start);
-                const horaFin = convertirHora12(lessonTimes[lesson].end);
+  {lessons.map((lesson, rowIndex) => (
+    <tr key={rowIndex}>
+      <td className="sticky left-0 bg-gray-100 dark:bg-gray-800 text-left font-semibold">
+        {lesson}
+        <div className="text-[10px] text-gray-500">
+          {convertirHora12(lessonTimes[lesson].start)} - {convertirHora12(lessonTimes[lesson].end)}
+        </div>
+      </td>
+      {diasSemana.map((dia) => {
+        const celda = bloquesPorDia[dia]?.[rowIndex];
+        if (!celda?.mostrar) return null;
 
-                return (
-                  <tr key={i} className="border-b dark:border-gray-700">
-                    <td className="px-3 py-2 font-semibold bg-gray-100 dark:bg-gray-800 sticky left-0 z-10 text-left">
-                      {lesson}
-                      <div className="text-[10px] text-gray-600 dark:text-gray-300">
-                        {horaInicio} - {horaFin}
-                      </div>
-                    </td>
+        const [materia, seccion, aula] = celda.contenido.split('|');
 
-                    {diasSemana.map((dia) => {
-                      const horario = obtenerHorarioPorDiaYLeccion(dia, lesson);
-                      return (
-                        <td
-                          key={`${dia}-${lesson}`}
-                        >
-                          {horario ? (
-                            <>
-                              <div className="text-sm font-semibold text-blue-600 dark:text-blue-300">
-                                {horario.materia?.nombre_Materia}
-                              </div>
-                              <div className="text-[11px] text-gray-600 dark:text-gray-300">
-                                {horario.seccion?.nombre_Seccion} | Aula {horario.aula?.nombre_Aula}
-                              </div>
-                            </>
-                          ) : (
-                            '-'
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
+        return (
+          <td
+            key={`${dia}-${rowIndex}`}
+            rowSpan={celda.rowSpan}
+            className="align-top border px-2 py-1 dark:border-gray-600"
+          >
+            <div className="text-sm font-semibold text-blue-600 dark:text-blue-300">
+              {materia}
+            </div>
+            <div className="text-[11px] text-gray-600 dark:text-gray-300">
+              Sección: {seccion} | Aula: {aula}
+            </div>
+          </td>
+        );
+      })}
+    </tr>
+  ))}
+</tbody>
+
           </table>
         </div>
       ) : (
