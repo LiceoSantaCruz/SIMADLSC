@@ -7,7 +7,6 @@ import 'jspdf-autotable';
 
 const MySwal = withReactContent(Swal);
 
-// URL base de la API
 const API_BASE_URL =
   process.env.NODE_ENV === 'production'
     ? 'https://simadlsc-backend-production.up.railway.app'
@@ -98,12 +97,16 @@ export const HorarioEstu = () => {
   }, [seccionSeleccionada]);
 
   const convertirHora12 = (hora24) => {
+    if (!hora24 || typeof hora24 !== 'string' || !hora24.includes(':')) return 'Sin hora';
     const [hora, minuto] = hora24.split(':');
     let horaNum = parseInt(hora, 10);
     const ampm = horaNum >= 12 ? 'PM' : 'AM';
     horaNum = horaNum % 12 || 12;
     return `${horaNum}:${minuto} ${ampm}`;
   };
+
+
+
 
   if (error) {
     return <div className="text-red-500">{error}</div>;
@@ -112,14 +115,14 @@ export const HorarioEstu = () => {
     return <div>Cargando datos...</div>;
   }
 
-  // Ordenar las lecciones según la hora de inicio
+
   const lessons = Object.entries(lessonTimes)
     .sort(([, a], [, b]) => a.start.localeCompare(b.start))
     .map(([key]) => key);
 
   const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
- const subjectColors = {
+  const subjectColors = {
     'Religión': 'bg-indigo-200',
     'Español': 'bg-yellow-200',
     'Estudios Sociales': 'bg-purple-200',
@@ -147,7 +150,7 @@ export const HorarioEstu = () => {
     'Guía': 'bg-lime-300',
     'Orientación': 'bg-orange-300',
     'Artes Industriales': 'bg-red-300',
-};
+  };
 
   const obtenerHorario = (dia, lesson) => {
     const lessonStart = lessonTimes[lesson].start;
@@ -158,18 +161,78 @@ export const HorarioEstu = () => {
     );
   };
 
-  const mostrarDetalles = (horario) => {
-    if (horario) {
-      MySwal.fire({
-        title: 'Detalles de la clase',
-        html: `<b>Aula:</b> ${horario.aula?.nombre_Aula || 'N/A'}<br/><b>Profesor:</b> ${
-          horario.profesor?.nombre_Profesor || 'N/A'
-        } ${horario.profesor?.apellido1_Profesor || 'N/A'} ${horario.profesor?.apellido2_Profesor || 'N/A'}`,
-        icon: 'info',
-        confirmButtonText: 'Cerrar',
-      });
-    }
+
+  const agruparMateriasPorLeccion = (dia) => {
+    const bloques = [];
+    let actual = null;
+
+    lessons.forEach((lesson) => {
+      const horario = obtenerHorario(dia, lesson);
+      const materia = horario?.materia?.nombre_Materia || '-';
+
+      if (!actual || actual.materia !== materia) {
+        if (actual) bloques.push(actual);
+        actual = { materia, span: 1, horarios: [horario] };
+      } else {
+        actual.span += 1;
+        actual.horarios.push(horario);
+      }
+    });
+
+    if (actual) bloques.push(actual);
+
+    return bloques;
   };
+
+  const mostrarDetalles = (bloque) => {
+    if (!bloque || !Array.isArray(bloque.horarios) || bloque.horarios.length === 0) return;
+
+    const { materia, horarios } = bloque;
+
+    let detallesHTML = '';
+
+    horarios.forEach((h, index) => {
+      const horaInicio = convertirHora12(h?.hora_inicio_Horario);
+
+      // Si no llega desde backend, buscar en lessonTimes
+      let horaFin = 'Sin hora fin';
+      if (h?.hora_final_Horario) {
+        horaFin = convertirHora12(h.hora_final_Horario);
+      } else {
+        // Buscar en lessonTimes por hora_inicio
+        const found = Object.entries(lessonTimes).find(
+          ([, value]) => value.start === h?.hora_inicio_Horario?.substring(0, 5)
+        );
+        if (found) {
+          horaFin = convertirHora12(found[1].end);
+        }
+      }
+
+      const profesorNombre = h.profesor
+        ? `${h.profesor.nombre_Profesor || ''} ${h.profesor.apellido1_Profesor || ''} ${h.profesor.apellido2_Profesor || ''}`
+        : 'N/A';
+
+      const aulaNombre = h.aula?.nombre_Aula || 'N/A';
+
+      detallesHTML += `
+        <b>Lección ${index + 1}:</b><br/>
+        <b>Hora:</b> ${horaInicio} - ${horaFin}<br/>
+        <b>Profesor:</b> ${profesorNombre}<br/>
+        <b>Aula:</b> ${aulaNombre}<br/><br/>
+      `;
+    });
+
+    MySwal.fire({
+      title: materia,
+      html: detallesHTML,
+      icon: 'info',
+      confirmButtonText: 'Cerrar',
+      customClass: {
+        htmlContainer: 'text-start text-sm',
+      },
+    });
+  };
+
 
   const exportarPdf = () => {
     const doc = new jsPDF({
@@ -177,56 +240,112 @@ export const HorarioEstu = () => {
       unit: 'pt',
       format: 'a4',
     });
-
+  
     const margin = 20;
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
+  
+   
+    const seccionActual = secciones.find(
+      (s) => String(s.id_Seccion) === String(seccionSeleccionada)
+    );
 
-    const title = `Horario de ${nombreEstudiante} ${apellidosEstudiante} - Sección ${seccion}`;
-    doc.setFontSize(12);
+    
+    const title =
+      role === 'estudiante'
+        ? `Horario de ${nombreEstudiante} ${apellidosEstudiante}`
+        : `Horario por Sección`;
+  
+        const subTitle =
+        role === 'admin' || role === 'superadmin'
+          ? `Sección seleccionada: ${seccionActual?.nombre_Seccion || 'N/D'}`
+          : `Sección: ${seccion}`;
+    const fecha = new Date().toLocaleDateString('es-CR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
     const titleWidth = doc.getTextWidth(title);
     const titleX = (pageWidth - titleWidth) / 2;
     doc.text(title, titleX, margin);
-
-    const tableColumns = [
-      'Día',
-      ...lessons.map(
-        (lesson) =>
-          `${lesson}\n${convertirHora12(lessonTimes[lesson].start)} - ${convertirHora12(
-            lessonTimes[lesson].end
-          )}`
-      ),
-    ];
-
-    const tableRows = dias.map((dia) => {
-      const row = [dia];
-      lessons.forEach((lesson) => {
-        const horario = obtenerHorario(dia, lesson);
-        row.push(horario ? horario.materia?.nombre_Materia || '-' : '-');
+  
+    // Subtítulo
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    const subTitleWidth = doc.getTextWidth(subTitle);
+    const subTitleX = (pageWidth - subTitleWidth) / 2;
+    doc.text(subTitle, subTitleX, margin + 16);
+  
+    // Fecha de generación (esquina superior derecha)
+    doc.setFontSize(9);
+    doc.text(`Generado: ${fecha}`, pageWidth - margin, margin, { align: 'right' });
+  
+  
+    const lessonsOrdenadas = Object.entries(lessonTimes)
+      .sort(([, a], [, b]) => a.start.localeCompare(b.start))
+      .map(([key]) => key);
+  
+    const tableColumns = ['Lección', ...dias];
+  
+    const tableRows = lessonsOrdenadas.map((lessonKey) => {
+      const row = [lessonKey];
+      const startHora = lessonTimes[lessonKey].start;
+      const endHora = lessonTimes[lessonKey].end;
+  
+      dias.forEach((dia) => {
+        const horario = horarios.find(
+          (h) =>
+            h.dia_semana_Horario === dia &&
+            h.hora_inicio_Horario?.substring(0, 5) === startHora
+        );
+  
+        if (horario) {
+          const materia = horario.materia?.nombre_Materia || '-';
+          const prof = 
+            horario.profesor?.nombre_Profesor &&
+            horario.profesor?.apellido1_Profesor
+              ? `${horario.profesor.nombre_Profesor} ${horario.profesor.apellido1_Profesor} ${horario.profesor.apellido2_Profesor}`
+              : 'Sin prof.';
+          const aula = `Aula: ` + horario.aula?.nombre_Aula || 'Aula N/D';
+          const hora = `${convertirHora12(startHora)} - ${convertirHora12(endHora)}`;
+  
+          row.push(`${materia}\n${prof}\n${aula}\n${hora}`);
+        } else {
+          row.push('-');
+        }
       });
+  
       return row;
     });
-
+  
     doc.autoTable({
       head: [tableColumns],
       body: tableRows,
-      startY: margin + 20,
+      startY: margin + 25,
       theme: 'grid',
       headStyles: {
-        fillColor: [100, 100, 100],
+        fillColor: [22, 78, 99],
         textColor: 255,
         halign: 'center',
-        fontSize: 8,
-        cellPadding: 3,
+        fontSize: 9,
       },
       bodyStyles: {
         halign: 'center',
-        fontSize: 8,
-        cellPadding: 3,
+        fontSize: 7,
+        cellPadding: { top: 5, bottom: 5, left: 3, right: 3 },
       },
-      styles: { fontSize: 8, cellPadding: 3 },
+      styles: {
+        fontSize: 7,
+        overflow: 'linebreak',
+      },
+      columnStyles: {
+        0: { cellWidth: 50 }, // columna de lección
+      },
     });
-
+  
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -238,10 +357,18 @@ export const HorarioEstu = () => {
         { align: 'right' }
       );
     }
+  
+    const nombreArchivo =
+    role === 'estudiante'
+      ? `Horario_${nombreEstudiante}_${apellidosEstudiante}.pdf`
+      : `Horario_${seccionActual?.nombre_Seccion || 'SeccionDesconocida'}.pdf`;
 
-    doc.save(`Horario_${nombreEstudiante}_${apellidosEstudiante}.pdf`);
+  doc.save(nombreArchivo);
+  
   };
-
+  
+  
+  
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 text-gray-800 dark:text-white">
       {role !== 'admin' && role !== 'superadmin' && (
@@ -279,7 +406,18 @@ export const HorarioEstu = () => {
       )}
 
       {horarios.length > 0 ? (
-        <>
+        <section className="max-w-full overflow-auto px-2 sm:px-4">
+          {role === 'estudiante' && (
+            <div className="mb-4 text-center text-sm text-blue-700 dark:text-blue-300 font-medium">
+              Este es tu horario personal de clases.
+            </div>
+          )}
+
+          {(role === 'admin' || role === 'superadmin') && (
+            <div className="mb-4 text-center text-sm text-purple-700 dark:text-purple-300 font-medium">
+              Vista administrativa del horario por sección.
+            </div>
+          )}
           <button
             className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg mb-4 text-sm transition"
             onClick={exportarPdf}
@@ -287,44 +425,79 @@ export const HorarioEstu = () => {
             Exportar Horario como PDF
           </button>
 
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md overflow-x-auto">
-            <h2 className="text-lg font-bold mb-4 text-center">Tu Horario</h2>
-            <table className="min-w-full table-auto text-xs">
-              <thead className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 sticky top-0">
+          <div className="rounded-lg border border-gray-300 dark:border-gray-700 shadow overflow-x-auto w-full">
+            <table className="table-auto w-full min-w-max text-xs text-center border-collapse">
+              <thead className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-100">
                 <tr>
-                  <th className="px-2 py-1 text-left">Día</th>
-                  {lessons.map((lesson, i) => (
-                    <th key={i} className="px-2 py-1 text-center">
-                      <div>{lesson}</div>
-                      <div className="text-[10px] text-gray-500 dark:text-gray-400">
-                        {`${convertirHora12(lessonTimes[lesson].start)} - ${convertirHora12(
-                          lessonTimes[lesson].end
-                        )}`}
-                      </div>
+                  <th className="px-2 py-2 sticky top-0 left-0 z-20 bg-gray-200 dark:bg-gray-700">
+                    Lección
+                  </th>
+                  {dias.map((dia, i) => (
+                    <th
+                      key={i}
+                      className="px-2 py-2 sticky top-0 bg-gray-200 dark:bg-gray-700 z-10 whitespace-nowrap"
+                    >
+                      {dia}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {dias.map((dia, i) => (
-                  <tr key={i} className="border-b dark:border-gray-700">
-                    <td className="px-2 py-1 font-semibold">{dia}</td>
-                    {lessons.map((lesson) => {
-                      const horario = obtenerHorario(dia, lesson);
-                      const subjectColorClass =
-                        horario &&
-                        horario.materia &&
-                        subjectColors[horario.materia.nombre_Materia]
-                          ? subjectColors[horario.materia.nombre_Materia]
+                {lessons.map((lesson, lessonIndex) => (
+                  <tr
+                    key={lessonIndex}
+                    className="border-b dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition duration-200"
+                  >
+                    <td className="px-2 py-2 font-medium bg-gray-100 dark:bg-gray-800 sticky left-0 z-10 whitespace-nowrap">
+                      {lesson}
+                    </td>
+
+                    {dias.map((dia) => {
+                      const bloques = agruparMateriasPorLeccion(dia);
+                      const bloque = bloques.find(
+                        (b) =>
+                          b.horarios.some(
+                            (h) =>
+                              h?.hora_inicio_Horario?.substring(0, 5) ===
+                              lessonTimes[lesson]?.start
+                          )
+                      );
+
+                      if (!bloque || bloque.mostrado) return null;
+
+                      const primeraHora = bloque.horarios[0]?.hora_inicio_Horario;
+                      if (
+                        !primeraHora ||
+                        primeraHora.substring(0, 5) !== lessonTimes[lesson]?.start
+                      )
+                        return null;
+
+                      bloque.mostrado = true;
+
+                      const materia = bloque.materia;
+                      const isEspecial =
+                        materia.toLowerCase().includes('recreo') ||
+                        materia.toLowerCase().includes('almuerzo');
+
+                      const bgColor = isEspecial
+                        ? 'bg-yellow-100 dark:bg-yellow-300 text-gray-900 font-bold'
+                        : materia !== '-' && subjectColors[materia]
+                          ? subjectColors[materia]
                           : 'bg-white dark:bg-gray-900';
 
                       return (
                         <td
-                          key={lesson}
-                          className={`px-2 py-1 text-center cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900 transition ${subjectColorClass}`}
-                          onClick={() => mostrarDetalles(horario)}
+                          key={`${dia}-${lesson}`}
+                          rowSpan={bloque.span}
+                          className={`px-2 py-2 ${bgColor} border dark:border-gray-700 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900 transition duration-150 whitespace-nowrap`}
+                          onClick={() =>
+                            materia !== '-' && mostrarDetalles(bloque)
+                          }
+                          title={`Materia: ${materia}`}
                         >
-                          {horario ? horario.materia?.nombre_Materia || '-' : '-'}
+                          <div className="font-semibold text-[11px] truncate leading-tight">
+                            {materia}
+                          </div>
                         </td>
                       );
                     })}
@@ -333,7 +506,7 @@ export const HorarioEstu = () => {
               </tbody>
             </table>
           </div>
-        </>
+        </section>
       ) : (
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md text-center">
           <p className="text-sm dark:text-gray-300">
@@ -343,6 +516,9 @@ export const HorarioEstu = () => {
       )}
     </div>
   );
+
+
+
 };
 
 export default HorarioEstu;
