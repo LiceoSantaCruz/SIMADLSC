@@ -386,7 +386,7 @@ export const FormularioMatriculaUnificado = () => {
               </div>
 
               <div>
-                <label className="block text-gray-700 dark:text-gray-100">Grado:</label>
+                <label className="block text-gray-700 dark:text-gray-200">Grado:</label>
                 {grados.length === 0 ? (
                   <p>Cargando grados...</p>
                 ) : (
@@ -394,14 +394,16 @@ export const FormularioMatriculaUnificado = () => {
                     name="estudiante.gradoId"
                     value={formData.estudiante.gradoId}
                     onChange={handleChange}
-                    className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
+                    className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                   >
                     <option value="">Seleccione un grado</option>
-                    {grados.map((grado) => (
-                      <option key={grado.id_grado} value={grado.id_grado}>
-                        {grado.nivel}
-                      </option>
-                    ))}
+                    {grados
+                      .filter((grado) => grado.nivel !== "Sétimo")
+                      .map((grado) => (
+                        <option key={grado.id_grado} value={grado.id_grado}>
+                          {grado.nivel}
+                        </option>
+                      ))}
                   </select>
                 )}
               </div>

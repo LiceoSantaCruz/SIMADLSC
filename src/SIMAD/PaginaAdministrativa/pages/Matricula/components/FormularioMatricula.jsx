@@ -230,116 +230,157 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
   const onSubmitHandler = async (e) => {
     e.preventDefault();
 
-    // Validar campos vacíos
-    const missingFields = [];
-    if (!formData.estudiante.cedula || formData.estudiante.cedula.trim() === "") {
-      missingFields.push("Cédula");
-    }
-    if (!formData.estudiante.nombre_Estudiante || formData.estudiante.nombre_Estudiante.trim() === "") {
-      missingFields.push("Nombre Completo");
-    }
-    if (!formData.estudiante.apellido1_Estudiante || formData.estudiante.apellido1_Estudiante.trim() === "") {
-      missingFields.push("Primer Apellido");
-    }
-    if (!formData.estudiante.apellido2_Estudiante || formData.estudiante.apellido2_Estudiante.trim() === "") {
-      missingFields.push("Segundo Apellido");
-    }
-    if (!formData.estudiante.fecha_nacimiento || formData.estudiante.fecha_nacimiento.trim() === "") {
-      missingFields.push("Fecha de Nacimiento");
-    }
-    if (!formData.estudiante.correo_estudiantil || formData.estudiante.correo_estudiantil.trim() === "") {
-      missingFields.push("Correo Estudiantil");
-    }
-    if (!formData.estudiante.telefono || formData.estudiante.telefono.trim() === "") {
-      missingFields.push("Teléfono");
-    }
-   
-    if (!formData.estudiante.sexo || formData.estudiante.sexo.trim() === "") {
-      missingFields.push("Sexo");
-    }
-    if (!formData.estudiante.lugar_de_nacimiento || formData.estudiante.lugar_de_nacimiento.trim() === "") {
-      missingFields.push("Lugar de Nacimiento");
-    }
-    if (!formData.estudiante.nacionalidad || formData.estudiante.nacionalidad.trim() === "") {
-      missingFields.push("Nacionalidad");
-    }
-    
-    if (!formData.estudiante.edad || formData.estudiante.edad.toString().trim() === "") {
-      missingFields.push("Edad");
-    }
-    if (!formData.estudiante.condicion_migratoria || formData.estudiante.condicion_migratoria.trim() === "") {
-      missingFields.push("Condición Migratoria");
-    }
-    if (!formData.estudiante.Repite_alguna_materia || formData.estudiante.Repite_alguna_materia.toString().trim() === "") {
-      missingFields.push("Repite alguna materia");
-    }
-    if (!formData.estudiante.institucion_de_procedencia || formData.estudiante.institucion_de_procedencia.toString().trim() === "") {
-      missingFields.push("Institución de Procedencia");
-    }
-    if (!formData.estudiante.tipo_de_adecuacion || formData.estudiante.tipo_de_adecuacion.toString().trim() === "") {
-      missingFields.push("Tipo de Adecuación");
-    }
-    if (!formData.estudiante.recibe_religion || formData.estudiante.recibe_religion.toString().trim() === "") {
-      missingFields.push("Recibe Religión");
-    }
-    if (!formData.estudiante.presenta_carta || formData.estudiante.presenta_carta.toString().trim() === "") { 
-      missingFields.push("Presenta Carta");    
-    } 
-    if (!formData.estudiante.Presenta_alguna_enfermedad || formData.estudiante.Presenta_alguna_enfermedad.toString().trim() === "") { 
-      missingFields.push("Presenta alguna enfermedad");    
-    }
-    if (!formData.estudiante.medicamentos_que_debe_tomar || formData.estudiante.medicamentos_que_debe_tomar.toString().trim() === "") { 
-      missingFields.push("Medicamentos que debe tomar");  
-    } 
-    if (!formData.estudiante.Ruta_de_viaje || formData.estudiante.Ruta_de_viaje.toString().trim() === "") { 
-      missingFields.push("Ruta de Viaje");  
-    }
- 
-    if (!formData.estudiante.nombres || formData.estudiante.nombres.trim() === "") {
-      missingFields.push("Nombres del encargado Legal");
-    }
-    if (!formData.estudiante.apellido1_Encargado_Legal || formData.estudiante.apellido1_Encargado_Legal.trim() === "") {
-      missingFields.push("Apellidos 1 del encargado Legal");
-    }
-    if (!formData.estudiante.apellido2_Encargado_Legal || formData.estudiante.apellido2_Encargado_Legal.trim() === "") {
-      missingFields.push("Apellidos 2 del encargado Legal");
-    }
-    if (!formData.estudiante.cedula || formData.estudiante.cedula.trim() === "") {
-      missingFields.push("Cédula del encargado Legal");
-    }
-    if (!formData.estudiante.ocupacion || formData.estudiante.ocupacion.trim() === "") {
-      missingFields.push("ocupación del encargado Legal");
-    }
-    if (!formData.estudiante.nacionalidad || formData.estudiante.nacionalidad.trim() === "") {
-      missingFields.push("nacionalidad del encargado Legal");
-    }
-    if (!formData.estudiante.direccion || formData.estudiante.direccion.trim() === "") {
-      missingFields.push("dirección del encargado Legal");
-    }
-    if (!formData.estudiante.telefono_celular || formData.estudiante.telefono_celular.trim() === "") {
-      missingFields.push("teléfono celular del encargado Legal");
-    }
-    if (!formData.estudiante.habitacion || formData.estudiante.habitacion.trim() === "") {
-      missingFields.push("habitación del encargado Legal");
-    }
-    if (!formData.estudiante.correo || formData.estudiante.correo.trim() === "") {
-      missingFields.push("correo del encargado Legal");
-    }
-    if (missingFields.length > 0) {
+    // Si ya se envió, mostramos aviso
+    if (hasSubmitted) {
       Swal.fire({
-        icon: "warning",
-        title: "Campos obligatorios incompletos",
-        text: `Por favor, complete los siguientes campos: ${missingFields.join(", ")}`,
+        icon: "info",
+        title: "Ya enviaste el formulario",
+        text: "No puedes enviar más de una vez.",
         confirmButtonColor: "#2563EB",
       });
       return;
     }
 
-    // Si no hay campos vacíos, proceder con el envío
+    // Si el formulario está inactivo, no se permite el envío
+    if (!isFormActive) {
+      Swal.fire({
+        icon: "warning",
+        title: "Formulario Inactivo",
+        text: "No puedes enviar el formulario porque está deshabilitado actualmente.",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
+    // Validar campos vacíos o inválidos
+    const missingFields = [];
+
+    // Verificar campos básicos
+    if (!formData.periodo || formData.periodo === "") {
+      missingFields.push("Periodo");
+    }
+    if (!formData.estudiante.gradoId || formData.estudiante.gradoId === "") {
+      missingFields.push("Grado");
+    }
+    
+    // Campos de estudiante
+    if (!formData.estudiante.nombre_Estudiante || formData.estudiante.nombre_Estudiante.trim() === "") {
+      missingFields.push("Nombre del estudiante");
+    }
+    if (!formData.estudiante.apellido1_Estudiante || formData.estudiante.apellido1_Estudiante.trim() === "") {
+      missingFields.push("Primer apellido del estudiante");
+    }
+    if (!formData.estudiante.apellido2_Estudiante || formData.estudiante.apellido2_Estudiante.trim() === "") {
+      missingFields.push("Segundo apellido del estudiante");
+    }
+    if (!formData.estudiante.edad || formData.estudiante.edad === "") {
+      missingFields.push("Edad del estudiante");
+    }
+    if (!formData.estudiante.telefono || formData.estudiante.telefono.trim() === "") {
+      missingFields.push("Teléfono del estudiante");
+    }
+    if (!formData.estudiante.cedula || formData.estudiante.cedula.trim() === "") {
+      missingFields.push("Cédula del estudiante");
+    }
+    if (!formData.estudiante.correo_estudiantil || formData.estudiante.correo_estudiantil.trim() === "") {
+      missingFields.push("Correo estudiantil");
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.estudiante.correo_estudiantil.trim())) {
+        missingFields.push("Correo estudiantil (debe ser un email válido)");
+      }
+    }
+    if (!formData.estudiante.fecha_nacimiento || formData.estudiante.fecha_nacimiento.trim() === "") {
+      missingFields.push("Fecha de nacimiento");
+    }
+    if (!formData.estudiante.sexo || formData.estudiante.sexo.trim() === "") {
+      missingFields.push("Sexo");
+    }
+    if (!formData.estudiante.lugar_de_nacimiento || formData.estudiante.lugar_de_nacimiento.trim() === "") {
+      missingFields.push("Lugar de nacimiento");
+    }
+    if (!formData.estudiante.nacionalidad || formData.estudiante.nacionalidad.trim() === "") {
+      missingFields.push("Nacionalidad del estudiante");
+    }
+    if (!formData.estudiante.condicion_migratoria || formData.estudiante.condicion_migratoria.trim() === "") {
+      missingFields.push("Condición migratoria");
+    }
+    if (!formData.estudiante.Repite_alguna_materia || formData.estudiante.Repite_alguna_materia.trim() === "") {
+      // Asignar un valor por defecto si está vacío
+      formData.estudiante.Repite_alguna_materia = "Ninguna";
+    }
+    if (!formData.estudiante.institucion_de_procedencia || formData.estudiante.institucion_de_procedencia.trim() === "") {
+      missingFields.push("Institución de procedencia");
+    }
+    if (!formData.estudiante.tipo_de_adecuacion || formData.estudiante.tipo_de_adecuacion.trim() === "") {
+      missingFields.push("Tipo de adecuación");
+    } else if (!["N", "DA", "S", "NS"].includes(formData.estudiante.tipo_de_adecuacion)) {
+      missingFields.push("Tipo de adecuación (debe ser N, DA, S o NS)");
+    }
+    if (!formData.estudiante.Presenta_alguna_enfermedad || formData.estudiante.Presenta_alguna_enfermedad.trim() === "") {
+      // Valor por defecto
+      formData.estudiante.Presenta_alguna_enfermedad = "Ninguna";
+    }
+    if (!formData.estudiante.medicamentos_que_debe_tomar || formData.estudiante.medicamentos_que_debe_tomar.trim() === "") {
+      // Valor por defecto
+      formData.estudiante.medicamentos_que_debe_tomar = "Ninguno";
+    }
+    if (!formData.estudiante.Ruta_de_viaje || formData.estudiante.Ruta_de_viaje.trim() === "") {
+      // Valor por defecto
+      formData.estudiante.Ruta_de_viaje = "Ninguna";
+    }
+    if (!formData.estudiante.recibe_religion || formData.estudiante.recibe_religion.trim() === "") {
+      missingFields.push("Recibe religión");
+    }
+    if (!formData.estudiante.presenta_carta || formData.estudiante.presenta_carta.trim() === "") {
+      missingFields.push("Presenta carta");
+    }
+
+    // Campos de encargado legal
+    if (!formData.encargadoLegal.nombre_Encargado_Legal || formData.encargadoLegal.nombre_Encargado_Legal.trim() === "") {
+      missingFields.push("Nombre del encargado legal");
+    }
+    if (!formData.encargadoLegal.apellido1_Encargado_Legal || formData.encargadoLegal.apellido1_Encargado_Legal.trim() === "") {
+      missingFields.push("Primer apellido del encargado legal");
+    }
+    if (!formData.encargadoLegal.apellido2_Encargado_Legal || formData.encargadoLegal.apellido2_Encargado_Legal.trim() === "") {
+      missingFields.push("Segundo apellido del encargado legal");
+    }
+    if (!formData.encargadoLegal.N_Cedula || formData.encargadoLegal.N_Cedula.trim() === "") {
+      missingFields.push("Cédula del encargado legal");
+    }
+    if (!formData.encargadoLegal.ocupacion || formData.encargadoLegal.ocupacion.trim() === "") {
+      missingFields.push("Ocupación del encargado legal");
+    }
+    if (!formData.encargadoLegal.nacionalidad || formData.encargadoLegal.nacionalidad.trim() === "") {
+      missingFields.push("Nacionalidad del encargado legal");
+    }
+    if (!formData.encargadoLegal.direccion || formData.encargadoLegal.direccion.trim() === "") {
+      missingFields.push("Dirección del encargado legal");
+    }
+    if (!formData.encargadoLegal.telefono_celular || formData.encargadoLegal.telefono_celular.trim() === "") {
+      missingFields.push("Teléfono celular del encargado legal");
+    }
+    if (!formData.encargadoLegal.habitacion || formData.encargadoLegal.habitacion.trim() === "") {
+      missingFields.push("Habitación del encargado legal");
+    }
+    if (!formData.encargadoLegal.correo || formData.encargadoLegal.correo.trim() === "") {
+      missingFields.push("Correo del encargado legal");
+    }
+
+    if (missingFields.length > 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Campos obligatorios incompletos o inválidos",
+        text: "Por favor, complete o corrija: " + missingFields.join(", "),
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
     try {
       await handleSubmit(e);
-      // Guarda la hora de envío actual
-      localStorage.setItem(`matricula-submitted-${userId}`, Date.now().toString());
+      localStorage.setItem(`matricula-submitted-${userId}`, "true");
       setHasSubmitted(true);
       Swal.fire({
         icon: "success",
@@ -348,7 +389,6 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
         confirmButtonColor: "#2563EB",
       });
     } catch (error) {
-      console.error("Error al enviar el formulario:", error);
       Swal.fire({
         icon: "error",
         title: "Error",

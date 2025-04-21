@@ -74,22 +74,49 @@ export const useMatriculaForm = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      // Convertir campos numéricos
+      // Convertir campos numéricos explícitamente
       const matriculaData = {
-        periodo: parseInt(formData.periodo, 10),
+        periodo: parseInt(formData.periodo, 10) || 0,
         estudiante: {
           ...formData.estudiante,
-          edad: parseInt(formData.estudiante.edad, 10),
-          gradoId: parseInt(formData.estudiante.gradoId, 10),
+          edad: parseInt(formData.estudiante.edad, 10) || 0,
+          gradoId: parseInt(formData.estudiante.gradoId, 10) || 0,
+          // Asegurar que todos los campos string existan
+          nombre_Estudiante: formData.estudiante.nombre_Estudiante || "",
+          apellido1_Estudiante: formData.estudiante.apellido1_Estudiante || "",
+          apellido2_Estudiante: formData.estudiante.apellido2_Estudiante || "",
+          telefono: formData.estudiante.telefono || "",
+          cedula: formData.estudiante.cedula || "",
+          correo_estudiantil: formData.estudiante.correo_estudiantil || "",
+          fecha_nacimiento: formData.estudiante.fecha_nacimiento || "",
+          sexo: formData.estudiante.sexo || "",
+          lugar_de_nacimiento: formData.estudiante.lugar_de_nacimiento || "",
+          nacionalidad: formData.estudiante.nacionalidad || "",
+          condicion_migratoria: formData.estudiante.condicion_migratoria || "",
+          Repite_alguna_materia: formData.estudiante.Repite_alguna_materia || "Ninguna",
+          institucion_de_procedencia: formData.estudiante.institucion_de_procedencia || "",
+          Presenta_alguna_enfermedad: formData.estudiante.Presenta_alguna_enfermedad || "Ninguna",
+          medicamentos_que_debe_tomar: formData.estudiante.medicamentos_que_debe_tomar || "Ninguno",
+          Ruta_de_viaje: formData.estudiante.Ruta_de_viaje || "Ninguna",
+          tipo_de_adecuacion: formData.estudiante.tipo_de_adecuacion || "N",
+          recibe_religion: formData.estudiante.recibe_religion || "No",
+          presenta_carta: formData.estudiante.presenta_carta || "No",
         },
         encargadoLegal: {
-          ...formData.encargadoLegal,
+          nombre_Encargado_Legal: formData.encargadoLegal.nombre_Encargado_Legal || "",
+          apellido1_Encargado_Legal: formData.encargadoLegal.apellido1_Encargado_Legal || "",
+          apellido2_Encargado_Legal: formData.encargadoLegal.apellido2_Encargado_Legal || "",
+          N_Cedula: formData.encargadoLegal.N_Cedula || "",
+          ocupacion: formData.encargadoLegal.ocupacion || "",
+          nacionalidad: formData.encargadoLegal.nacionalidad || "",
+          direccion: formData.encargadoLegal.direccion || "",
+          telefono_celular: formData.encargadoLegal.telefono_celular || "",
+          habitacion: formData.encargadoLegal.habitacion || "",
+          correo: formData.encargadoLegal.correo || "",
         },
       };
 
-      // A diferencia de antes, NO eliminamos campos vacíos:
-      // Se envían tal cual, aunque sean cadenas vacías.
-
+      console.log("Datos de matrícula a enviar:", matriculaData);
       await createMatricula(matriculaData);
 
       Swal.fire({
@@ -101,6 +128,7 @@ export const useMatriculaForm = () => {
       // Resetea el formulario
       setFormData(initialFormData);
     } catch (error) {
+      console.error("Error al enviar el formulario:", error);
       Swal.fire({
         title: "Error!",
         text: error.message || "Hubo un error al enviar el formulario.",
