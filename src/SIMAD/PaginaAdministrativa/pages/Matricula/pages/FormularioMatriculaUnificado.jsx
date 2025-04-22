@@ -420,7 +420,7 @@ export const FormularioMatriculaUnificado = () => {
                   name="estudiante.cedula"
                   value={formData.estudiante.cedula}
                   onChange={handleChange}
-                  placeholder="5-0442-0911"
+                  placeholder="5-0433-0921"
                   className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                 />
                 <button

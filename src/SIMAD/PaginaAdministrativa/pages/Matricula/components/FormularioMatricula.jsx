@@ -698,7 +698,7 @@ export const FormularioMatricula = () => {
                   value={formData.estudiante.cedula}
                   onChange={handleChange}
                   onBlur={(e) => buscarEstudiantePorCedula(e.target.value)} // Llamar a la función al perder el foco
-                  placeholder="5-0442-0911"
+                  placeholder="5-0432-0913"
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
                 <button
