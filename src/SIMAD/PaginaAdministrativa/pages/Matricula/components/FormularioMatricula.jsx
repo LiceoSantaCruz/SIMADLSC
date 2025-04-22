@@ -11,6 +11,8 @@ export const FormularioMatricula = () => {
   const {
     page,
     setPage,
+    formData, // <-- usa el formData del hook
+    handleChange, // <-- usa el handleChange del hook
     handleSubmit,
     handleDownloadPDF,
     isSubmitting,
@@ -28,48 +30,6 @@ export const FormularioMatricula = () => {
   const [deadline, setDeadline] = useState(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isEditable, setIsEditable] = useState(false); // Controla si los campos son editables
-
-  const initialFormData = {
-    estudiante: {
-      cedula: "",
-      nombre_Estudiante: "",
-      apellido1_Estudiante: "",
-      apellido2_Estudiante: "",
-      // Otros campos del estudiante...
-    },
-    encargadoLegal: {
-      nombre_Encargado_Legal: "",
-      apellido1_Encargado_Legal: "",
-      apellido2_Encargado_Legal: "",
-      N_Cedula: "",
-      ocupacion: "",
-      nacionalidad: "",
-      direccion: "",
-      telefono_celular: "",
-      habitacion: "",
-      correo: "",
-    },
-  };
-  const [formData, setFormData] = useState(initialFormData);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    const keys = name.split(".");
-    if (keys.length === 2) {
-      setFormData((prevData) => ({
-        ...prevData,
-        [keys[0]]: {
-          ...prevData[keys[0]],
-          [keys[1]]: value,
-        },
-      }));
-    } else {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
-    }
-  };
 
   // Cargamos el estado del formulario y el deadline desde localStorage al montar
   useEffect(() => {
@@ -99,26 +59,26 @@ export const FormularioMatricula = () => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-// Verificamos si el usuario ya envió el formulario (envío único de 24 horas)
-useEffect(() => {
-  const submittedTime = localStorage.getItem(`matricula-submitted-${userId}`);
-  if (submittedTime) {
-    const timeDiff = Date.now() - Number(submittedTime);
-    // 24 horas en milisegundos: 86400000
-    if (timeDiff < 86400000) {
-      setHasSubmitted(true);
-    } else {
-      // Si han pasado 24 horas, se elimina la marca y se permite enviar de nuevo
-      localStorage.removeItem(`matricula-submitted-${userId}`);
-      setHasSubmitted(false);
+  // Verificamos si el usuario ya envió el formulario (envío único de 24 horas)
+  useEffect(() => {
+    const submittedTime = localStorage.getItem(`matricula-submitted-${userId}`);
+    if (submittedTime) {
+      const timeDiff = Date.now() - Number(submittedTime);
+      // 24 horas en milisegundos: 86400000
+      if (timeDiff < 86400000) {
+        setHasSubmitted(true);
+      } else {
+        // Si han pasado 24 horas, se elimina la marca y se permite enviar de nuevo
+        localStorage.removeItem(`matricula-submitted-${userId}`);
+        setHasSubmitted(false);
+      }
     }
-  }
-}, [userId]);
+  }, [userId]);
 
-const API_BASE_URL = process.env.NODE_ENV === 'production'
-  ? 'https://simadlsc-backend-production.up.railway.app'
-  : 'http://localhost:3000';
-
+  const API_BASE_URL =
+    process.env.NODE_ENV === "production"
+      ? "https://simadlsc-backend-production.up.railway.app"
+      : "http://localhost:3000";
 
   // Función para calcular la edad a partir de la fecha de nacimiento
   const handleFechaNacimientoChange = (e) => {
@@ -148,56 +108,188 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
       });
       return;
     }
-  
+
     try {
-      const response = await axios.get(`${API_BASE_URL}/estudiantes/cedula/${cedula}`);
+      const response = await axios.get(
+        `${API_BASE_URL}/estudiantes/cedula/${cedula}`
+      );
       const estudiante = response.data;
-  
+
       if (estudiante) {
         // Actualizar los datos del estudiante y del encargado legal
-        setFormData((prevData) => ({
-          ...prevData,
-          estudiante: {
-            ...prevData.estudiante, // Mantener los valores existentes del estudiante
-            cedula: estudiante.cedula,
-            nombre_Estudiante: estudiante.nombre_Estudiante,
-            apellido1_Estudiante: estudiante.apellido1_Estudiante,
-            apellido2_Estudiante: estudiante.apellido2_Estudiante,
-            fecha_nacimiento: estudiante.fecha_nacimiento,
-            correo_estudiantil: estudiante.correo_estudiantil,
-            telefono: estudiante.telefono,
-            sexo: estudiante.sexo,
-            lugar_de_nacimiento: estudiante.lugar_de_nacimiento,
-            nacionalidad: estudiante.nacionalidad,
-            edad: estudiante.edad,
-            condicion_migratoria: estudiante.condicion_migratoria,
-            Repite_alguna_materia: estudiante.Repite_alguna_materia,
-            institucion_de_procedencia: estudiante.institucion_de_procedencia,
-            tipo_de_adecuacion: estudiante.tipo_de_adecuacion,
-            recibe_religion: estudiante.recibe_religion,
-            presenta_carta: estudiante.presenta_carta,
-            Presenta_alguna_enfermedad: estudiante.Presenta_alguna_enfermedad,
-            medicamentos_que_debe_tomar: estudiante.medicamentos_que_debe_tomar,
-            Ruta_de_viaje: estudiante.Ruta_de_viaje,
+        handleChange({
+          target: { name: "estudiante.cedula", value: estudiante.cedula },
+        });
+        handleChange({
+          target: {
+            name: "estudiante.nombre_Estudiante",
+            value: estudiante.nombre_Estudiante,
           },
-          encargadoLegal: {
-            ...prevData.encargadoLegal, // Mantener los valores existentes del encargado legal
-            nombre_Encargado_Legal: estudiante.encargadoLegal.nombre_Encargado_Legal,
-            apellido1_Encargado_Legal: estudiante.encargadoLegal.apellido1_Encargado_Legal,
-            apellido2_Encargado_Legal: estudiante.encargadoLegal.apellido2_Encargado_Legal,
-            N_Cedula: estudiante.encargadoLegal.N_Cedula,
-            ocupacion: estudiante.encargadoLegal.ocupacion,
-            nacionalidad: estudiante.encargadoLegal.nacionalidad,
-            direccion: estudiante.encargadoLegal.direccion,
-            telefono_celular: estudiante.encargadoLegal.telefono_celular,
-            habitacion: estudiante.encargadoLegal.habitacion,
-            correo: estudiante.encargadoLegal.correo,
+        });
+        handleChange({
+          target: {
+            name: "estudiante.apellido1_Estudiante",
+            value: estudiante.apellido1_Estudiante,
           },
-        }));
-  
+        });
+        handleChange({
+          target: {
+            name: "estudiante.apellido2_Estudiante",
+            value: estudiante.apellido2_Estudiante,
+          },
+        });
+        handleChange({
+          target: {
+            name: "estudiante.fecha_nacimiento",
+            value: estudiante.fecha_nacimiento,
+          },
+        });
+        handleChange({
+          target: {
+            name: "estudiante.correo_estudiantil",
+            value: estudiante.correo_estudiantil,
+          },
+        });
+        handleChange({
+          target: { name: "estudiante.telefono", value: estudiante.telefono },
+        });
+        handleChange({
+          target: { name: "estudiante.sexo", value: estudiante.sexo },
+        });
+        handleChange({
+          target: {
+            name: "estudiante.lugar_de_nacimiento",
+            value: estudiante.lugar_de_nacimiento,
+          },
+        });
+        handleChange({
+          target: {
+            name: "estudiante.nacionalidad",
+            value: estudiante.nacionalidad,
+          },
+        });
+        handleChange({
+          target: { name: "estudiante.edad", value: estudiante.edad },
+        });
+        handleChange({
+          target: {
+            name: "estudiante.condicion_migratoria",
+            value: estudiante.condicion_migratoria,
+          },
+        });
+        handleChange({
+          target: {
+            name: "estudiante.Repite_alguna_materia",
+            value: estudiante.Repite_alguna_materia,
+          },
+        });
+        handleChange({
+          target: {
+            name: "estudiante.institucion_de_procedencia",
+            value: estudiante.institucion_de_procedencia,
+          },
+        });
+        handleChange({
+          target: {
+            name: "estudiante.tipo_de_adecuacion",
+            value: estudiante.tipo_de_adecuacion,
+          },
+        });
+        handleChange({
+          target: {
+            name: "estudiante.recibe_religion",
+            value: estudiante.recibe_religion,
+          },
+        });
+        handleChange({
+          target: {
+            name: "estudiante.presenta_carta",
+            value: estudiante.presenta_carta,
+          },
+        });
+        handleChange({
+          target: {
+            name: "estudiante.Presenta_alguna_enfermedad",
+            value: estudiante.Presenta_alguna_enfermedad,
+          },
+        });
+        handleChange({
+          target: {
+            name: "estudiante.medicamentos_que_debe_tomar",
+            value: estudiante.medicamentos_que_debe_tomar,
+          },
+        });
+        handleChange({
+          target: {
+            name: "estudiante.Ruta_de_viaje",
+            value: estudiante.Ruta_de_viaje,
+          },
+        });
+        // Encargado legal
+        handleChange({
+          target: {
+            name: "encargadoLegal.nombre_Encargado_Legal",
+            value: estudiante.encargadoLegal.nombre_Encargado_Legal,
+          },
+        });
+        handleChange({
+          target: {
+            name: "encargadoLegal.apellido1_Encargado_Legal",
+            value: estudiante.encargadoLegal.apellido1_Encargado_Legal,
+          },
+        });
+        handleChange({
+          target: {
+            name: "encargadoLegal.apellido2_Encargado_Legal",
+            value: estudiante.encargadoLegal.apellido2_Encargado_Legal,
+          },
+        });
+        handleChange({
+          target: {
+            name: "encargadoLegal.N_Cedula",
+            value: estudiante.encargadoLegal.N_Cedula,
+          },
+        });
+        handleChange({
+          target: {
+            name: "encargadoLegal.ocupacion",
+            value: estudiante.encargadoLegal.ocupacion,
+          },
+        });
+        handleChange({
+          target: {
+            name: "encargadoLegal.nacionalidad",
+            value: estudiante.encargadoLegal.nacionalidad,
+          },
+        });
+        handleChange({
+          target: {
+            name: "encargadoLegal.direccion",
+            value: estudiante.encargadoLegal.direccion,
+          },
+        });
+        handleChange({
+          target: {
+            name: "encargadoLegal.telefono_celular",
+            value: estudiante.encargadoLegal.telefono_celular,
+          },
+        });
+        handleChange({
+          target: {
+            name: "encargadoLegal.habitacion",
+            value: estudiante.encargadoLegal.habitacion,
+          },
+        });
+        handleChange({
+          target: {
+            name: "encargadoLegal.correo",
+            value: estudiante.encargadoLegal.correo,
+          },
+        });
+
         // Permitir la edición si los datos son correctos
         setIsEditable(true);
-  
+
         Swal.fire({
           icon: "success",
           title: "Estudiante encontrado",
@@ -262,27 +354,45 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
     if (!formData.estudiante.gradoId || formData.estudiante.gradoId === "") {
       missingFields.push("Grado");
     }
-    
+
     // Campos de estudiante
-    if (!formData.estudiante.nombre_Estudiante || formData.estudiante.nombre_Estudiante.trim() === "") {
+    if (
+      !formData.estudiante.nombre_Estudiante ||
+      formData.estudiante.nombre_Estudiante.trim() === ""
+    ) {
       missingFields.push("Nombre del estudiante");
     }
-    if (!formData.estudiante.apellido1_Estudiante || formData.estudiante.apellido1_Estudiante.trim() === "") {
+    if (
+      !formData.estudiante.apellido1_Estudiante ||
+      formData.estudiante.apellido1_Estudiante.trim() === ""
+    ) {
       missingFields.push("Primer apellido del estudiante");
     }
-    if (!formData.estudiante.apellido2_Estudiante || formData.estudiante.apellido2_Estudiante.trim() === "") {
+    if (
+      !formData.estudiante.apellido2_Estudiante ||
+      formData.estudiante.apellido2_Estudiante.trim() === ""
+    ) {
       missingFields.push("Segundo apellido del estudiante");
     }
     if (!formData.estudiante.edad || formData.estudiante.edad === "") {
       missingFields.push("Edad del estudiante");
     }
-    if (!formData.estudiante.telefono || formData.estudiante.telefono.trim() === "") {
+    if (
+      !formData.estudiante.telefono ||
+      formData.estudiante.telefono.trim() === ""
+    ) {
       missingFields.push("Teléfono del estudiante");
     }
-    if (!formData.estudiante.cedula || formData.estudiante.cedula.trim() === "") {
+    if (
+      !formData.estudiante.cedula ||
+      formData.estudiante.cedula.trim() === ""
+    ) {
       missingFields.push("Cédula del estudiante");
     }
-    if (!formData.estudiante.correo_estudiantil || formData.estudiante.correo_estudiantil.trim() === "") {
+    if (
+      !formData.estudiante.correo_estudiantil ||
+      formData.estudiante.correo_estudiantil.trim() === ""
+    ) {
       missingFields.push("Correo estudiantil");
     } else {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -290,81 +400,152 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
         missingFields.push("Correo estudiantil (debe ser un email válido)");
       }
     }
-    if (!formData.estudiante.fecha_nacimiento || formData.estudiante.fecha_nacimiento.trim() === "") {
+    if (
+      !formData.estudiante.fecha_nacimiento ||
+      formData.estudiante.fecha_nacimiento.trim() === ""
+    ) {
       missingFields.push("Fecha de nacimiento");
     }
-    if (!formData.estudiante.sexo || formData.estudiante.sexo.trim() === "") {
+    if (
+      !formData.estudiante.sexo ||
+      formData.estudiante.sexo.trim() === ""
+    ) {
       missingFields.push("Sexo");
     }
-    if (!formData.estudiante.lugar_de_nacimiento || formData.estudiante.lugar_de_nacimiento.trim() === "") {
+    if (
+      !formData.estudiante.lugar_de_nacimiento ||
+      formData.estudiante.lugar_de_nacimiento.trim() === ""
+    ) {
       missingFields.push("Lugar de nacimiento");
     }
-    if (!formData.estudiante.nacionalidad || formData.estudiante.nacionalidad.trim() === "") {
+    if (
+      !formData.estudiante.nacionalidad ||
+      formData.estudiante.nacionalidad.trim() === ""
+    ) {
       missingFields.push("Nacionalidad del estudiante");
     }
-    if (!formData.estudiante.condicion_migratoria || formData.estudiante.condicion_migratoria.trim() === "") {
+    if (
+      !formData.estudiante.condicion_migratoria ||
+      formData.estudiante.condicion_migratoria.trim() === ""
+    ) {
       missingFields.push("Condición migratoria");
     }
-    if (!formData.estudiante.Repite_alguna_materia || formData.estudiante.Repite_alguna_materia.trim() === "") {
+    if (
+      !formData.estudiante.Repite_alguna_materia ||
+      formData.estudiante.Repite_alguna_materia.trim() === ""
+    ) {
       // Asignar un valor por defecto si está vacío
       formData.estudiante.Repite_alguna_materia = "Ninguna";
     }
-    if (!formData.estudiante.institucion_de_procedencia || formData.estudiante.institucion_de_procedencia.trim() === "") {
+    if (
+      !formData.estudiante.institucion_de_procedencia ||
+      formData.estudiante.institucion_de_procedencia.trim() === ""
+    ) {
       missingFields.push("Institución de procedencia");
     }
-    if (!formData.estudiante.tipo_de_adecuacion || formData.estudiante.tipo_de_adecuacion.trim() === "") {
+    if (
+      !formData.estudiante.tipo_de_adecuacion ||
+      formData.estudiante.tipo_de_adecuacion.trim() === ""
+    ) {
       missingFields.push("Tipo de adecuación");
-    } else if (!["N", "DA", "S", "NS"].includes(formData.estudiante.tipo_de_adecuacion)) {
+    } else if (
+      !["N", "DA", "S", "NS"].includes(formData.estudiante.tipo_de_adecuacion)
+    ) {
       missingFields.push("Tipo de adecuación (debe ser N, DA, S o NS)");
     }
-    if (!formData.estudiante.Presenta_alguna_enfermedad || formData.estudiante.Presenta_alguna_enfermedad.trim() === "") {
+    if (
+      !formData.estudiante.Presenta_alguna_enfermedad ||
+      formData.estudiante.Presenta_alguna_enfermedad.trim() === ""
+    ) {
       // Valor por defecto
       formData.estudiante.Presenta_alguna_enfermedad = "Ninguna";
     }
-    if (!formData.estudiante.medicamentos_que_debe_tomar || formData.estudiante.medicamentos_que_debe_tomar.trim() === "") {
+    if (
+      !formData.estudiante.medicamentos_que_debe_tomar ||
+      formData.estudiante.medicamentos_que_debe_tomar.trim() === ""
+    ) {
       // Valor por defecto
       formData.estudiante.medicamentos_que_debe_tomar = "Ninguno";
     }
-    if (!formData.estudiante.Ruta_de_viaje || formData.estudiante.Ruta_de_viaje.trim() === "") {
+    if (
+      !formData.estudiante.Ruta_de_viaje ||
+      formData.estudiante.Ruta_de_viaje.trim() === ""
+    ) {
       // Valor por defecto
       formData.estudiante.Ruta_de_viaje = "Ninguna";
     }
-    if (!formData.estudiante.recibe_religion || formData.estudiante.recibe_religion.trim() === "") {
+    if (
+      !formData.estudiante.recibe_religion ||
+      formData.estudiante.recibe_religion.trim() === ""
+    ) {
       missingFields.push("Recibe religión");
     }
-    if (!formData.estudiante.presenta_carta || formData.estudiante.presenta_carta.trim() === "") {
+    if (
+      !formData.estudiante.presenta_carta ||
+      formData.estudiante.presenta_carta.trim() === ""
+    ) {
       missingFields.push("Presenta carta");
     }
 
     // Campos de encargado legal
-    if (!formData.encargadoLegal.nombre_Encargado_Legal || formData.encargadoLegal.nombre_Encargado_Legal.trim() === "") {
+    if (
+      !formData.encargadoLegal.nombre_Encargado_Legal ||
+      formData.encargadoLegal.nombre_Encargado_Legal.trim() === ""
+    ) {
       missingFields.push("Nombre del encargado legal");
     }
-    if (!formData.encargadoLegal.apellido1_Encargado_Legal || formData.encargadoLegal.apellido1_Encargado_Legal.trim() === "") {
+    if (
+      !formData.encargadoLegal.apellido1_Encargado_Legal ||
+      formData.encargadoLegal.apellido1_Encargado_Legal.trim() === ""
+    ) {
       missingFields.push("Primer apellido del encargado legal");
     }
-    if (!formData.encargadoLegal.apellido2_Encargado_Legal || formData.encargadoLegal.apellido2_Encargado_Legal.trim() === "") {
+    if (
+      !formData.encargadoLegal.apellido2_Encargado_Legal ||
+      formData.encargadoLegal.apellido2_Encargado_Legal.trim() === ""
+    ) {
       missingFields.push("Segundo apellido del encargado legal");
     }
-    if (!formData.encargadoLegal.N_Cedula || formData.encargadoLegal.N_Cedula.trim() === "") {
+    if (
+      !formData.encargadoLegal.N_Cedula ||
+      formData.encargadoLegal.N_Cedula.trim() === ""
+    ) {
       missingFields.push("Cédula del encargado legal");
     }
-    if (!formData.encargadoLegal.ocupacion || formData.encargadoLegal.ocupacion.trim() === "") {
+    if (
+      !formData.encargadoLegal.ocupacion ||
+      formData.encargadoLegal.ocupacion.trim() === ""
+    ) {
       missingFields.push("Ocupación del encargado legal");
     }
-    if (!formData.encargadoLegal.nacionalidad || formData.encargadoLegal.nacionalidad.trim() === "") {
+    if (
+      !formData.encargadoLegal.nacionalidad ||
+      formData.encargadoLegal.nacionalidad.trim() === ""
+    ) {
       missingFields.push("Nacionalidad del encargado legal");
     }
-    if (!formData.encargadoLegal.direccion || formData.encargadoLegal.direccion.trim() === "") {
+    if (
+      !formData.encargadoLegal.direccion ||
+      formData.encargadoLegal.direccion.trim() === ""
+    ) {
       missingFields.push("Dirección del encargado legal");
     }
-    if (!formData.encargadoLegal.telefono_celular || formData.encargadoLegal.telefono_celular.trim() === "") {
+    if (
+      !formData.encargadoLegal.telefono_celular ||
+      formData.encargadoLegal.telefono_celular.trim() === ""
+    ) {
       missingFields.push("Teléfono celular del encargado legal");
     }
-    if (!formData.encargadoLegal.habitacion || formData.encargadoLegal.habitacion.trim() === "") {
+    if (
+      !formData.encargadoLegal.habitacion ||
+      formData.encargadoLegal.habitacion.trim() === ""
+    ) {
       missingFields.push("Habitación del encargado legal");
     }
-    if (!formData.encargadoLegal.correo || formData.encargadoLegal.correo.trim() === "") {
+    if (
+      !formData.encargadoLegal.correo ||
+      formData.encargadoLegal.correo.trim() === ""
+    ) {
       missingFields.push("Correo del encargado legal");
     }
 
@@ -392,7 +573,9 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: error.message || "Hubo un error al enviar el formulario. Intente nuevamente.",
+        text:
+          error.message ||
+          "Hubo un error al enviar el formulario. Intente nuevamente.",
         confirmButtonColor: "#2563EB",
       });
     }
@@ -405,7 +588,8 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
           Boleta de Matrícula Año 2025
         </h1>
         <p className="text-center text-green-600 dark:text-green-300">
-          ¡Ya has enviado tu formulario de matrícula! No es posible enviar más de una vez.
+          ¡Ya has enviado tu formulario de matrícula! No es posible enviar más
+          de una vez.
         </p>
       </div>
     );
@@ -429,11 +613,12 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
       <p className="text-center text-gray-600 dark:text-gray-300 mb-6">
         Por favor, complete todos los campos solicitados con datos verídicos.
       </p>
-     
+
       {/* Mensaje de aviso si el formulario está inactivo */}
       {!isFormActive && (
         <div className="bg-red-100 text-red-800 p-3 rounded-md mb-4">
-          <strong>El formulario está inactivo.</strong> No podrás enviarlo hasta que sea habilitado.
+          <strong>El formulario está inactivo.</strong> No podrás enviarlo hasta
+          que sea habilitado.
         </div>
       )}
 
@@ -442,8 +627,10 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
           <>
             {/* Página 1: Datos del Estudiante */}
             <div className="flex justify-between">
-            <div>
-                <label className="block text-gray-700 dark:text-gray-200">Periodo:</label>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Periodo:
+                </label>
                 {periodos.length === 0 ? (
                   <p>Cargando periodos...</p>
                 ) : (
@@ -455,7 +642,10 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
                   >
                     <option value="">Seleccione un periodo</option>
                     {periodos.map((periodo) => (
-                      <option key={periodo.id_Periodo} value={periodo.id_Periodo}>
+                      <option
+                        key={periodo.id_Periodo}
+                        value={periodo.id_Periodo}
+                      >
                         {periodo.nombre_Periodo}
                       </option>
                     ))}
@@ -464,7 +654,9 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
               </div>
 
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Grado:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Grado:
+                </label>
                 {grados.length === 0 ? (
                   <p>Cargando grados...</p>
                 ) : (
@@ -475,17 +667,6 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
                     className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                   >
                     <option value="">Seleccione un grado</option>
-                    {/* 
-                      Si deseas mostrar todos los grados sin filtro, usa simplemente:
-                      
-                      {grados.map((grado) => (
-                        <option key={grado.id_grado} value={grado.id_grado}>
-                          {grado.nivel}
-                        </option>
-                      ))}
-                      
-                      Si deseas omitir solo "Sétimo", aplica un filter como se ve abajo.
-                    */}
                     {grados
                       .filter((grado) => grado.nivel !== "Sétimo")
                       .map((grado) => (
@@ -498,13 +679,18 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
               </div>
             </div>
 
-            <h2 className="text-lg font-semibold dark:text-white">Datos del Estudiante</h2>
+            <h2 className="text-lg font-semibold dark:text-white">
+              Datos del Estudiante
+            </h2>
             <p className="text-sm text-gray-500 dark:text-gray-300 mb-2">
-              Complete la información personal del estudiante. Asegúrese de que los datos sean correctos.
+              Complete la información personal del estudiante. Asegúrese de que
+              los datos sean correctos.
             </p>
-              {/* Campo de cédula al inicio */}
-              <div>
-              <label className="block text-gray-700 dark:text-gray-200">Nº Cédula o Pasaporte:</label>
+            {/* Campo de cédula al inicio */}
+            <div>
+              <label className="block text-gray-700 dark:text-gray-200">
+                Nº Cédula o Pasaporte:
+              </label>
               <div className="flex items-center space-x-2">
                 <input
                   type="text"
@@ -517,7 +703,9 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
                 />
                 <button
                   type="button"
-                  onClick={() => buscarEstudiantePorCedula(formData.estudiante.cedula)}
+                  onClick={() =>
+                    buscarEstudiantePorCedula(formData.estudiante.cedula)
+                  }
                   className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
                 >
                   Buscar
@@ -527,66 +715,78 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Nombre Completo:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Nombre Completo:
+                </label>
                 <input
                   type="text"
                   name="estudiante.nombre_Estudiante"
                   value={formData.estudiante.nombre_Estudiante}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">1º Apellido:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  1º Apellido:
+                </label>
                 <input
                   type="text"
                   name="estudiante.apellido1_Estudiante"
                   value={formData.estudiante.apellido1_Estudiante}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">2º Apellido:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  2º Apellido:
+                </label>
                 <input
                   type="text"
                   name="estudiante.apellido2_Estudiante"
                   value={formData.estudiante.apellido2_Estudiante}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
-              
+
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Correo Estudiantil:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Correo Estudiantil:
+                </label>
                 <input
                   type="email"
                   name="estudiante.correo_estudiantil"
                   value={formData.estudiante.correo_estudiantil}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   placeholder="ejemplo@correo.com"
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Teléfono:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Teléfono:
+                </label>
                 <input
                   type="text"
                   name="estudiante.telefono"
                   value={formData.estudiante.telefono}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
             </div>
 
             <div className="flex space-x-4">
-              <label className="block text-gray-700 dark:text-gray-200">Sexo:</label>
+              <label className="block text-gray-700 dark:text-gray-200">
+                Sexo:
+              </label>
               <label className="inline-flex items-center">
                 <input
                   type="radio"
@@ -594,7 +794,7 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
                   value="Femenino"
                   checked={formData.estudiante.sexo === "Femenino"}
                   onChange={handleChange}
-                  disabled={!isEditable}
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="mr-2"
                 />
                 Femenino
@@ -606,7 +806,7 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
                   value="Masculino"
                   checked={formData.estudiante.sexo === "Masculino"}
                   onChange={handleChange}
-                  disabled={!isEditable}
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="mr-2"
                 />
                 Masculino
@@ -615,24 +815,28 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
 
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Lugar de Nacimiento:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Lugar de Nacimiento:
+                </label>
                 <input
                   type="text"
                   name="estudiante.lugar_de_nacimiento"
                   value={formData.estudiante.lugar_de_nacimiento}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Fecha de Nacimiento:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Fecha de Nacimiento:
+                </label>
                 <input
                   type="date"
                   name="estudiante.fecha_nacimiento"
                   value={formData.estudiante.fecha_nacimiento}
                   onChange={handleFechaNacimientoChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -640,18 +844,22 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Nacionalidad:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Nacionalidad:
+                </label>
                 <input
                   type="text"
                   name="estudiante.nacionalidad"
                   value={formData.estudiante.nacionalidad}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Edad:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Edad:
+                </label>
                 <input
                   type="number"
                   name="estudiante.edad"
@@ -664,7 +872,9 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
 
             {/* Campos adicionales */}
             <div className="flex space-x-4">
-              <label className="block text-gray-700 dark:text-gray-200">Condición Migratoria:</label>
+              <label className="block text-gray-700 dark:text-gray-200">
+                Condición Migratoria:
+              </label>
               <label className="inline-flex items-center">
                 <input
                   type="radio"
@@ -672,7 +882,7 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
                   value="legal"
                   checked={formData.estudiante.condicion_migratoria === "legal"}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="mr-2"
                 />
                 Legal
@@ -682,9 +892,11 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
                   type="radio"
                   name="estudiante.condicion_migratoria"
                   value="refugiado"
-                  checked={formData.estudiante.condicion_migratoria === "refugiado"}
+                  checked={
+                    formData.estudiante.condicion_migratoria === "refugiado"
+                  }
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="mr-2"
                 />
                 Refugiado
@@ -696,7 +908,7 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
                   value="ilegal"
                   checked={formData.estudiante.condicion_migratoria === "ilegal"}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="mr-2"
                 />
                 Ilegal
@@ -704,38 +916,44 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
             </div>
 
             <div>
-              <label className="block text-gray-700 dark:text-gray-200">Repite alguna materia:</label>
+              <label className="block text-gray-700 dark:text-gray-200">
+                Repite alguna materia:
+              </label>
               <input
                 type="text"
                 name="estudiante.Repite_alguna_materia"
                 value={formData.estudiante.Repite_alguna_materia}
                 onChange={handleChange}
-                disabled={!isEditable} // Bloquear si no es editable
+                readOnly={!isEditable} // Cambiado de disabled a readOnly
                 className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white mt-1"
                 placeholder="Si repite alguna materia, ingrese el nombre; de lo contrario, déjelo en blanco."
               />
             </div>
 
             <div>
-              <label className="block text-gray-700 dark:text-gray-200">Institución de Procedencia:</label>
+              <label className="block text-gray-700 dark:text-gray-200">
+                Institución de Procedencia:
+              </label>
               <input
                 type="text"
                 name="estudiante.institucion_de_procedencia"
                 value={formData.estudiante.institucion_de_procedencia}
                 onChange={handleChange}
-                disabled={!isEditable} // Bloquear si no es editable
+                readOnly={!isEditable} // Cambiado de disabled a readOnly
                 className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Tipo de Adecuación:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Tipo de Adecuación:
+                </label>
                 <select
                   name="estudiante.tipo_de_adecuacion"
                   value={formData.estudiante.tipo_de_adecuacion}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 >
                   <option value="">Seleccione una opción</option>
@@ -747,7 +965,9 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
               </div>
 
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Recibe Religión:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Recibe Religión:
+                </label>
                 <div className="flex space-x-4">
                   <label className="inline-flex items-center">
                     <input
@@ -756,7 +976,7 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
                       value="Si"
                       checked={formData.estudiante.recibe_religion === "Si"}
                       onChange={handleChange}
-                      disabled={!isEditable} // Bloquear si no es editable
+                      readOnly={!isEditable} // Cambiado de disabled a readOnly
                       className="mr-2"
                     />
                     Sí
@@ -768,7 +988,7 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
                       value="No"
                       checked={formData.estudiante.recibe_religion === "No"}
                       onChange={handleChange}
-                      disabled={!isEditable} // Bloquear si no es editable
+                      readOnly={!isEditable} // Cambiado de disabled a readOnly
                       className="mr-2"
                     />
                     No
@@ -779,7 +999,9 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
 
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Presenta Carta:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Presenta Carta:
+                </label>
                 <div className="flex space-x-4">
                   <label className="inline-flex items-center">
                     <input
@@ -788,7 +1010,7 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
                       value="Si"
                       checked={formData.estudiante.presenta_carta === "Si"}
                       onChange={handleChange}
-                      disabled={!isEditable} // Bloquear si no es editable
+                      readOnly={!isEditable} // Cambiado de disabled a readOnly
                       className="mr-2"
                     />
                     Sí
@@ -800,7 +1022,7 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
                       value="No"
                       checked={formData.estudiante.presenta_carta === "No"}
                       onChange={handleChange}
-                      disabled={!isEditable} // Bloquear si no es editable
+                      readOnly={!isEditable} // Cambiado de disabled a readOnly
                       className="mr-2"
                     />
                     No
@@ -809,53 +1031,78 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
               </div>
             </div>
 
-            <h2 className="text-lg font-semibold dark:text-white">Enfermedades y Medicamentos</h2>
+            <h2 className="text-lg font-semibold dark:text-white">
+              Enfermedades y Medicamentos
+            </h2>
             <p className="text-sm text-gray-500 dark:text-gray-300 mb-2">
-              Si el estudiante presenta alguna condición médica o necesita medicación específica, indíquelo aquí.
+              Si el estudiante presenta alguna condición médica o necesita
+              medicación específica, indíquelo aquí.
             </p>
 
             <div>
-              <label className="block text-gray-700 dark:text-gray-200">Presenta alguna enfermedad:</label>
+              <label className="block text-gray-700 dark:text-gray-200">
+                Presenta alguna enfermedad:
+              </label>
               <input
                 type="text"
                 name="estudiante.Presenta_alguna_enfermedad"
                 value={formData.estudiante.Presenta_alguna_enfermedad}
                 onChange={handleChange}
-                disabled={!isEditable} // Bloquear si no es editable
+                readOnly={!isEditable} // Cambiado de disabled a readOnly
                 className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
               />
             </div>
 
             <div>
-              <label className="block text-gray-700 dark:text-gray-200">Medicamentos que debe tomar:</label>
+              <label className="block text-gray-700 dark:text-gray-200">
+                Medicamentos que debe tomar:
+              </label>
               <input
                 type="text"
                 name="estudiante.medicamentos_que_debe_tomar"
                 value={formData.estudiante.medicamentos_que_debe_tomar}
                 onChange={handleChange}
-                disabled={!isEditable} // Bloquear si no es editable
+                readOnly={!isEditable} // Cambiado de disabled a readOnly
                 className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
               />
             </div>
 
             <div>
-              <label className="block text-gray-700 dark:text-gray-200">Ruta que viaja el estudiante:</label>
+              <label className="block text-gray-700 dark:text-gray-200">
+                Ruta que viaja el estudiante:
+              </label>
               <select
                 name="estudiante.Ruta_de_viaje"
                 value={formData.estudiante.Ruta_de_viaje}
                 onChange={handleChange}
-                disabled={!isEditable} // Bloquear si no es editable
+                readOnly={!isEditable} // Cambiado de disabled a readOnly
                 className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
               >
                 <option value="">Seleccione una ruta</option>
-                <option value="San Juan - Guayabal - Santa Cruz">San Juan - Guayabal - Santa Cruz</option>
-                <option value="Río Cañas - Barrio Limón - Santa Cruz">Río Cañas - Barrio Limón - Santa Cruz</option>
-                <option value="Bolsón - Ortega - Oriente - Santa Cruz">Bolsón - Ortega - Oriente - Santa Cruz</option>
-                <option value="Guaitil - Santa Bárbara - Santa Cruz">Guaitil - Santa Bárbara - Santa Cruz</option>
-                <option value="Bernabela - El Cacao - Santa Cruz">Bernabela - El Cacao - Santa Cruz</option>
-                <option value="Arado - Hato Viejo - Santa Cruz">Arado - Hato Viejo - Santa Cruz</option>
-                <option value="Lagunilla - San Pedro - Santa Cruz">Lagunilla - San Pedro - Santa Cruz</option>
-                <option value="San José de la montaña - Santa Cruz">San José de la montaña - Santa Cruz</option>
+                <option value="San Juan - Guayabal - Santa Cruz">
+                  San Juan - Guayabal - Santa Cruz
+                </option>
+                <option value="Río Cañas - Barrio Limón - Santa Cruz">
+                  Río Cañas - Barrio Limón - Santa Cruz
+                </option>
+                <option value="Bolsón - Ortega - Oriente - Santa Cruz">
+                  Bolsón - Ortega - Oriente - Santa Cruz
+                </option>
+                <option value="Guaitil - Santa Bárbara - Santa Cruz">
+                  Guaitil - Santa Bárbara - Santa Cruz
+                </option>
+                <option value="Bernabela - El Cacao - Santa Cruz">
+                  Bernabela - El Cacao - Santa Cruz
+                </option>
+                <option value="Arado - Hato Viejo - Santa Cruz">
+                  Arado - Hato Viejo - Santa Cruz
+                </option>
+                <option value="Lagunilla - San Pedro - Santa Cruz">
+                  Lagunilla - San Pedro - Santa Cruz
+                </option>
+                <option value="San José de la montaña - Santa Cruz">
+                  San José de la montaña - Santa Cruz
+                </option>
               </select>
             </div>
 
@@ -871,120 +1118,143 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
           </>
         ) : (
           <>
-            <h2 className="text-lg font-semibold dark:text-white">Datos del Encargado Legal</h2>
+            <h2 className="text-lg font-semibold dark:text-white">
+              Datos del Encargado Legal
+            </h2>
             <p className="text-sm text-gray-500 dark:text-gray-300 mb-2">
-              Ingrese la información del encargado legal o tutor del estudiante. Asegúrese de completar todos los campos.
+              Ingrese la información del encargado legal o tutor del estudiante.
+              Asegúrese de completar todos los campos.
             </p>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Nombre Completo:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Nombre Completo:
+                </label>
                 <input
                   type="text"
                   name="encargadoLegal.nombre_Encargado_Legal"
                   value={formData.encargadoLegal.nombre_Encargado_Legal}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">1º Apellido:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  1º Apellido:
+                </label>
                 <input
                   type="text"
                   name="encargadoLegal.apellido1_Encargado_Legal"
                   value={formData.encargadoLegal.apellido1_Encargado_Legal}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">2º Apellido:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  2º Apellido:
+                </label>
                 <input
                   type="text"
                   name="encargadoLegal.apellido2_Encargado_Legal"
                   value={formData.encargadoLegal.apellido2_Encargado_Legal}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Nº Cédula:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Nº Cédula:
+                </label>
                 <input
                   type="text"
                   name="encargadoLegal.N_Cedula"
                   value={formData.encargadoLegal.N_Cedula}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   placeholder="5-0123-0456"
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Ocupación:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Ocupación:
+                </label>
                 <input
                   type="text"
                   name="encargadoLegal.ocupacion"
                   value={formData.encargadoLegal.ocupacion}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Nacionalidad:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Nacionalidad:
+                </label>
                 <input
                   type="text"
                   name="encargadoLegal.nacionalidad"
                   value={formData.encargadoLegal.nacionalidad}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Dirección:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Dirección:
+                </label>
                 <input
                   type="text"
                   name="encargadoLegal.direccion"
                   value={formData.encargadoLegal.direccion}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Teléfono Celular:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Teléfono Celular:
+                </label>
                 <input
                   type="text"
                   name="encargadoLegal.telefono_celular"
                   value={formData.encargadoLegal.telefono_celular}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Habitación:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Habitación:
+                </label>
                 <input
                   type="text"
                   name="encargadoLegal.habitacion"
                   value={formData.encargadoLegal.habitacion}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-200">Correo:</label>
+                <label className="block text-gray-700 dark:text-gray-200">
+                  Correo:
+                </label>
                 <input
                   type="email"
                   name="encargadoLegal.correo"
                   value={formData.encargadoLegal.correo}
                   onChange={handleChange}
-                  disabled={!isEditable} // Bloquear si no es editable
+                  readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
               </div>
