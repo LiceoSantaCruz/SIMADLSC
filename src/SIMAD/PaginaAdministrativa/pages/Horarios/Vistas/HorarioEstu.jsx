@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
@@ -104,15 +104,6 @@ export const HorarioEstu = () => {
     return `${horaNum}:${minuto} ${ampm}`;
   };
 
-
-  if (error) {
-    return <div className="text-red-500">{error}</div>;
-  }
-  if (cargando) {
-    return <div>Cargando datos...</div>;
-  }
-
-
   const lessons = Object.entries(lessonTimes)
     .sort(([, a], [, b]) => a.start.localeCompare(b.start))
     .map(([key]) => key);
@@ -149,21 +140,19 @@ export const HorarioEstu = () => {
     'Artes Industriales': 'bg-red-300',
   };
 
-  const obtenerHorario = (dia, lesson) => {
-    const lessonStart = lessonTimes[lesson].start;
-    return horarios.find(
-      (h) =>
-        h.dia_semana_Horario === dia &&
-        h.hora_inicio_Horario.substring(0, 5) === lessonStart
-    );
-  };
-
   const agruparMateriasPorLeccion = (dia) => {
     const bloques = [];
     let actual = null;
 
+    // Filtrar primero los horarios por el día específico
+    const horariosDelDia = horarios.filter(h => h.dia_semana_Horario === dia);
+
     lessons.forEach((lesson) => {
-      const horario = obtenerHorario(dia, lesson);
+      // Buscar el horario que coincida con la lección actual para este día específico
+      const horario = horariosDelDia.find(
+        h => h.hora_inicio_Horario?.substring(0, 5) === lessonTimes[lesson].start
+      );
+      
       const materia = horario?.materia?.nombre_Materia || '-';
 
       if (!actual || actual.materia !== materia) {
@@ -179,6 +168,20 @@ export const HorarioEstu = () => {
 
     return bloques;
   };
+
+  // Generar un mapeo de celdas para ubicar rowSpan correctos
+  const cellMap = useMemo(() => {
+    const map = {};
+    dias.forEach((dia) => {
+      const bloques = agruparMateriasPorLeccion(dia);
+      let offset = 0;
+      bloques.forEach((b) => {
+        map[`${offset}-${dia}`] = b;
+        offset += b.span;
+      });
+    });
+    return map;
+  }, [horarios]);
 
   const mostrarDetalles = (bloque) => {
     if (!bloque || !Array.isArray(bloque.horarios) || bloque.horarios.length === 0) return;
@@ -238,11 +241,9 @@ export const HorarioEstu = () => {
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
 
-
     const seccionActual = secciones.find(
       (s) => String(s.id_Seccion) === String(seccionSeleccionada)
     );
-
 
     const title =
       role === 'estudiante'
@@ -259,12 +260,12 @@ export const HorarioEstu = () => {
       day: 'numeric',
     });
 
+    // Configuración del título y subtítulo
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
     const titleWidth = doc.getTextWidth(title);
     const titleX = (pageWidth - titleWidth) / 2;
     doc.text(title, titleX, margin);
-
 
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
@@ -272,48 +273,70 @@ export const HorarioEstu = () => {
     const subTitleX = (pageWidth - subTitleWidth) / 2;
     doc.text(subTitle, subTitleX, margin + 16);
 
- 
     doc.setFontSize(9);
     doc.text(`Generado: ${fecha}`, pageWidth - margin, margin, { align: 'right' });
 
-
+    // Preparar datos para la tabla
     const lessonsOrdenadas = Object.entries(lessonTimes)
       .sort(([, a], [, b]) => a.start.localeCompare(b.start))
       .map(([key]) => key);
 
-    const tableColumns = ['Lección', ...dias];
+    const tableColumns = ['Lección/Hora', ...dias];
 
-    const tableRows = lessonsOrdenadas.map((lessonKey) => {
-      const row = [lessonKey];
-      const startHora = lessonTimes[lessonKey].start;
-      const endHora = lessonTimes[lessonKey].end;
-
+    // Construir las filas de la tabla
+    const tableRows = [];
+    
+    lessonsOrdenadas.forEach((lessonKey) => {
+      const row = [];
+      const isBreakOrLunch = lessonKey.toLowerCase().includes('recreo') || lessonKey.toLowerCase().includes('almuerzo');
+      
+      // Primera columna: lección y hora
+      const lesson = `${lessonKey}\n${lessonTimes[lessonKey].start}-${lessonTimes[lessonKey].end}`;
+      row.push(lesson);
+      
+      // Para cada día de la semana
       dias.forEach((dia) => {
+        if (isBreakOrLunch) {
+          // Para recreos y almuerzos, mostrar solo el nombre
+          row.push(lessonKey);
+          return;
+        }
+        
+        // Buscar el horario que coincide con el día y la hora de inicio
         const horario = horarios.find(
-          (h) =>
-            h.dia_semana_Horario === dia &&
-            h.hora_inicio_Horario?.substring(0, 5) === startHora
+          (h) => 
+            h.dia_semana_Horario === dia && 
+            h.hora_inicio_Horario?.substring(0, 5) === lessonTimes[lessonKey].start
         );
-
-        if (horario) {
-          const materia = horario.materia?.nombre_Materia || '-';
-          const prof =
-            horario.profesor?.nombre_Profesor &&
-              horario.profesor?.apellido1_Profesor
-              ? `${horario.profesor.nombre_Profesor} ${horario.profesor.apellido1_Profesor} ${horario.profesor.apellido2_Profesor}`
-              : 'Sin prof.';
-          const aula = `Aula: ` + horario.aula?.nombre_Aula || 'Aula N/D';
-          const hora = `${convertirHora12(startHora)} - ${convertirHora12(endHora)}`;
-
-          row.push(`${materia}\n${prof}\n${aula}\n${hora}`);
+        
+        if (horario && horario.materia) {
+          const materia = horario.materia.nombre_Materia || '-';
+          
+          // Información del profesor
+          let prof = '';
+          if (horario.profesor) {
+            prof = `${horario.profesor.nombre_Profesor || ''} ${horario.profesor.apellido1_Profesor || ''} ${horario.profesor.apellido2_Profesor || ''}`.trim();
+            if (!prof) prof = 'Sin profesor';
+          }
+          
+          // Información del aula
+          const aula = horario.aula?.nombre_Aula ? `Aula: ${horario.aula.nombre_Aula}` : '';
+          
+          // Construir la celda con la información completa
+          const cellContent = [materia];
+          if (prof) cellContent.push(prof);
+          if (aula) cellContent.push(aula);
+          
+          row.push(cellContent.join('\n'));
         } else {
           row.push('-');
         }
       });
-
-      return row;
+      
+      tableRows.push(row);
     });
 
+    // Generar la tabla en el PDF
     doc.autoTable({
       head: [tableColumns],
       body: tableRows,
@@ -324,21 +347,79 @@ export const HorarioEstu = () => {
         textColor: 255,
         halign: 'center',
         fontSize: 9,
+        fontStyle: 'bold',
       },
       bodyStyles: {
         halign: 'center',
         fontSize: 7,
-        cellPadding: { top: 5, bottom: 5, left: 3, right: 3 },
+        cellPadding: { top: 2, bottom: 2, left: 2, right: 2 },
       },
       styles: {
         fontSize: 7,
         overflow: 'linebreak',
+        lineColor: [80, 80, 80],
+        lineWidth: 0.1,
       },
       columnStyles: {
-        0: { cellWidth: 50 },
+        0: { 
+          cellWidth: 45,
+          fontStyle: 'bold',
+          fillColor: [240, 240, 240],
+          textColor: [50, 50, 50]
+        },
+      },
+      didParseCell: function(data) {
+        // Estilizar las celdas para recreos y almuerzo
+        const cellText = data.cell.text.join('').toLowerCase();
+        if (cellText.includes('recreo') || cellText.includes('almuerzo')) {
+          data.cell.styles.fillColor = [255, 241, 184]; // Amarillo claro
+          data.cell.styles.textColor = [100, 80, 0]; // Texto más oscuro para contraste
+          data.cell.styles.fontStyle = 'bold';
+        }
+        
+        // Estilizar las materias según el tipo
+        if (data.section === 'body' && data.column.index > 0 && !cellText.includes('recreo') && !cellText.includes('almuerzo') && cellText !== '-') {
+          // Extraer el nombre de la materia (primera línea)
+          const materiaNombre = data.cell.text[0]?.toLowerCase();
+          
+          // Asignar colores según la materia
+          if (materiaNombre?.includes('religión')) {
+            data.cell.styles.fillColor = [230, 230, 255]; // Azul claro
+          } else if (materiaNombre?.includes('matemática')) {
+            data.cell.styles.fillColor = [220, 240, 255]; // Celeste
+          } else if (materiaNombre?.includes('español')) {
+            data.cell.styles.fillColor = [255, 245, 220]; // Amarillo crema
+          } else if (materiaNombre?.includes('estudios sociales') || materiaNombre?.includes('cívica')) {
+            data.cell.styles.fillColor = [245, 225, 255]; // Lila
+          } else if (materiaNombre?.includes('ciencias') || materiaNombre?.includes('química') || materiaNombre?.includes('biología')) {
+            data.cell.styles.fillColor = [225, 255, 225]; // Verde claro
+          } else if (materiaNombre?.includes('inglés')) {
+            data.cell.styles.fillColor = [255, 225, 240]; // Rosa claro
+          } else {
+            data.cell.styles.fillColor = [245, 245, 245]; // Gris muy claro para otras materias
+          }
+        }
+      },
+      willDrawCell: function(data) {
+        // Opcional: bordes personalizados u otros ajustes visuales
+        if (data.section === 'body') {
+          // Nada adicional por ahora
+        }
       },
     });
 
+    // Agregar leyenda de colores al final
+    const legendY = doc.autoTable.previous.finalY + 20;
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text("Leyenda:", margin, legendY);
+    
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.text("• Las materias se muestran con diferentes colores para facilitar su identificación.", margin, legendY + 15);
+    doc.text("• Los recreos y almuerzos se muestran en amarillo.", margin, legendY + 30);
+
+    // Agregar número de página
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -351,14 +432,25 @@ export const HorarioEstu = () => {
       );
     }
 
+    // Nombre del archivo según el rol
     const nombreArchivo =
       role === 'estudiante'
         ? `Horario_${nombreEstudiante}_${apellidosEstudiante}.pdf`
         : `Horario_${seccionActual?.nombre_Seccion || 'SeccionDesconocida'}.pdf`;
 
     doc.save(nombreArchivo);
-
   };
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
+  if (cargando) {
+    return <div>Cargando datos...</div>;
+  }
+
+  // Inicializar estructura de filas procesadas por día
+  const processed = {};
+  dias.forEach(dia => { processed[dia] = new Set(); });
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 text-gray-800 dark:text-white">
@@ -447,51 +539,49 @@ export const HorarioEstu = () => {
                     </td>
 
                     {dias.map((dia) => {
-                      const bloques = agruparMateriasPorLeccion(dia);
-                      const bloque = bloques.find(
-                        (b) =>
-                          b.horarios.some(
-                            (h) =>
-                              h?.hora_inicio_Horario?.substring(0, 5) ===
-                              lessonTimes[lesson]?.start
-                          )
+                      // Si ya procesamos esta celda, la omitimos
+                      if (processed[dia].has(lessonIndex)) return null;
+                      // Obtener el horario de este día y lección
+                      const horario = horarios.find(
+                        h => h.dia_semana_Horario === dia &&
+                          h.hora_inicio_Horario?.substring(0,5) === lessonTimes[lesson].start
                       );
-
-                      if (!bloque || bloque.mostrado) return null;
-
-                      const primeraHora = bloque.horarios[0]?.hora_inicio_Horario;
-                      if (
-                        !primeraHora ||
-                        primeraHora.substring(0, 5) !== lessonTimes[lesson]?.start
-                      )
-                        return null;
-
-                      bloque.mostrado = true;
-
-                      const materia = bloque.materia;
+                      if (!horario) {
+                        return <td key={`${dia}-${lesson}`} className="px-2 py-2">-</td>;
+                      }
+                      const materia = horario.materia?.nombre_Materia || '-';
+                      // Calcular rowspan contando bloques consecutivos con misma materia
+                      let span = 1;
+                      for (let k = lessonIndex + 1; k < lessons.length; k++) {
+                        const next = horarios.find(
+                          h => h.dia_semana_Horario === dia &&
+                            h.hora_inicio_Horario?.substring(0,5) === lessonTimes[lessons[k]].start
+                        );
+                        if (next && next.materia?.nombre_Materia === materia) {
+                          span += 1;
+                        } else break;
+                      }
+                      // Marcar como procesadas esas filas para este día
+                      for (let i = lessonIndex; i < lessonIndex + span; i++) {
+                        processed[dia].add(i);
+                      }
+                      // Estilo del fondo
                       const isEspecial =
-                        materia.toLowerCase().includes('recreo') ||
-                        materia.toLowerCase().includes('almuerzo');
-
+                        materia.toLowerCase().includes('recreo') || materia.toLowerCase().includes('almuerzo');
                       const bgColor = isEspecial
                         ? 'bg-yellow-100 dark:bg-yellow-300 text-gray-900 font-bold'
                         : materia !== '-' && subjectColors[materia]
                           ? subjectColors[materia]
                           : 'bg-white dark:bg-gray-900';
-
                       return (
                         <td
                           key={`${dia}-${lesson}`}
-                          rowSpan={bloque.span}
+                          rowSpan={span}
                           className={`px-2 py-2 ${bgColor} border dark:border-gray-700 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900 transition duration-150 whitespace-nowrap`}
-                          onClick={() =>
-                            materia !== '-' && mostrarDetalles(bloque)
-                          }
+                          onClick={() => materia !== '-' && mostrarDetalles({ materia, span, horarios: Array(span).fill(horario) })}
                           title={`Materia: ${materia}`}
                         >
-                          <div className="font-semibold text-[11px] truncate leading-tight">
-                            {materia}
-                          </div>
+                          <div className="font-semibold text-[11px] truncate leading-tight">{materia}</div>
                         </td>
                       );
                     })}
