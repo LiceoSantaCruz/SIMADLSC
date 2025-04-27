@@ -24,6 +24,16 @@ export async function getSecciones() {
   }
   return await res.json();
 }
+export async function graduateUndecimoAPI() {
+  const res = await fetch(`${API_URL}/estudiantes/graduar-undecimo`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    const msg = await res.text();
+    throw new Error(`Error al graduar: ${msg}`);
+  }
+  return await res.json(); // Array de Estudiante[]
+}
 
 /**
  * Asigna una sección a múltiples matrículas.

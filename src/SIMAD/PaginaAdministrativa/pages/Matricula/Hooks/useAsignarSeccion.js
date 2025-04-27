@@ -1,4 +1,6 @@
+// src/Hooks/useAsignarSeccion.js
 import { useEffect, useState } from "react";
+import { graduateUndecimoAPI } from "../Service/asignarSeccionService";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -39,6 +41,20 @@ export function useAsignarSeccion() {
     fetchData();
   }, []);
 
+  async function onGraduateUndecimo() {
+    try {
+      setLoading(true);
+      setError(null);
+      const estudiantesGraduados = await graduateUndecimoAPI();
+      return estudiantesGraduados;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function onAssignSeccion(seccionId, matriculaIds) {
     try {
       setLoading(true);
@@ -54,8 +70,8 @@ export function useAsignarSeccion() {
       }
       const updated = await res.json();
       // Actualizamos la lista local: eliminamos las matrículas actualizadas
-      setMatriculas((prev) =>
-        prev.filter((mat) => !matriculaIds.includes(mat.id_Matricula))
+      setMatriculas(prev =>
+        prev.filter(mat => !matriculaIds.includes(mat.id_Matricula))
       );
       return updated;
     } catch (err) {
@@ -66,5 +82,5 @@ export function useAsignarSeccion() {
     }
   }
 
-  return { matriculas, secciones, loading, error, onAssignSeccion };
+  return { matriculas, secciones, loading, error, onAssignSeccion, onGraduateUndecimo };
 }

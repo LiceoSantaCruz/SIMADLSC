@@ -91,6 +91,20 @@ const EstudiantesService = {
       throw error;
     }
   },
+    // Actualizar sólo la sección de un estudiante
+    updateSeccion: async (id, seccionId) => {
+      try {
+        const response = await axiosInstance.patch(
+          `/estudiantes/${id}/seccion`,
+          { seccionId }
+        );
+        return response.data;
+      } catch (error) {
+        console.error('Error al actualizar sección del estudiante:', error);
+        throw error;
+      }
+    },
+  
 
   // Eliminar un estudiante
   deleteEstudiante: async (id) => {
@@ -113,6 +127,18 @@ const EstudiantesService = {
       throw error;
     }
   },
+
+  deactivateEstudiante: async (id) => {
+    try {
+      const response = await axiosInstance.patch(`/estudiantes/${id}/deactivate`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al desactivar estudiante:', error);
+      throw error;
+    }
+  },
+
+
 
   // Obtener niveles (para otros usos)
   getNiveles: async () => {
