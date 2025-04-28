@@ -203,46 +203,134 @@ export const FormularioMatriculaUnificado = () => {
     ) {
       missingFields.push("Grado");
     }
-    if (
-      !formData.estudiante.nombre_Estudiante ||
-      formData.estudiante.nombre_Estudiante.trim() === ""
-    ) {
-      missingFields.push("Nombre del estudiante");
-    }
-    if (
-      !formData.estudiante.apellido1_Estudiante ||
-      formData.estudiante.apellido1_Estudiante.trim() === ""
-    ) {
-      missingFields.push("Primer apellido del estudiante");
-    }
-
-    if (!formData.estudiante.cedula || formData.estudiante.cedula.trim() === "") {
-      missingFields.push("Cédula del estudiante");
-    } else {
-      const cedulaRegex = /^\d-\d{4}-\d{4}$/;
-      if (!cedulaRegex.test(formData.estudiante.cedula.trim())) {
-        missingFields.push("Cédula del estudiante (formato válido: 5-0442-0911)");
-      }
-    }
-
-    if (
-      !formData.estudiante.correo_estudiantil ||
-      formData.estudiante.correo_estudiantil.trim() === ""
-    ) {
-      missingFields.push("Correo estudiantil");
-    } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.estudiante.correo_estudiantil.trim())) {
-        missingFields.push("Correo estudiantil (debe ser un email válido)");
-      }
-    }
-
-    if (formData.estudiante.fecha_nacimiento) {
-      const birthDate = new Date(formData.estudiante.fecha_nacimiento);
-      if (isNaN(birthDate.getTime())) {
-        missingFields.push("Fecha de nacimiento (formato inválido)");
-      }
-    }
+        // Campos de estudiante
+        if (
+          !formData.estudiante.nombre_Estudiante ||
+          formData.estudiante.nombre_Estudiante.trim() === ""
+        ) {
+          missingFields.push("Nombre del estudiante");
+        }
+        if (
+          !formData.estudiante.apellido1_Estudiante ||
+          formData.estudiante.apellido1_Estudiante.trim() === ""
+        ) {
+          missingFields.push("Primer apellido del estudiante");
+        }
+        if (
+          !formData.estudiante.apellido2_Estudiante ||
+          formData.estudiante.apellido2_Estudiante.trim() === ""
+        ) {
+          missingFields.push("Segundo apellido del estudiante");
+        }
+        if (!formData.estudiante.edad || formData.estudiante.edad === "") {
+          missingFields.push("Edad del estudiante");
+        }
+        if (
+          !formData.estudiante.telefono ||
+          formData.estudiante.telefono.trim() === ""
+        ) {
+          missingFields.push("Teléfono del estudiante");
+        }
+        if (
+          !formData.estudiante.cedula ||
+          formData.estudiante.cedula.trim() === ""
+        ) {
+          missingFields.push("Cédula del estudiante");
+        }
+        if (
+          !formData.estudiante.correo_estudiantil ||
+          formData.estudiante.correo_estudiantil.trim() === ""
+        ) {
+          missingFields.push("Correo estudiantil");
+        } else {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(formData.estudiante.correo_estudiantil.trim())) {
+            missingFields.push("Correo estudiantil (debe ser un email válido)");
+          }
+        }
+        if (
+          !formData.estudiante.fecha_nacimiento ||
+          formData.estudiante.fecha_nacimiento.trim() === ""
+        ) {
+          missingFields.push("Fecha de nacimiento");
+        }
+        if (!formData.estudiante.sexo || formData.estudiante.sexo.trim() === "") {
+          missingFields.push("Sexo");
+        }
+        if (
+          !formData.estudiante.lugar_de_nacimiento ||
+          formData.estudiante.lugar_de_nacimiento.trim() === ""
+        ) {
+          missingFields.push("Lugar de nacimiento");
+        }
+        if (
+          !formData.estudiante.nacionalidad ||
+          formData.estudiante.nacionalidad.trim() === ""
+        ) {
+          missingFields.push("Nacionalidad del estudiante");
+        }
+        if (
+          !formData.estudiante.condicion_migratoria ||
+          formData.estudiante.condicion_migratoria.trim() === ""
+        ) {
+          missingFields.push("Condición migratoria");
+        }
+        if (
+          !formData.estudiante.Repite_alguna_materia ||
+          formData.estudiante.Repite_alguna_materia.trim() === ""
+        ) {
+          // Asignar un valor por defecto si está vacío
+          formData.estudiante.Repite_alguna_materia = "Ninguna";
+        }
+        if (
+          !formData.estudiante.institucion_de_procedencia ||
+          formData.estudiante.institucion_de_procedencia.trim() === ""
+        ) {
+          missingFields.push("Institución de procedencia");
+        }
+        if (
+          !formData.estudiante.tipo_de_adecuacion ||
+          formData.estudiante.tipo_de_adecuacion.trim() === ""
+        ) {
+          missingFields.push("Tipo de adecuación");
+        } else if (
+          !["N", "DA", "S", "NS"].includes(formData.estudiante.tipo_de_adecuacion)
+        ) {
+          missingFields.push("Tipo de adecuación (debe ser N, DA, S o NS)");
+        }
+        if (
+          !formData.estudiante.Presenta_alguna_enfermedad ||
+          formData.estudiante.Presenta_alguna_enfermedad.trim() === ""
+        ) {
+          // Valor por defecto
+          formData.estudiante.Presenta_alguna_enfermedad = "Ninguna";
+        }
+        if (
+          !formData.estudiante.medicamentos_que_debe_tomar ||
+          formData.estudiante.medicamentos_que_debe_tomar.trim() === ""
+        ) {
+          // Valor por defecto
+          formData.estudiante.medicamentos_que_debe_tomar = "Ninguno";
+        }
+        if (
+          !formData.estudiante.Ruta_de_viaje ||
+          formData.estudiante.Ruta_de_viaje.trim() === ""
+        ) {
+          // Valor por defecto
+          formData.estudiante.Ruta_de_viaje = "Ninguna";
+        }
+        if (
+          !formData.estudiante.recibe_religion ||
+          formData.estudiante.recibe_religion.trim() === ""
+        ) {
+          missingFields.push("Recibe religión");
+        }
+        if (
+          !formData.estudiante.presenta_carta ||
+          formData.estudiante.presenta_carta.trim() === ""
+        ) {
+          missingFields.push("Presenta carta");
+        }
 
     if (matriculaType === "extraordinaria") {
       if (

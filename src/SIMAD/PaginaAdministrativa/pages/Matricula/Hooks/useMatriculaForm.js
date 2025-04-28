@@ -131,7 +131,6 @@ export const useMatriculaForm = () => {
         },
       };
 
-      console.log("Datos de matrícula a enviar:", matriculaData);
       await createMatricula(matriculaData);
 
       Swal.fire({
