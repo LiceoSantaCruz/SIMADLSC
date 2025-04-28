@@ -209,7 +209,7 @@ export const SideBar = () => {
                   {(role === 'admin' || role === 'superadmin' || role === 'estudiante') && (
                     <Link to="/horario-estudiantes" className="block hover:text-green-400">Horario de estudiantes</Link>
                   )}
-                  {(role === 'admin' || role === 'superadmin') && (
+                  { (role === 'superadmin') && (
                     <Link to="/gestion-horario" className="block hover:text-green-400">Gestión Horario</Link>
                   )}
                 </div>

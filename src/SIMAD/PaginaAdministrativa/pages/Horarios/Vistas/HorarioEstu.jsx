@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback  } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
@@ -30,6 +30,38 @@ const lessonTimes = {
   "Recreo 4": { start: "14:45", end: "14:55" },
   "11": { start: "14:55", end: "15:35" },
   "12": { start: "15:35", end: "16:15" },
+};
+
+const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+
+const subjectColors = {
+  'Religión': 'bg-indigo-200',
+  'Español': 'bg-yellow-200',
+  'Estudios Sociales': 'bg-purple-200',
+  'Matemática': 'bg-blue-200',
+  'Inglés': 'bg-pink-200',
+  'Ciencias': 'bg-green-200',
+  'Química': 'bg-teal-200',
+  'Biología': 'bg-lime-200',
+  'Física': 'bg-orange-200',
+  'Educación Física': 'bg-rose-200',
+  'Educación para el Hogar': 'bg-cyan-200',
+  'Psicología': 'bg-fuchsia-200',
+  'Turismo': 'bg-violet-200',
+  'Francés': 'bg-emerald-200',
+  'Artes Plásticas': 'bg-red-200',
+  'Música': 'bg-indigo-300',
+  'Informática - Cómputo': 'bg-blue-300',
+  'Emprendedurismo': 'bg-amber-300',
+  'Sexualidad y Afectividad': 'bg-pink-300',
+  'Filosofía': 'bg-gray-300',
+  'Coordinación de Departamento': 'bg-yellow-300',
+  'Comité de Evaluación': 'bg-purple-300',
+  'Educación Cívica': 'bg-green-300',
+  'Formación Tecnológica': 'bg-teal-300',
+  'Guía': 'bg-lime-300',
+  'Orientación': 'bg-orange-300',
+  'Artes Industriales': 'bg-red-300',
 };
 
 export const HorarioEstu = () => {
@@ -73,6 +105,8 @@ export const HorarioEstu = () => {
     obtenerDatosIniciales();
   }, [role, estudianteId]);
 
+
+
   useEffect(() => {
     const obtenerHorarios = async () => {
       if (!seccionSeleccionada) return;
@@ -85,60 +119,33 @@ export const HorarioEstu = () => {
           a.hora_inicio_Horario.localeCompare(b.hora_inicio_Horario)
         );
         setHorarios(horariosOrdenados);
-        setCargando(false);
       } catch (error) {
-        console.error('Error al obtener los horarios:', error);
+        console.warn('Error al obtener los horarios:', error); // Solo muestra si hay error real
         setHorarios([]);
+      } finally {
         setCargando(false);
       }
     };
     obtenerHorarios();
   }, [seccionSeleccionada]);
+  
 
-  const convertirHora12 = (hora24) => {
+  const convertirHora12 = useCallback((hora24) => {
     if (!hora24 || typeof hora24 !== 'string' || !hora24.includes(':')) return 'Sin hora';
     const [hora, minuto] = hora24.split(':');
     let horaNum = parseInt(hora, 10);
     const ampm = horaNum >= 12 ? 'PM' : 'AM';
     horaNum = horaNum % 12 || 12;
     return `${horaNum}:${minuto} ${ampm}`;
-  };
+  }, []);
+  
+  const lessons = useMemo(() => {
+    return Object.entries(lessonTimes)
+      .sort(([, a], [, b]) => a.start.localeCompare(b.start))
+      .map(([key]) => key);
+  }, []);
 
-  const lessons = Object.entries(lessonTimes)
-    .sort(([, a], [, b]) => a.start.localeCompare(b.start))
-    .map(([key]) => key);
-
-  const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
-
-  const subjectColors = {
-    'Religión': 'bg-indigo-200',
-    'Español': 'bg-yellow-200',
-    'Estudios Sociales': 'bg-purple-200',
-    'Matemática': 'bg-blue-200',
-    'Inglés': 'bg-pink-200',
-    'Ciencias': 'bg-green-200',
-    'Química': 'bg-teal-200',
-    'Biología': 'bg-lime-200',
-    'Física': 'bg-orange-200',
-    'Educación Física': 'bg-rose-200',
-    'Educación para el Hogar': 'bg-cyan-200',
-    'Psicología': 'bg-fuchsia-200',
-    'Turismo': 'bg-violet-200',
-    'Francés': 'bg-emerald-200',
-    'Artes Plásticas': 'bg-red-200',
-    'Música': 'bg-indigo-300',
-    'Informática - Cómputo': 'bg-blue-300',
-    'Emprendedurismo': 'bg-amber-300',
-    'Sexualidad y Afectividad': 'bg-pink-300',
-    'Filosofía': 'bg-gray-300',
-    'Coordinación de Departamento': 'bg-yellow-300',
-    'Comité de Evaluación': 'bg-purple-300',
-    'Educación Cívica': 'bg-green-300',
-    'Formación Tecnológica': 'bg-teal-300',
-    'Guía': 'bg-lime-300',
-    'Orientación': 'bg-orange-300',
-    'Artes Industriales': 'bg-red-300',
-  };
+ 
 
   const agruparMateriasPorLeccion = (dia) => {
     const bloques = [];
@@ -183,7 +190,7 @@ export const HorarioEstu = () => {
     return map;
   }, [horarios]);
 
-  const mostrarDetalles = (bloque) => {
+  const mostrarDetalles = useCallback((bloque) => {
     if (!bloque || !bloque.horarios || bloque.horarios.length === 0) return;
 
     const { materia, horarios } = bloque;
@@ -240,9 +247,9 @@ export const HorarioEstu = () => {
         htmlContainer: 'text-start text-sm',
       },
     });
-  };
+  }, [convertirHora12]);
 
-  const exportarPdf = () => {
+  const exportarPdf = useCallback(() => {
     const doc = new jsPDF({
       orientation: 'landscape',
       unit: 'pt',
@@ -451,13 +458,25 @@ export const HorarioEstu = () => {
         : `Horario_${seccionActual?.nombre_Seccion || 'SeccionDesconocida'}.pdf`;
 
     doc.save(nombreArchivo);
-  };
+  }, [role, nombreEstudiante, apellidosEstudiante, secciones, seccionSeleccionada, seccion, horarios]);
 
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-md">
+          <strong className="font-bold">¡Error!</strong>
+          <span className="block sm:inline ml-2">{error}</span>
+        </div>
+      </div>
+    );
   }
+  
   if (cargando) {
-    return <div>Cargando datos...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-white"></div>
+      </div>
+    );
   }
 
   // Inicializar estructura de filas procesadas por día

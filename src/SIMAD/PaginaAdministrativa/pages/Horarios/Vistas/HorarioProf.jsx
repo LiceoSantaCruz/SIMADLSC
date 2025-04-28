@@ -28,6 +28,14 @@ const lessonTimes = {
   "12": { start: "15:35", end: "16:15" },
 };
 
+const convertirHora12 = (hora24) => {
+  const [hora, minuto] = hora24.split(':');
+  let horaNum = parseInt(hora, 10);
+  const ampm = horaNum >= 12 ? 'PM' : 'AM';
+  horaNum = horaNum % 12 || 12;
+  return `${horaNum}:${minuto} ${ampm}`;
+};
+
 export const HorarioProf = () => {
   const [profesores, setProfesores] = useState([]);
   const [idProfesorSeleccionado, setIdProfesorSeleccionado] = useState(null);
@@ -40,13 +48,7 @@ export const HorarioProf = () => {
   const idProfesorLocal = localStorage.getItem('id_profesor');
   const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
-  const convertirHora12 = (hora24) => {
-    const [hora, minuto] = hora24.split(':');
-    let horaNum = parseInt(hora, 10);
-    const ampm = horaNum >= 12 ? 'PM' : 'AM';
-    horaNum = horaNum % 12 || 12;
-    return `${horaNum}:${minuto} ${ampm}`;
-  };
+
 
   const agruparCeldas = (filas) => {
     const resultado = [];
