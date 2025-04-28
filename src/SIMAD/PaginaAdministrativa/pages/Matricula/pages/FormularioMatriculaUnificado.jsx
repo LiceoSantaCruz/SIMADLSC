@@ -2,7 +2,6 @@ import { useState } from "react";
 import Swal from "sweetalert2";
 import "@sweetalert2/theme-bulma/bulma.css";
 import { useMatriculaForm } from "../Hooks/useMatriculaForm";
-import { usePeriodos } from "../Hooks/usePeriodos";
 import useGrados from "../../Asistencias/Hook/useGrados";
 import axios from "axios"; // Asegúrate de importar axios si no está ya importado
 
@@ -17,7 +16,6 @@ export const FormularioMatriculaUnificado = () => {
     isSubmitting,
   } = useMatriculaForm();
 
-  const { periodos } = usePeriodos();
   const { grados } = useGrados();
 
   const [matriculaType, setMatriculaType] = useState("ordinaria");

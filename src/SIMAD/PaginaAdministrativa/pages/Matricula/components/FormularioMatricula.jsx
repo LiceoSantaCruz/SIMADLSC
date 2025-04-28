@@ -1,6 +1,5 @@
 import useGrados from "../../Asistencias/Hook/useGrados";
 import { useMatriculaForm } from "../Hooks/useMatriculaForm";
-import { usePeriodos } from "../Hooks/usePeriodos";
 import Swal from "sweetalert2";
 import "@sweetalert2/theme-bulma/bulma.css";
 import ActivarFormularioButton from "./ActivarFormularioButton";
@@ -37,7 +36,6 @@ export const FormularioMatricula = () => {
     isSubmitting,
   } = useMatriculaForm();
 
-  const { periodos } = usePeriodos();
   const { grados } = useGrados();
 
   // Obtenemos role y userId del localStorage (o de donde corresponda)
