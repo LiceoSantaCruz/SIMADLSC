@@ -24,6 +24,7 @@ export default function LoginPage() {
     }
 
     try {
+      // Limpia las claves antiguas
       localStorage.removeItem("token");
       localStorage.removeItem("role");
       localStorage.removeItem("id_Usuario");
@@ -93,16 +94,19 @@ export default function LoginPage() {
         return;
       }
 
-      try {
-        localStorage.setItem("token", token);
-        localStorage.setItem("role", role);
-        if (idProfesor) localStorage.setItem("id_profesor", idProfesor);
-        if (idEstudiante) localStorage.setItem("id_estudiante", idEstudiante);
-        if (materia) localStorage.setItem("materia", materia);
-        localStorage.setItem("user_data", JSON.stringify(userData));
-      } catch (err) {
-        console.error("Error al guardar en localStorage:", err);
+      // Guarda en localStorage usando la misma clave que luego lees
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", role);
+      if (idProfesor !== undefined) {
+        localStorage.setItem("id_Profesor", String(idProfesor));
       }
+      if (idEstudiante !== undefined) {
+        localStorage.setItem("id_Estudiante", String(idEstudiante));
+      }
+      if (materia !== undefined) {
+        localStorage.setItem("materia", materia);
+      }
+      localStorage.setItem("userData", JSON.stringify(userData));
 
       MySwal.fire({
         icon: "success",

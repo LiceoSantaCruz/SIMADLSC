@@ -95,60 +95,97 @@ export const SideBar = () => {
       
         {/* Contenido del sidebar */}
         <nav className="flex-1 px-2 space-y-1">
-          {/* Asistencia */}
-                 {/* Si el rol es "estudiante", mostramos solamente el link a "Mis Asistencias" */}
-        {role === 'estudiante' ? (
-          <div>
-            <Link
-              to="/mi-asistencia"
-              className="flex items-center px-2 py-2 rounded-md hover:bg-blue-500/10 transition"
-            >
-              <FaUserGraduate className="text-blue-400" />
-              {isOpen && <span className="ml-3">Mis Asistencias</span>}
-            </Link>
-          </div>
-        ) : (
-          <>
-            {/* Otras secciones del menú para roles admin, profesor, etc. */}
-            {/* Ejemplo de sección Asistencia */}
-            {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
-              <div>
-                <button
-                  onClick={() => toggleSection('asistencia')}
-                  className="flex items-center w-full px-2 py-2 rounded-md hover:bg-blue-500/10 transition group"
-                >
-                  <FaUserGraduate className="text-blue-400" />
-                  {isOpen && <span className="ml-3">Asistencia</span>}
-                  {isOpen && (
-                    <FaChevronDown
-                      className={`ml-auto transform transition-transform ${
-                        openSection === 'asistencia' ? 'rotate-180' : ''
-                      }`}
-                      size={12}
-                    />
-                  )}
-                </button>
-                {isOpen && openSection === 'asistencia' && (
-                  <div className="ml-8 text-sm text-black dark:text-white space-y-1">
-                    <Link to="/asistencia-estudiantes" className="block hover:text-blue-400">
-                      Asistencia estudiantes
-                    </Link>
-                    <Link to="/justificacion-ausencias" className="block hover:text-blue-400">
-                      Justificación ausencias
-                    </Link>
-                    <Link to="/reporte-asistencia" className="block hover:text-blue-400">
-                      Reporte asistencia
-                    </Link>
-                    <Link to="/gestion-asistencia" className="block hover:text-blue-400">
-                      Gestión asistencia
-                    </Link>
-                    <Link to="/reporte-asistencia-seccion" className="block py-1 text-sm hover:text-blue-500">
-                      Reporte asistencia sección
-                    </Link>
-                  </div>
-                )}
-              </div>
+  {/* Asistencia */}
+  {role === 'estudiante' ? (
+    <div>
+      <Link
+        to="/mi-asistencia"
+        className="flex items-center px-2 py-2 rounded-md hover:bg-blue-500/10 transition"
+      >
+        <FaUserGraduate className="text-blue-400" />
+        {isOpen && <span className="ml-3">Mis Asistencias</span>}
+      </Link>
+    </div>
+  ) : (
+    <>
+      {/* Admin & Superadmin: todas las opciones */}
+      {(role === 'admin' || role === 'superadmin') && (
+        <div>
+          <button
+            onClick={() => toggleSection('asistencia')}
+            className="flex items-center w-full px-2 py-2 rounded-md hover:bg-blue-500/10 transition group"
+          >
+            <FaUserGraduate className="text-blue-400" />
+            {isOpen && <span className="ml-3">Asistencia</span>}
+            {isOpen && (
+              <FaChevronDown
+                className={`ml-auto transform transition-transform ${
+                  openSection === 'asistencia' ? 'rotate-180' : ''
+                }`}
+                size={12}
+              />
             )}
+          </button>
+          {isOpen && openSection === 'asistencia' && (
+            <div className="ml-8 text-sm text-black dark:text-white space-y-1">
+              <Link to="/gestion-asistencia" className="block hover:text-blue-400">
+                Gestión asistencia
+              </Link>
+              <Link to="/justificacion-ausencias" className="block hover:text-blue-400">
+                Justificación ausencias
+              </Link>
+              <Link to="/reporte-asistencia" className="block hover:text-blue-400">
+                Reporte asistencia
+              </Link>
+              <Link
+                to="/reporte-asistencia-seccion"
+                className="block hover:text-blue-400"
+              >
+                Reporte asistencia sección
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Profesor: solo 3 rutas */}
+      {role === 'profesor' && (
+        <div>
+          <button
+            onClick={() => toggleSection('asistencia')}
+            className="flex items-center w-full px-2 py-2 rounded-md hover:bg-blue-500/10 transition group"
+          >
+            <FaUserGraduate className="text-blue-400" />
+            {isOpen && <span className="ml-3">Asistencia</span>}
+            {isOpen && (
+              <FaChevronDown
+                className={`ml-auto transform transition-transform ${
+                  openSection === 'asistencia' ? 'rotate-180' : ''
+                }`}
+                size={12}
+              />
+            )}
+          </button>
+          {isOpen && openSection === 'asistencia' && (
+            <div className="ml-8 text-sm text-black dark:text-white space-y-1">
+              <Link to="/asistencia-estudiantes" className="block hover:text-blue-400">
+                Asistencia estudiantes
+              </Link>
+              <Link to="/reporte-asistencia" className="block hover:text-blue-400">
+                Reporte asistencia
+              </Link>
+              <Link
+                to="/reporte-asistencia-seccion"
+                className="block hover:text-blue-400"
+              >
+                Reporte asistencia sección
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+      {/* Resto de secciones */}
+    
             {/* Resto de secciones (Eventos, Horarios, Matrícula, etc.) se mantienen */}
             {/* ... */}
           </>
@@ -273,7 +310,7 @@ export const SideBar = () => {
           )}
       
           {/* Gestión Académica */}
-          {(role === 'admin' || role === 'superadmin') && (
+          {(role === 'admin' || role === 'profesor' || role === 'superadmin') && (
     <div>
         <button
             onClick={() => toggleSection('gestionAcademica')}
@@ -292,32 +329,76 @@ export const SideBar = () => {
             )}
         </button>
         {isOpen && openSection === 'gestionAcademica' && (
-            <div
-                id="submenu-gestionAcademica"
-                role="region"
-                aria-labelledby="gestionAcademica-label"
-                className="ml-8 text-sm text-black dark:text-white space-y-1"
+          <div
+          id="submenu-gestionAcademica"
+          role="region"
+          aria-labelledby="gestionAcademica-label"
+          className="ml-8 text-sm text-black dark:text-white space-y-1"
+        >
+          {/* Superadmin: todo */}
+          {role === 'superadmin' && (
+            <>
+              <Link
+                to="/Gestion-grados"
+                className="flex items-center gap-2 hover:text-cyan-400 transition"
+              >
+                <FaListOl className="text-cyan-400" /> Grados
+              </Link>
+              <Link
+                to="/secciones"
+                className="flex items-center gap-2 hover:text-cyan-400 transition"
+              >
+                <FaThLarge className="text-cyan-400" /> Secciones
+              </Link>
+              <Link
+                to="/Gestion-aulas"
+                className="flex items-center gap-2 hover:text-cyan-400 transition"
+              >
+                <FaDoorOpen className="text-cyan-400" /> Aulas
+              </Link>
+              <Link
+                to="/Gestion-materias"
+                className="flex items-center gap-2 hover:text-cyan-400 transition"
+              >
+                <FaBookOpen className="text-cyan-400" /> Materias
+              </Link>
+              <Link
+                to="/busqueda-estudiantes"
+                className="flex items-center gap-2 hover:text-cyan-400 transition"
+              >
+                <FaUserGraduate className="text-cyan-400" /> Estudiantes
+              </Link>
+            </>
+          )}
+        
+          {/* Admin: sólo Secciones y Búsqueda de Estudiantes */}
+          {role === 'admin' && (
+            <>
+              <Link
+                to="/secciones"
+                className="flex items-center gap-2 hover:text-cyan-400 transition"
+              >
+                <FaThLarge className="text-cyan-400" /> Secciones
+              </Link>
+              <Link
+                to="/busqueda-estudiantes"
+                className="flex items-center gap-2 hover:text-cyan-400 transition"
+              >
+                <FaUserGraduate className="text-cyan-400" /> Estudiantes
+              </Link>
+            </>
+          )}
+        
+          {/* Profesor: sólo Búsqueda de Estudiantes */}
+          {role === 'profesor' && (
+            <Link
+              to="/busqueda-estudiantes"
+              className="flex items-center gap-2 hover:text-cyan-400 transition"
             >
-                <Link to="/Gestion-grados" className="flex items-center gap-2 hover:text-cyan-400 transition">
-                    <FaListOl className="text-cyan-400" /> Grados
-                </Link>
-
-                <Link to="/secciones" className="flex items-center gap-2 hover:text-cyan-400 transition">
-                    <FaThLarge className="text-cyan-400" /> Secciones
-                </Link>
-
-                <Link to="/Gestion-aulas" className="flex items-center gap-2 hover:text-cyan-400 transition">
-                    <FaDoorOpen className="text-cyan-400" /> Aulas
-                </Link>
-
-                <Link to="/Gestion-materias" className="flex items-center gap-2 hover:text-cyan-400 transition">
-                    <FaBookOpen className="text-cyan-400" /> Materias
-                </Link>
-
-                <Link to="/busqueda-estudiantes" className="flex items-center gap-2 hover:text-cyan-400 transition">
-                    <FaUserGraduate className="text-cyan-400" /> Estudiantes
-                </Link>
-            </div>
+              <FaUserGraduate className="text-cyan-400" /> Estudiantes
+            </Link>
+          )}
+        </div>
         )}
     </div>
 )}
