@@ -184,24 +184,36 @@ export const HorarioEstu = () => {
   }, [horarios]);
 
   const mostrarDetalles = (bloque) => {
-    if (!bloque || !Array.isArray(bloque.horarios) || bloque.horarios.length === 0) return;
+    if (!bloque || !bloque.horarios || bloque.horarios.length === 0) return;
 
     const { materia, horarios } = bloque;
 
     let detallesHTML = '';
-
-    horarios.forEach((h, index) => {
-      const horaInicio = convertirHora12(h?.hora_inicio_Horario);
+    
+    // Para cada lección dentro del bloque
+    for (let i = 0; i < horarios.length; i++) {
+      const h = horarios[i];
+      if (!h) continue;
+      
+      // Encontrar el número de lección actual basado en la hora de inicio
+      const horaInicio = h?.hora_inicio_Horario?.substring(0, 5);
+      const leccionActual = Object.entries(lessonTimes).find(
+        ([, value]) => value.start === horaInicio
+      );
+      const numeroLeccion = leccionActual ? leccionActual[0] : `Lección ${i + 1}`;
+      
+      // Formatear las horas para mostrar
+      const horaInicioFormateada = convertirHora12(h?.hora_inicio_Horario);
 
       let horaFin = 'Sin hora fin';
       if (h?.hora_final_Horario) {
         horaFin = convertirHora12(h.hora_final_Horario);
-      } else {
+      } else if (horaInicio) {
         const found = Object.entries(lessonTimes).find(
-          ([, value]) => value.start === h?.hora_inicio_Horario?.substring(0, 5)
+          ([, value]) => value.start === horaInicio
         );
         if (found) {
-          horaFin = convertirHora12(found[1].end);
+          horaFin = convertirHora12(`${found[1].end}:00`);
         }
       }
 
@@ -212,12 +224,12 @@ export const HorarioEstu = () => {
       const aulaNombre = h.aula?.nombre_Aula || 'N/A';
 
       detallesHTML += `
-        <b>Lección ${index + 1}:</b><br/>
-        <b>Hora:</b> ${horaInicio} - ${horaFin}<br/>
+        <b>Lección ${numeroLeccion}:</b><br/>
+        <b>Hora:</b> ${horaInicioFormateada} - ${horaFin}<br/>
         <b>Profesor:</b> ${profesorNombre}<br/>
         <b>Aula:</b> ${aulaNombre}<br/><br/>
       `;
-    });
+    }
 
     MySwal.fire({
       title: materia,
@@ -578,7 +590,17 @@ export const HorarioEstu = () => {
                           key={`${dia}-${lesson}`}
                           rowSpan={span}
                           className={`px-2 py-2 ${bgColor} border dark:border-gray-700 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900 transition duration-150 whitespace-nowrap`}
-                          onClick={() => materia !== '-' && mostrarDetalles({ materia, span, horarios: Array(span).fill(horario) })}
+                          onClick={() => materia !== '-' && mostrarDetalles({
+                            materia, 
+                            span, 
+                            horarios: lessons.slice(lessonIndex, lessonIndex + span).map(lessonKey => {
+                              // Para cada lección incluida en el span, buscar su horario correspondiente
+                              return horarios.find(h => 
+                                h.dia_semana_Horario === dia && 
+                                h.hora_inicio_Horario?.substring(0, 5) === lessonTimes[lessonKey]?.start
+                              ) || null;
+                            })
+                          })}
                           title={`Materia: ${materia}`}
                         >
                           <div className="font-semibold text-[11px] truncate leading-tight">{materia}</div>
