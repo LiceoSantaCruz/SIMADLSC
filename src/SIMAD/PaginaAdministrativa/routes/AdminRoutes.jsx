@@ -51,18 +51,28 @@ export const AdminRoutes = () => {
         
 
         {/* Rutas para asistencia, según rol */}
-        {(role === 'admin' || role === 'superadmin' || role === 'profesor') && (
-          <>
-            <Route path="/asistencia-estudiantes" element={<AsistenciaEst />} />
-            <Route path="/gestion-asistencia" element={<GestionAsistencia />} />
-            <Route path="/justificacion-ausencias" element={<JustificacionAusencias />} />
-            <Route path="/reporte-asistencia" element={<ReporteAsistencia />} />
-            <Route path="/reporte-asistencia-seccion" element={<ReporteAsistenciaSeccion />} />
-          </>
-        )}
-                {role === 'estudiante' && (
-          <Route path="/mi-asistencia" element={<MiAsistencia />} />
-        )}
+{(role === 'admin' || role === 'superadmin') && (
+  <>
+    <Route path="/asistencia-estudiantes" element={<AsistenciaEst />} />
+    <Route path="/gestion-asistencia" element={<GestionAsistencia />} />
+    <Route path="/justificacion-ausencias" element={<JustificacionAusencias />} />
+    <Route path="/reporte-asistencia" element={<ReporteAsistencia />} />
+    <Route path="/reporte-asistencia-seccion" element={<ReporteAsistenciaSeccion />} />
+  </>
+)}
+
+{role === 'profesor' && (
+  <>
+    <Route path="/asistencia-estudiantes" element={<AsistenciaEst />} />
+    <Route path="/reporte-asistencia" element={<ReporteAsistencia />} />
+    <Route path="/reporte-asistencia-seccion" element={<ReporteAsistenciaSeccion />} />
+  </>
+)}
+
+{role === 'estudiante' && (
+  <Route path="/mi-asistencia" element={<MiAsistencia />} />
+)}
+
 
         <Route path="/eventos" element={<Eventos />} />
         <Route path="/crear-eventos" element={<CrearEventos />} />
