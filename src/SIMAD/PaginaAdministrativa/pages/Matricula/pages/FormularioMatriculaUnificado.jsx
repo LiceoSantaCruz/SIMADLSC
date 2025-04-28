@@ -199,9 +199,6 @@ export const FormularioMatriculaUnificado = () => {
 
     let missingFields = [];
 
-    if (!formData.periodo || formData.periodo.trim() === "") {
-      missingFields.push("Periodo");
-    }
     if (
       !formData.estudiante.gradoId ||
       formData.estudiante.gradoId.toString().trim() === ""
@@ -362,28 +359,6 @@ export const FormularioMatriculaUnificado = () => {
         {page === 1 ? (
           <>
             <div className="flex justify-between">
-              <div>
-                <label className="block text-gray-700 dark:text-gray-100">Periodo:</label>
-                {periodos.length === 0 ? (
-                  <p>Cargando periodos...</p>
-                ) : (
-                  <select
-                    name="periodo"
-                    value={formData.periodo}
-                    onChange={handleChange}
-                    
-
-                    className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
-                  >
-                    <option value="">Seleccione un periodo</option>
-                    {periodos.map((periodo) => (
-                      <option key={periodo.id_Periodo} value={periodo.id_Periodo}>
-                        {periodo.nombre_Periodo}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </div>
 
               <div>
                 <label className="block text-gray-700 dark:text-gray-200">Grado:</label>

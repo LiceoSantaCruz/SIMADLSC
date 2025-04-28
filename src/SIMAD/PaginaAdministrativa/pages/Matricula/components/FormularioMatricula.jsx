@@ -403,9 +403,6 @@ export const FormularioMatricula = () => {
     const missingFields = [];
 
     // Verificar campos básicos
-    if (!formData.periodo || formData.periodo === "") {
-      missingFields.push("Periodo");
-    }
     if (!formData.estudiante.gradoId || formData.estudiante.gradoId === "") {
       missingFields.push("Grado");
     }
@@ -683,31 +680,6 @@ export const FormularioMatricula = () => {
           <>
             {/* Página 1: Datos del Estudiante */}
             <div className="flex justify-between">
-              <div>
-                <label className="block text-gray-700 dark:text-gray-200">
-                  Periodo:
-                </label>
-                {periodos.length === 0 ? (
-                  <p>Cargando periodos...</p>
-                ) : (
-                  <select
-                    name="periodo"
-                    value={formData.periodo}
-                    onChange={handleChange}
-                    className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
-                  >
-                    <option value="">Seleccione un periodo</option>
-                    {periodos.map((periodo) => (
-                      <option
-                        key={periodo.id_Periodo}
-                        value={periodo.id_Periodo}
-                      >
-                        {periodo.nombre_Periodo}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </div>
 
               <div>
                 <label className="block text-gray-700 dark:text-gray-200">
