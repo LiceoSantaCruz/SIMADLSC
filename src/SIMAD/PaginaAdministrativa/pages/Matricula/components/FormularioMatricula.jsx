@@ -7,6 +7,25 @@ import ActivarFormularioButton from "./ActivarFormularioButton";
 import { useEffect, useState } from "react";
 import axios from "axios"; // Asegúrate de importar axios si no está ya importado
 
+const validarCedulaUsuario = async (cedula, API_BASE_URL) => {
+  const idEst = localStorage.getItem("id_estudiante");
+  if (!idEst) return false;
+  try {
+    const { data } = await axios.get(`${API_BASE_URL}/estudiantes/${idEst}`);
+    return data.cedula.trim() === cedula.trim();
+  } catch {
+    return false;
+  }
+};
+
+const formatTime = (ms) => {
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${hours}h ${minutes}m ${seconds}s`;
+};
+
 export const FormularioMatricula = () => {
   const {
     page,
@@ -30,6 +49,7 @@ export const FormularioMatricula = () => {
   const [deadline, setDeadline] = useState(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isEditable, setIsEditable] = useState(false); // Controla si los campos son editables
+  const [timeToResend, setTimeToResend] = useState(null);
 
   // Cargamos el estado del formulario y el deadline desde localStorage al montar
   useEffect(() => {
@@ -64,13 +84,14 @@ export const FormularioMatricula = () => {
     const submittedTime = localStorage.getItem(`matricula-submitted-${userId}`);
     if (submittedTime) {
       const timeDiff = Date.now() - Number(submittedTime);
-      // 24 horas en milisegundos: 86400000
-      if (timeDiff < 86400000) {
+      const twentyFourHours = 86400000;
+      if (timeDiff < twentyFourHours) {
         setHasSubmitted(true);
+        setTimeToResend(twentyFourHours - timeDiff);
       } else {
-        // Si han pasado 24 horas, se elimina la marca y se permite enviar de nuevo
         localStorage.removeItem(`matricula-submitted-${userId}`);
         setHasSubmitted(false);
+        setTimeToResend(null);
       }
     }
   }, [userId]);
@@ -107,6 +128,17 @@ export const FormularioMatricula = () => {
         confirmButtonColor: "#2563EB",
       });
       return;
+    }
+
+    // 6.1) Validar cédula vs usuario logeado
+    const esValida = await validarCedulaUsuario(cedula, API_BASE_URL);
+    if (!esValida) {
+      return Swal.fire({
+        icon: "error",
+        title: "Cédula inválida",
+        text: "Solo puedes usar tu propia cédula.",
+        confirmButtonColor: "#2563EB",
+      });
     }
 
     try {
@@ -322,6 +354,29 @@ export const FormularioMatricula = () => {
   const onSubmitHandler = async (e) => {
     e.preventDefault();
 
+    const ced = formData.estudiante.cedula.trim();
+    const idEst = localStorage.getItem("id_estudiante");
+    try {
+      const { data: userData } = await axios.get(
+        `${API_BASE_URL}/estudiantes/${idEst}`
+      );
+      if (userData.cedula.trim() !== ced) {
+        return Swal.fire({
+          icon: "error",
+          title: "Cédula inválida",
+          text: "Solo puedes enviar tu propia cédula.",
+          confirmButtonColor: "#2563EB",
+        });
+      }
+    } catch {
+      return Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo validar la cédula.",
+        confirmButtonColor: "#2563EB",
+      });
+    }
+
     // Si ya se envió, mostramos aviso
     if (hasSubmitted) {
       Swal.fire({
@@ -406,10 +461,7 @@ export const FormularioMatricula = () => {
     ) {
       missingFields.push("Fecha de nacimiento");
     }
-    if (
-      !formData.estudiante.sexo ||
-      formData.estudiante.sexo.trim() === ""
-    ) {
+    if (!formData.estudiante.sexo || formData.estudiante.sexo.trim() === "") {
       missingFields.push("Sexo");
     }
     if (
@@ -588,9 +640,13 @@ export const FormularioMatricula = () => {
           Boleta de Matrícula Año 2025
         </h1>
         <p className="text-center text-green-600 dark:text-green-300">
-          ¡Ya has enviado tu formulario de matrícula! No es posible enviar más
-          de una vez.
+          ¡Ya has enviado tu formulario de matrícula!
         </p>
+        {timeToResend && (
+          <p className="text-center text-gray-700 dark:text-gray-300 mt-2">
+            Podrás reenviar el formulario en {formatTime(timeToResend)}.
+          </p>
+        )}
       </div>
     );
   }
@@ -692,20 +748,18 @@ export const FormularioMatricula = () => {
                 Nº Cédula o Pasaporte:
               </label>
               <div className="flex items-center space-x-2">
-                <input
+              <input
                   type="text"
                   name="estudiante.cedula"
                   value={formData.estudiante.cedula}
                   onChange={handleChange}
-                  onBlur={(e) => buscarEstudiantePorCedula(e.target.value)} // Llamar a la función al perder el foco
-                  placeholder="5-0432-0913"
+                  onBlur={(e) => buscarEstudiantePorCedula(e.target.value)}
+                  placeholder="5-0434-0022"
                   className="border p-2 rounded-md w-full bg-white dark:bg-gray-700 dark:text-white"
                 />
                 <button
                   type="button"
-                  onClick={() =>
-                    buscarEstudiantePorCedula(formData.estudiante.cedula)
-                  }
+                  onClick={() => buscarEstudiantePorCedula(formData.estudiante.cedula)}
                   className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
                 >
                   Buscar
@@ -906,7 +960,9 @@ export const FormularioMatricula = () => {
                   type="radio"
                   name="estudiante.condicion_migratoria"
                   value="ilegal"
-                  checked={formData.estudiante.condicion_migratoria === "ilegal"}
+                  checked={
+                    formData.estudiante.condicion_migratoria === "ilegal"
+                  }
                   onChange={handleChange}
                   readOnly={!isEditable} // Cambiado de disabled a readOnly
                   className="mr-2"
