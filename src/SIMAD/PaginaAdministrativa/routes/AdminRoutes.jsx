@@ -81,14 +81,14 @@ export const AdminRoutes = () => {
         <Route path="/eventos-edit/:id" element={<EventosEdit />} />
 
           {/* Rutas para horarios, según el rol */}
-          { (role === 'superadmin') && (
+          { (role === 'superadmin'|| role === 'admin') && (
             <>
               <Route path="/gestion-horario" element={<GestionHorario />} />
               <Route path="/horario-estudiantes" element={<HorarioEstu />} />
               <Route path="/horario-profesores" element={<HorarioProf />} />
             </>
           )}
-          {role === 'admin' ||role === 'profesor' && (
+          {role === 'admin' || role === 'profesor' && (
             <Route path="/horario-profesores" element={<HorarioProf />} />
           )}
           {role === 'admin' || role === 'estudiante' && (

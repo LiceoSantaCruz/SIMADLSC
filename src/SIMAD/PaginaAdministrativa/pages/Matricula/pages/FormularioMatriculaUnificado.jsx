@@ -12,7 +12,6 @@ export const FormularioMatriculaUnificado = () => {
     formData,
     handleChange,
     handleSubmit,
-    handleDownloadPDF,
     isSubmitting,
   } = useMatriculaForm();
 
@@ -976,13 +975,6 @@ export const FormularioMatriculaUnificado = () => {
                 className="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-600"
               >
                 {isSubmitting ? "Enviando..." : "Enviar"}
-              </button>
-              <button
-                type="button"
-                onClick={handleDownloadPDF}
-                className="bg-green-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-green-600"
-              >
-                Descargar PDF
               </button>
               <button
                 type="button"
