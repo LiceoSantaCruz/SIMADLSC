@@ -85,6 +85,8 @@ export default function LoginPage() {
       const userData = data.user_data;
       const materia = data.payload?.materia;
 
+     
+
       if (!role) {
         MySwal.fire({
           icon: "error",
@@ -108,10 +110,7 @@ export default function LoginPage() {
       }
       localStorage.setItem("userData", JSON.stringify(userData));
 
-      console.log('Login exitoso:');
-      console.log('Token:', token);
-      console.log('Rol:', role);
-      console.log('id_Profesor:', idProfesor);
+     
       MySwal.fire({
         icon: "success",
         title: "Éxito",

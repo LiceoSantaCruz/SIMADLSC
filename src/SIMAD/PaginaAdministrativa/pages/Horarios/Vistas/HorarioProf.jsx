@@ -45,7 +45,7 @@ export const HorarioProf = () => {
   const [error, setError] = useState(null);
 
   const role = localStorage.getItem('role');
-  const idProfesorLocal = localStorage.getItem('id_profesor');
+  const idProfesorLocal = localStorage.getItem('id_Profesor');
   const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
 
@@ -98,19 +98,44 @@ export const HorarioProf = () => {
         setError('Error al cargar la lista de profesores.');
       }
     };
+  
     if (role === 'admin' || role === 'superadmin') {
       obtenerProfesores();
     }
   }, [role]);
+  
 
   useEffect(() => {
     const obtenerDatosProfesorYHorario = async () => {
       try {
-        let profesorId = idProfesorSeleccionado;
-        if (role === 'profesor') profesorId = idProfesorLocal;
-        if (!profesorId) return;
-
-        // Datos del profesor
+        // Siempre convertir a número (si existe)
+        const idProfesorLocalNumero = idProfesorLocal !== null ? Number(idProfesorLocal) : null;
+        let profesorId = null;
+  
+        // 🥇 Primero prioridad: si hay id_profesor en localStorage (rol profesor)
+        if (idProfesorLocalNumero !== null) {
+          profesorId = idProfesorLocalNumero;
+        }
+  
+        // 🥈 Segundo prioridad: si hay profesor seleccionado (admin/superadmin)
+        if (!profesorId && idProfesorSeleccionado !== null) {
+          profesorId = Number(idProfesorSeleccionado);
+        }
+  
+  
+        // Si no hay ID, usar nombre/apellidos almacenados del login
+        if (profesorId === null) {
+          const nombreGuardado = localStorage.getItem('nombre_Profesor') || '';
+          const apellido1Guardado = localStorage.getItem('apellido1_Profesor') || '';
+          const apellido2Guardado = localStorage.getItem('apellido2_Profesor') || '';
+  
+          setNombreProfesor(nombreGuardado);
+          setApellidosProfesor(`${apellido1Guardado} ${apellido2Guardado}`);
+          console.warn("No hay ID de profesor, usando datos de login guardados.");
+          return;
+        }
+  
+        // Fetch datos del profesor
         const profesorResponse = await fetch(`${API_BASE_URL}/profesores/${profesorId}`, {
           method: 'GET',
           headers: {
@@ -118,13 +143,16 @@ export const HorarioProf = () => {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         });
+  
         if (!profesorResponse.ok)
           throw new Error('Error al obtener los datos del profesor.');
+  
         const profesorData = await profesorResponse.json();
+  
         setNombreProfesor(profesorData.nombre_Profesor);
         setApellidosProfesor(`${profesorData.apellido1_Profesor} ${profesorData.apellido2_Profesor}`);
-
-        // Horarios del profesor
+  
+        // Fetch horarios del profesor
         const horariosResponse = await fetch(`${API_BASE_URL}/horarios/profesor/${profesorId}`, {
           method: 'GET',
           headers: {
@@ -132,11 +160,13 @@ export const HorarioProf = () => {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         });
+  
         if (!horariosResponse.ok)
           throw new Error('Error al obtener los horarios del profesor.');
+  
         const horariosData = await horariosResponse.json();
+  
         if (Array.isArray(horariosData)) {
-          // Ordenamos por hora de inicio y, si son iguales, por hora de fin
           const horariosOrdenados = horariosData.sort((a, b) => {
             const startComparison = a.hora_inicio_Horario.localeCompare(b.hora_inicio_Horario);
             return startComparison !== 0 ? startComparison : a.hora_fin_Horario.localeCompare(b.hora_fin_Horario);
@@ -145,13 +175,17 @@ export const HorarioProf = () => {
         } else {
           setHorarios([]);
         }
+  
       } catch (error) {
-        console.error('Error al obtener datos:', error);
+        console.warn('Error al obtener los datos del profesor y horarios:', error);
         setError('Error de conexión con el servidor o credenciales inválidas.');
       }
     };
+  
     obtenerDatosProfesorYHorario();
   }, [idProfesorSeleccionado, role, idProfesorLocal]);
+  
+  
 
   const lessons = Object.keys(lessonTimes).sort((a, b) =>
     lessonTimes[a].start.localeCompare(lessonTimes[b].start)

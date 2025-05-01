@@ -75,7 +75,7 @@ export const HorarioEstu = () => {
   const [cargando, setCargando] = useState(true);
 
   const role = localStorage.getItem('role');
-  const estudianteId = localStorage.getItem('id_estudiante');
+  const estudianteId = localStorage.getItem('id_Estudiante');
 
   useEffect(() => {
     const obtenerDatosIniciales = async () => {
