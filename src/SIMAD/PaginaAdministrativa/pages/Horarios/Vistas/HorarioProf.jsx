@@ -177,19 +177,19 @@ export const HorarioProf = () => {
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
 
-    const profesorSeleccionado = role === 'profesor'
-      ? `${nombreProfesor} ${apellidosProfesor}`
-      : profesores.find(p => String(p.id_Profesor) === String(idProfesorSeleccionado));
+    const profesorSeleccionado = profesores.find(
+      (p) => p.id_Profesor === Number(idProfesorSeleccionado)
+    );
 
     const nombreCompleto = typeof profesorSeleccionado === 'string'
       ? profesorSeleccionado
       : profesorSeleccionado
         ? `${profesorSeleccionado.nombre_Profesor} ${profesorSeleccionado.apellido1_Profesor} ${profesorSeleccionado.apellido2_Profesor}`
         : 'Profesor Desconocido';
-
+      
     const fecha = new Date().toLocaleDateString('es-CR');
 
-    const title = `Horario de ${nombreCompleto}`;
+    const title = `Horario de ${nombreProfesor} ${apellidosProfesor}`;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
     const titleX = (pageWidth - doc.getTextWidth(title)) / 2;
@@ -315,23 +315,19 @@ export const HorarioProf = () => {
           </select>
         </div>
       )}
+<div className="flex justify-between items-center mb-4">
+  <h2 className="text-xl font-semibold">
+    Horario de {nombreProfesor} {apellidosProfesor}
+  </h2>
+  <button
+    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition"
+    onClick={exportarPdf}
+    disabled={role !== 'profesor' && !idProfesorSeleccionado}
+  >
+    Exportar Horario como PDF
+  </button>
+</div>
 
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">
-          {role === 'profesor'
-            ? `Horario de ${nombreProfesor} ${apellidosProfesor}`
-            : idProfesorSeleccionado
-              ? `Horario de ${profesores.find(p => p.id_Profesor === Number(idProfesorSeleccionado))?.nombre_Profesor || ''}`
-              : 'Selecciona un profesor para ver su horario'}
-        </h2>
-        <button
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition"
-          onClick={exportarPdf}
-          disabled={!idProfesorSeleccionado && role !== 'profesor'}
-        >
-          Exportar Horario como PDF
-        </button>
-      </div>
       
 
       {horarios.length > 0 ? (

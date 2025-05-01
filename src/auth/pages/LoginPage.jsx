@@ -98,15 +98,16 @@ export default function LoginPage() {
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
       if (idProfesor !== undefined) {
-        localStorage.setItem("id_Profesor", String(idProfesor));
+        localStorage.setItem("id_Profesor", idProfesor);
       }
       if (idEstudiante !== undefined) {
-        localStorage.setItem("id_Estudiante", String(idEstudiante));
+        localStorage.setItem("id_Estudiante", idEstudiante);
       }
       if (materia !== undefined) {
         localStorage.setItem("materia", materia);
       }
       localStorage.setItem("userData", JSON.stringify(userData));
+
 
       MySwal.fire({
         icon: "success",
