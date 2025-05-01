@@ -108,7 +108,10 @@ export default function LoginPage() {
       }
       localStorage.setItem("userData", JSON.stringify(userData));
 
-
+      console.log('Login exitoso:');
+      console.log('Token:', token);
+      console.log('Rol:', role);
+      console.log('id_Profesor:', idProfesor);
       MySwal.fire({
         icon: "success",
         title: "Éxito",
