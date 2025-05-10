@@ -23,7 +23,7 @@ export const GestionHorario = () => {
   const [horarios, setHorarios] = useState([]);
   const [horarioEdit, setHorarioEdit] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(27);
   const [seccionSeleccionada, setSeccionSeleccionada] = useState('');
   const { data: grados, loading: loadingGrados, error: errorGrados } = useFetch(
     `${API_BASE_URL}/grados`
@@ -56,7 +56,7 @@ export const GestionHorario = () => {
 
   // Para estudiantes, la sección viene de su información
   const role = localStorage.getItem('role');
-  const estudianteId = localStorage.getItem('id_estudiante');
+  const estudianteId = localStorage.getItem('id_Estudiante');
 
   useEffect(() => {
     const obtenerDatosIniciales = async () => {
