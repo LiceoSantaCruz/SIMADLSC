@@ -21,7 +21,7 @@ const MiAsistencia = () => {
 
   // Al montar el componente, obtenemos el ID del estudiante
   useEffect(() => {
-    const storedId = localStorage.getItem("id_estudiante");
+    const storedId = localStorage.getItem("id_Estudiante");
     if (storedId) {
       setStudentId(storedId);
     }

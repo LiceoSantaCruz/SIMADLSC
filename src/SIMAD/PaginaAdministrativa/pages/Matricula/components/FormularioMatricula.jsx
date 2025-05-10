@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import axios from "axios"; // Asegúrate de importar axios si no está ya importado
 
 const validarCedulaUsuario = async (cedula, API_BASE_URL) => {
-  const idEst = localStorage.getItem("id_estudiante");
+  const idEst = localStorage.getItem("id_Estudiante");
   if (!idEst) return false;
   try {
     const { data } = await axios.get(`${API_BASE_URL}/estudiantes/${idEst}`);
