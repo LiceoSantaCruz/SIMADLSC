@@ -25,6 +25,7 @@ export const GestionHorario = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(27);
   const [seccionSeleccionada, setSeccionSeleccionada] = useState('');
+
   const { data: grados, loading: loadingGrados, error: errorGrados } = useFetch(
     `${API_BASE_URL}/grados`
   );
@@ -61,11 +62,10 @@ export const GestionHorario = () => {
   useEffect(() => {
     const obtenerDatosIniciales = async () => {
       try {
-        if (role === 'admin' || role === 'superadmin') {
-          // Ya se obtiene la lista de secciones mediante useFetch
-        }
         if (role === 'estudiante' && estudianteId) {
-          const responseEstudiante = await fetch(`${API_BASE_URL}/estudiantes/${estudianteId}`);
+          const responseEstudiante = await fetch(
+            `${API_BASE_URL}/estudiantes/${estudianteId}`
+          );
           const dataEstudiante = await responseEstudiante.json();
           setSeccionSeleccionada(dataEstudiante.seccion?.id_Seccion || '');
         }
@@ -81,47 +81,61 @@ export const GestionHorario = () => {
     setCurrentPage(1);
   }, [seccionSeleccionada]);
 
-  // Filtro: si se selecciona una sección, se muestran solo esos horarios; si no, todos
+  // Filtro de sección
   const horariosFiltrados = useMemo(() => {
     return seccionSeleccionada
       ? horarios.filter((h) => h.seccion?.id_Seccion === Number(seccionSeleccionada))
       : horarios;
   }, [seccionSeleccionada, horarios]);
 
+  // Confirmación y eliminación de todos los horarios
+  const handleDeleteAll = async () => {
+    const result = await MySwal.fire({
+      title: '¿Eliminar todos los horarios?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#e53e3e',
+      cancelButtonColor: '#a0aec0',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/horarios`, { method: 'DELETE' });
+        if (!res.ok) throw new Error();
+        setHorarios([]);
+        refetchHorarios();
+        MySwal.fire('Eliminados', 'Todos los horarios han sido eliminados.', 'success');
+      } catch {
+        MySwal.fire('Error', 'No se pudieron eliminar los horarios.', 'error');
+      }
+    }
+  };
+
+  // Abrir / cerrar formulario
   const toggleFormulario = () => {
     setFormularioAbierto(!formularioAbierto);
     setHorarioEdit(null);
   };
 
+  // Manejadores de éxito en crear/editar
   const handleSubmitSuccess = (nuevoHorario) => {
-    setHorarios((prevHorarios) => [...prevHorarios, nuevoHorario]);
-    Swal.fire({
-      icon: 'success',
-      title: 'Horario registrado exitosamente.',
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'OK',
-    });
+    setHorarios((prev) => [...prev, nuevoHorario]);
+    MySwal.fire({ icon: 'success', title: 'Horario registrado exitosamente.', confirmButtonText: 'OK' });
     refetchHorarios();
     setFormularioAbierto(false);
   };
-
   const handleEditHorario = (horario) => {
     setFormularioAbierto(true);
     setHorarioEdit(horario);
   };
-
   const handleUpdateHorario = (horarioActualizado) => {
-    setHorarios((prevHorarios) =>
-      prevHorarios.map((horario) =>
-        horario.id_Horario === horarioActualizado.id_Horario ? horarioActualizado : horario
-      )
+    setHorarios((prev) =>
+      prev.map((h) => (h.id_Horario === horarioActualizado.id_Horario ? horarioActualizado : h))
     );
-    Swal.fire({
-      icon: 'success',
-      title: 'Horario actualizado exitosamente.',
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'OK',
-    });
+    MySwal.fire({ icon: 'success', title: 'Horario actualizado exitosamente.', confirmButtonText: 'OK' });
     setHorarioEdit(null);
     setFormularioAbierto(false);
     refetchHorarios();
@@ -145,106 +159,69 @@ export const GestionHorario = () => {
     errorHorarios,
   ].some(Boolean);
 
-  const formatearHora = (hora24) => {
-    if (!hora24) return 'N/A';
-    const [hora, minuto] = hora24.split(':');
-    let horaNum = parseInt(hora, 10);
-    const ampm = horaNum >= 12 ? 'PM' : 'AM';
-    horaNum = horaNum % 12 || 12;
-    return `${horaNum}:${minuto} ${ampm}`;
+  // Función para formatear hora
+  const formatearHora = (h) => {
+    if (!h) return 'N/A';
+    const [hora, min] = h.split(':');
+    let num = parseInt(hora, 10);
+    const ampm = num >= 12 ? 'PM' : 'AM';
+    num = num % 12 || 12;
+    return `${num}:${min} ${ampm}`;
   };
 
+  // Exportar a PDF
   const exportarPdf = () => {
     if (horariosFiltrados.length === 0) {
-      Swal.fire({
-        icon: 'info',
-        title: 'No hay horarios para exportar.',
-        confirmButtonText: 'OK',
-      });
+      MySwal.fire({ icon: 'info', title: 'No hay horarios para exportar.', confirmButtonText: 'OK' });
       return;
     }
     const doc = new jsPDF();
     doc.setFontSize(16);
     doc.text('Gestión de Horarios', 14, 22);
 
-    const tableColumn = [
-      'ID',
-      'Grado',
-      'Sección',
-      'Materia',
-      'Profesor',
-      'Aula',
-      'Día',
-      'Hora Inicio',
-      'Hora Fin',
-    ];
-    const tableRows = [];
-    horariosFiltrados.forEach((horario) => {
-      const grado = horario.seccion?.gradoId || 'N/A';
-      const seccion = horario.seccion?.nombre_Seccion || 'N/A';
-      const materia = horario.materia?.nombre_Materia || 'N/A';
-      const profesor = horario.profesor
-        ? `${horario.profesor.nombre_Profesor} ${horario.profesor.apellido1_Profesor} ${horario.profesor.apellido2_Profesor}`
-        : 'N/A';
-      const aula = horario.aula?.nombre_Aula || 'N/A';
-      tableRows.push([
-        horario.id_Horario,
-        grado,
-        seccion,
-        materia,
-        profesor,
-        aula,
-        horario.dia_semana_Horario,
-        formatearHora(horario.hora_inicio_Horario),
-        formatearHora(horario.hora_fin_Horario),
-      ]);
-    });
+    const cols = ['ID','Grado','Sección','Materia','Profesor','Aula','Día','Hora Inicio','Hora Fin'];
+    const rows = horariosFiltrados.map((h) => [
+      h.id_Horario,
+      h.seccion?.gradoId || 'N/A',
+      h.seccion?.nombre_Seccion || 'N/A',
+      h.materia?.nombre_Materia || 'N/A',
+      h.profesor
+        ? `${h.profesor.nombre_Profesor} ${h.profesor.apellido1_Profesor} ${h.profesor.apellido2_Profesor}`
+        : 'N/A',
+      h.aula?.nombre_Aula || 'N/A',
+      h.dia_semana_Horario,
+      formatearHora(h.hora_inicio_Horario),
+      formatearHora(h.hora_fin_Horario),
+    ]);
 
-    doc.autoTable({
-      head: [tableColumn],
-      body: tableRows,
-      startY: 30,
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [100, 100, 100] },
-      theme: 'striped',
-      margin: { top: 20 },
-    });
-    doc.save(`Gestion_Horarios.pdf`);
+    doc.autoTable({ head: [cols], body: rows, startY: 30, styles: { fontSize: 10 }, theme: 'striped', margin: { top: 20 } });
+    doc.save('Gestion_Horarios.pdf');
   };
 
-  // Paginación: calcular la porción actual según la página
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentHorarios = horariosFiltrados.slice(indexOfFirstItem, indexOfLastItem);
-
-  // Lógica para limitar la cantidad de botones a 6
+  // Paginación
   const totalPages = Math.ceil(horariosFiltrados.length / itemsPerPage);
-  const maxButtons = 6;
-  let startPage, endPage;
-  if (totalPages <= maxButtons) {
-    startPage = 1;
-    endPage = totalPages;
-  } else {
-    if (currentPage <= Math.floor(maxButtons / 2)) {
-      startPage = 1;
-      endPage = maxButtons;
-    } else if (currentPage + Math.floor(maxButtons / 2) - 1 >= totalPages) {
-      startPage = totalPages - maxButtons + 1;
-      endPage = totalPages;
-    } else {
-      startPage = currentPage - Math.floor(maxButtons / 2) + 1;
-      endPage = startPage + maxButtons - 1;
-    }
-  }
+  const indexLast = currentPage * itemsPerPage;
+  const indexFirst = indexLast - itemsPerPage;
+  const currentHorarios = horariosFiltrados.slice(indexFirst, indexLast);
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const maxButtons = 6;
+  let startPage = 1;
+  let endPage = totalPages <= maxButtons
+    ? totalPages
+    : currentPage <= Math.floor(maxButtons/2)
+      ? maxButtons
+      : currentPage + Math.floor(maxButtons/2) - 1 >= totalPages
+        ? totalPages
+        : currentPage - Math.floor(maxButtons/2) + 1 + maxButtons - 1;
+
+  const paginate = (num) => setCurrentPage(num);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 text-gray-900 dark:text-white">
       <div className="max-w-5xl mx-auto px-4">
         <h1 className="text-4xl font-extrabold text-center mb-8">Gestión de Horarios</h1>
 
-        {/* Filtro por Sección */}
+        {/* Filtro por sección */}
         {(role === 'admin' || role === 'superadmin') && !formularioAbierto && secciones && (
           <div className="mb-6">
             <label className="block text-lg font-medium mb-2 text-gray-700 dark:text-gray-200">
@@ -265,7 +242,7 @@ export const GestionHorario = () => {
           </div>
         )}
 
-        {/* Botones */}
+        {/* Botones de acción */}
         <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
           <ToggleButton
             label={formularioAbierto ? 'Cerrar Formulario' : 'Crear Horario'}
@@ -274,20 +251,24 @@ export const GestionHorario = () => {
             color="green"
           />
           <button
+            className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md transition disabled:opacity-50"
+            onClick={handleDeleteAll}
+            disabled={horarios.length === 0 || isLoading}
+            title={horarios.length === 0 ? "No hay horarios para eliminar" : "Eliminar todos los horarios"}
+          >
+            Eliminar Todos los Horarios
+          </button>
+          <button
             className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition disabled:opacity-50"
             onClick={exportarPdf}
             disabled={horariosFiltrados.length === 0 || isLoading}
-            title={
-              horariosFiltrados.length === 0
-                ? "No hay horarios para exportar"
-                : "Exportar todos los horarios como PDF"
-            }
+            title={horariosFiltrados.length === 0 ? "No hay horarios para exportar" : "Exportar todos los horarios como PDF"}
           >
             Exportar Todos los Horarios como PDF
           </button>
         </div>
 
-        {/* Estados */}
+        {/* Estado de carga / error */}
         {isLoading && <LoadingIndicator />}
         {hasError && (
           <ErrorMessage message="Hubo un problema al cargar los datos. Por favor, intenta nuevamente." />
@@ -322,9 +303,8 @@ export const GestionHorario = () => {
                       secciones={secciones}
                     />
                   </div>
-                  {/* Paginación personalizada */}
+                  {/* Paginación */}
                   <div className="flex justify-center items-center mt-6 space-x-2">
-                    {/* Botón anterior */}
                     <button
                       onClick={() => setCurrentPage((prev) => prev - 1)}
                       disabled={currentPage === 1}
@@ -340,15 +320,14 @@ export const GestionHorario = () => {
                           onClick={() => paginate(pageNumber)}
                           className={`mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition font-medium ${
                             currentPage === pageNumber
-                              ? "bg-blue-600 text-white hover:bg-blue-700"
-                              : "bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-500"
+                              ? 'bg-blue-600 text-white hover:bg-blue-700'
+                              : 'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-500'
                           }`}
                         >
                           {pageNumber}
                         </button>
                       );
                     })}
-                    {/* Botón siguiente */}
                     <button
                       onClick={() => setCurrentPage((prev) => prev + 1)}
                       disabled={currentPage === totalPages}

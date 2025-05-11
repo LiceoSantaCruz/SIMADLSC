@@ -25,7 +25,6 @@ const BusquedaEstudiantes = () => {
   const cargarEstudiantes = async () => {
     try {
       const data = await EstudiantesService.findByFilters(filters);
-      // Ordenar únicamente por primer apellido
       data.sort((a, b) =>
         a.apellido1_Estudiante.localeCompare(b.apellido1_Estudiante, 'es', { sensitivity: 'base' })
       );
@@ -161,6 +160,7 @@ const BusquedaEstudiantes = () => {
                   <th className="px-6 py-3 text-left">Apellido 2</th>
                   <th className="px-6 py-3 text-left">Nombre</th>
                   <th className="px-6 py-3 text-left">Cédula</th>
+                  <th className="px-6 py-3 text-left">Estado</th>
                   <th className="px-6 py-3 text-left">Acciones</th>
                 </tr>
               </thead>
@@ -183,6 +183,15 @@ const BusquedaEstudiantes = () => {
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                         {est.cedula}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={
+                          inactive 
+                            ? 'text-red-600 dark:text-red-400' 
+                            : 'text-green-600 dark:text-green-400'
+                        }>
+                          {est.estado_Estudiante}
+                        </span>
                       </td>
                       <td className="px-6 py-4 flex space-x-3">
                         <Link
