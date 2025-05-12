@@ -40,7 +40,7 @@ export const ReporteAsistencia = () => {
       Swal.fire({
         icon: "warning",
         title: "Validación",
-        text: "Por favor, ingresa la cédula o el nombre del estudiante.",
+        text: "Por favor, ingresa la cédula del estudiante.",
         confirmButtonColor: "#2563EB",
       });
       return;
@@ -141,7 +141,7 @@ export const ReporteAsistencia = () => {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-950 p-6 text-gray-800 dark:text-gray-100 transition-colors duration-300">
       {/* Encabezado */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Gestión de Reportes de Asistencia</h1>
+        <h1 className="text-2xl font-bold">Gestión de reportes de asistencia</h1>
         <p className="text-gray-600 dark:text-gray-300">
           Consulta y gestiona los reportes de asistencia por cédula o nombre del estudiante y fechas.
         </p>
@@ -152,7 +152,7 @@ export const ReporteAsistencia = () => {
         <form className="grid grid-cols-1 md:grid-cols-3 gap-4" onSubmit={handleSubmit}>
           <div>
             <label htmlFor="cedula" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-              Cédula o Nombre del Estudiante
+              Cédula del Estudiante
             </label>
             <input
               type="text"
@@ -171,7 +171,7 @@ export const ReporteAsistencia = () => {
 
           <div>
             <label htmlFor="fechaInicio" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-              Fecha de Inicio
+              Fecha de inicio
             </label>
             <input
               type="date"
@@ -188,7 +188,7 @@ export const ReporteAsistencia = () => {
 
           <div>
             <label htmlFor="fechaFin" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-              Fecha Final
+              Fecha final
             </label>
             <input
               type="date"
@@ -216,7 +216,7 @@ export const ReporteAsistencia = () => {
               }}
               className="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm"
             >
-              <option value="">Seleccionar Periodo</option>
+              <option value="">Seleccionar periodo</option>
               {periodos.map((periodo) => (
                 <option key={periodo.id_Periodo} value={periodo.id_Periodo}>
                   {periodo.nombre_Periodo}
@@ -292,7 +292,7 @@ export const ReporteAsistencia = () => {
               onClick={handleExportPDF}
               className="w-full bg-green-700 hover:bg-green-800 text-white p-2 rounded-md shadow focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
             >
-              Exportar Reporte a PDF
+              Exportar reporte a PDF
             </button>
           </div>
         </>

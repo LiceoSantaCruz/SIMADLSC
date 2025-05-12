@@ -78,7 +78,7 @@ const MiAsistencia = () => {
   return (
     <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
       <h1 className="text-3xl font-bold text-center mb-4 dark:text-white">
-        Mis Asistencias
+        Mi asistencia
       </h1>
 
       <form
@@ -88,7 +88,7 @@ const MiAsistencia = () => {
         {/* Fecha Inicio */}
         <div className="flex flex-col">
           <label htmlFor="fechaInicio" className="mb-1 text-gray-700 dark:text-gray-200">
-            Fecha Inicio
+            Fecha inicio
           </label>
           <input
             type="date"
@@ -101,7 +101,7 @@ const MiAsistencia = () => {
         {/* Fecha Fin */}
         <div className="flex flex-col">
           <label htmlFor="fechaFin" className="mb-1 text-gray-700 dark:text-gray-200">
-            Fecha Fin
+            Fecha fin
           </label>
           <input
             type="date"
@@ -122,21 +122,21 @@ const MiAsistencia = () => {
       {/* Totales ya contados por el backend */}
       <div className="mb-4 text-center dark:text-gray-300 space-y-1">
         <p>
-          <span className="font-semibold">Ausencias Totales:</span>{" "}
+          <span className="font-semibold">Ausencias totales:</span>{" "}
           {resumen.total_ausencias}
         </p>
         <p>
-          <span className="font-semibold">Escapados Totales:</span>{" "}
+          <span className="font-semibold">Escapadas totales:</span>{" "}
           {resumen.total_escapados}
         </p>
         <p>
-          <span className="font-semibold">Justificados Totales:</span>{" "}
+          <span className="font-semibold">Justificados totales:</span>{" "}
           {resumen.total_justificados}
         </p>
       </div>
 
       <h2 className="text-2xl font-semibold mb-4 dark:text-white">
-        Resumen por Materia
+        Resumen por materia
       </h2>
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 dark:border-gray-600">
