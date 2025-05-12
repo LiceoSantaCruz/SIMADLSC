@@ -1,13 +1,15 @@
+// File: src/Pages/GestionAsistencia.jsx
 import { useEffect, useState, useMemo } from "react";
 import { useDatosIniciales } from "./Hook/useDatosIniciales";
 import {
-  actualizarAsistencia,
-  eliminarAsistencia,
   obtenerGestionAsistencias,
   obtenerTodasLasAsistencias,
+  actualizarAsistencia,
+  eliminarAsistencia,
+  deleteAllAsistencias
 } from "./Services/GestionAsistenciaService";
 import { usePeriodos } from "./Hook/usePeriodos";
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 import Swal from "sweetalert2";
 import "@sweetalert2/theme-bulma/bulma.css";
@@ -26,20 +28,12 @@ export const GestionAsistencia = () => {
   });
   const [error, setError] = useState("");
 
-  // Paginación: 20 items por página, máximo 100 registros.
+  // Paginación: 15 items por página, máximo 100 registros.
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
 
-  /**
-   * parseError:
-   * Retorna siempre un mensaje amigable para el usuario,
-   * sin exponer detalles técnicos del error.
-   */
-  const parseError = (_err, defaultMessage) => {
-    return defaultMessage;
-  };
+  const parseError = (_err, defaultMessage) => defaultMessage;
 
-  // Función de validación para los filtros de búsqueda
   const validateFiltros = () => {
     if (!filtros.periodo || !filtros.grado || !filtros.materia || !filtros.seccion) {
       return {
@@ -70,28 +64,21 @@ export const GestionAsistencia = () => {
         );
         setError(errorMessage);
         setAsistencias([]);
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: errorMessage,
-          confirmButtonColor: "#2563EB",
-        });
+        Swal.fire({ icon: "error", title: "Error", text: errorMessage, confirmButtonColor: "#2563EB" });
       }
     };
-
     fetchAsistencias();
   }, []);
 
   const handleBuscar = async () => {
     const { isValid, message } = validateFiltros();
     if (!isValid) {
-      Swal.fire({
+      return Swal.fire({
         icon: "warning",
         title: "Validación",
         text: message,
         confirmButtonColor: "#2563EB",
       });
-      return;
     }
     try {
       const data = await obtenerGestionAsistencias(filtros);
@@ -111,7 +98,6 @@ export const GestionAsistencia = () => {
         err,
         "Ocurrió un problema durante la búsqueda. Por favor, verifique los datos ingresados y vuelva a intentarlo."
       );
-      console.error("Error al obtener las asistencias:", err);
       setError(errorMessage);
       setAsistencias([]);
       Swal.fire({
@@ -149,63 +135,56 @@ export const GestionAsistencia = () => {
       preConfirm: () => {
         const estado = document.getElementById("swal-input1").value;
         const lecciones = document.getElementById("swal-input2").value;
-        if (!estado) {
-          Swal.showValidationMessage("El campo Estado es obligatorio");
-        }
+        if (!estado) Swal.showValidationMessage("El campo Estado es obligatorio");
         return { estado, lecciones };
       },
     });
 
-    if (formValues) {
-      const newLecciones = formValues.lecciones
-        .split(",")
-        .map((l) => l.trim())
-        .filter((l) => l !== "")
-        .join(", ");
-      const oldLecciones = Array.isArray(asistencia.lecciones)
-        ? asistencia.lecciones.join(", ")
-        : asistencia.lecciones;
-      if (formValues.estado === asistencia.estado && newLecciones === oldLecciones) {
-        Swal.fire({
-          icon: "warning",
-          title: "Sin cambios",
-          text: "No se detectaron cambios en la asistencia.",
-          confirmButtonColor: "#2563EB",
-        });
-        return;
-      }
-      const updatedData = {
-        estado: formValues.estado,
-        lecciones: formValues.lecciones
-          .split(",")
-          .map((l) => l.trim())
-          .filter((l) => l !== ""),
-      };
-      try {
-        await actualizarAsistencia(asistencia.asistencia_id, updatedData);
-        setAsistencias(
-          asistencias.map((a) =>
-            a.asistencia_id === asistencia.asistencia_id ? { ...a, ...updatedData } : a
-          )
-        );
-        Swal.fire({
-          icon: "success",
-          title: "Actualización exitosa",
-          confirmButtonColor: "#2563EB",
-        });
-      } catch (err) {
-        const errorMessage = parseError(
-          err,
-          "Error al actualizar la asistencia. Por favor, intente de nuevo."
-        );
-        console.error(err);
-        Swal.fire({
-          icon: "error",
-          title: "Error al actualizar la asistencia",
-          text: errorMessage,
-          confirmButtonColor: "#2563EB",
-        });
-      }
+    if (!formValues) return;
+
+    const newLecciones = formValues.lecciones
+      .split(",")
+      .map((l) => l.trim())
+      .filter((l) => l)
+      .join(", ");
+    const oldLecciones = Array.isArray(asistencia.lecciones)
+      ? asistencia.lecciones.join(", ")
+      : asistencia.lecciones;
+    if (formValues.estado === asistencia.estado && newLecciones === oldLecciones) {
+      return Swal.fire({
+        icon: "warning",
+        title: "Sin cambios",
+        text: "No se detectaron cambios en la asistencia.",
+        confirmButtonColor: "#2563EB",
+      });
+    }
+    const updatedData = {
+      estado: formValues.estado,
+      lecciones: formValues.lecciones.split(",").map((l) => l.trim()).filter((l) => l),
+    };
+    try {
+      await actualizarAsistencia(id, updatedData);
+      setAsistencias(
+        asistencias.map((a) =>
+          a.asistencia_id === id ? { ...a, ...updatedData } : a
+        )
+      );
+      Swal.fire({
+        icon: "success",
+        title: "Actualización exitosa",
+        confirmButtonColor: "#2563EB",
+      });
+    } catch (err) {
+      const errorMessage = parseError(
+        err,
+        "Error al actualizar la asistencia. Por favor, intente de nuevo."
+      );
+      Swal.fire({
+        icon: "error",
+        title: "Error al actualizar la asistencia",
+        text: errorMessage,
+        confirmButtonColor: "#2563EB",
+      });
     }
   };
 
@@ -219,100 +198,90 @@ export const GestionAsistencia = () => {
       cancelButtonText: "Cancelar",
       confirmButtonColor: "#2563EB",
     });
-    if (result.isConfirmed) {
-      try {
-        await eliminarAsistencia(id);
-        setAsistencias((prev) => prev.filter((a) => a.asistencia_id !== id));
-        Swal.fire({
-          icon: "success",
-          title: "Eliminado",
-          text: "La asistencia ha sido eliminada correctamente.",
-          confirmButtonColor: "#2563EB",
-        });
-      } catch (err) {
-        const errorMessage = parseError(
-          err,
-          "Error al eliminar la asistencia. Por favor, intente de nuevo."
-        );
-        setError(errorMessage);
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: errorMessage,
-          confirmButtonColor: "#2563EB",
-        });
-      }
+    if (!result.isConfirmed) return;
+    try {
+      await eliminarAsistencia(id);
+      setAsistencias((prev) => prev.filter((a) => a.asistencia_id !== id));
+      Swal.fire({
+        icon: "success",
+        title: "Eliminado",
+        text: "La asistencia ha sido eliminada correctamente.",
+        confirmButtonColor: "#2563EB",
+      });
+    } catch (err) {
+      const errorMessage = parseError(
+        err,
+        "Error al eliminar la asistencia. Por favor, intente de nuevo."
+      );
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: errorMessage,
+        confirmButtonColor: "#2563EB",
+      });
     }
   };
 
-  // Cálculo de paginación: se limita el total de asistencias a 100.
+  const handleDeleteAll = async () => {
+    const { isConfirmed } = await Swal.fire({
+      title: "¿Eliminar todas las asistencias?",
+      text: "Esta acción no se puede deshacer.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#e53e3e",
+      cancelButtonColor: "#a0aec0",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    });
+    if (!isConfirmed) return;
+    try {
+      await deleteAllAsistencias();
+      setAsistencias([]);
+      Swal.fire("¡Eliminado!", "Todas las asistencias han sido eliminadas.", "success");
+    } catch {
+      Swal.fire("Error", "No se pudieron eliminar las asistencias.", "error");
+    }
+  };
+
+  // Cálculo de paginación
   const totalItems = Math.min(asistencias.length, 100);
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
   const paginatedAsistencias = asistencias.slice(indexOfFirst, indexOfLast);
 
-  // ---------------- Paginación personalizada ----------------
   const maxButtons = 6;
   let startPage, endPage;
   if (totalPages <= maxButtons) {
     startPage = 1;
     endPage = totalPages;
+  } else if (currentPage <= Math.floor(maxButtons / 2)) {
+    startPage = 1;
+    endPage = maxButtons;
+  } else if (currentPage + Math.floor(maxButtons / 2) - 1 >= totalPages) {
+    startPage = totalPages - maxButtons + 1;
+    endPage = totalPages;
   } else {
-    if (currentPage <= Math.floor(maxButtons / 2)) {
-      startPage = 1;
-      endPage = maxButtons;
-    } else if (currentPage + Math.floor(maxButtons / 2) - 1 >= totalPages) {
-      startPage = totalPages - maxButtons + 1;
-      endPage = totalPages;
-    } else {
-      startPage = currentPage - Math.floor(maxButtons / 2) + 1;
-      endPage = startPage + maxButtons - 1;
-    }
+    startPage = currentPage - Math.floor(maxButtons / 2) + 1;
+    endPage = startPage + maxButtons - 1;
   }
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-  // ---------------------------------------------------------
 
   return (
     <div className="p-6 bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300 min-h-screen">
-      <h1 className="text-2xl font-bold mb-4">Gestión de Asistencias</h1>
-  
+      <h1 className="text-2xl font-bold mb-4">Gestión de ssistencias</h1>
+
       <p className="mb-2 text-sm text-gray-700 dark:text-gray-300">
-        Por favor seleccione Periodo, Grado, Materia y Sección antes de realizar la búsqueda.
+        Por favor seleccione periodo, grado, materia y sección antes de realizar la búsqueda.
       </p>
-  
+
       <div className="mb-4 grid grid-cols-1 md:grid-cols-5 gap-4">
-        {/* Filtros */}
         {[
-          {
-            name: "periodo",
-            label: "Seleccionar Periodo",
-            options: periodos,
-            key: "id_Periodo",
-            text: "nombre_Periodo"
-          },
-          {
-            name: "grado",
-            label: "Seleccionar Grado",
-            options: grados,
-            key: "id_grado",
-            text: "nivel"
-          },
-          {
-            name: "materia",
-            label: "Seleccionar Materia",
-            options: materias,
-            key: "id_Materia",
-            text: "nombre_Materia"
-          },
-          {
-            name: "seccion",
-            label: "Seleccionar Sección",
-            options: secciones,
-            key: "id_Seccion",
-            text: "nombre_Seccion"
-          },
+          { name: "periodo", label: "Seleccionar Periodo", options: periodos, key: "id_Periodo", text: "nombre_Periodo" },
+          { name: "grado", label: "Seleccionar Grado", options: grados, key: "id_grado", text: "nivel" },
+          { name: "materia", label: "Seleccionar Materia", options: materias, key: "id_Materia", text: "nombre_Materia" },
+          { name: "seccion", label: "Seleccionar Sección", options: secciones, key: "id_Seccion", text: "nombre_Seccion" },
         ].map(({ name, label, options, key, text }) => (
           <select
             key={name}
@@ -329,7 +298,7 @@ export const GestionAsistencia = () => {
             ))}
           </select>
         ))}
-  
+
         <input
           type="date"
           name="fecha"
@@ -337,16 +306,21 @@ export const GestionAsistencia = () => {
           onChange={handleChange}
           className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded px-4 py-2"
         />
-  
+
         <button
           onClick={handleBuscar}
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition"
         >
           Buscar
         </button>
+        <button
+          onClick={handleDeleteAll}
+          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition"
+        >
+          Eliminar registro de asistencia
+        </button>
       </div>
-  
-      {/* Tabla de resultados */}
+
       {paginatedAsistencias.length > 0 ? (
         <table className="min-w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md overflow-hidden">
           <thead>
@@ -409,8 +383,8 @@ export const GestionAsistencia = () => {
       ) : (
         <p className="text-gray-700 dark:text-gray-300">No se encontraron asistencias.</p>
       )}
-  
-      {/* Paginación personalizada */}
+
+      {/* Paginación */}
       <div className="flex justify-center items-center gap-2 mt-4">
         <button
           onClick={() => currentPage > 1 && setCurrentPage((prev) => prev - 1)}

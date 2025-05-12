@@ -216,7 +216,7 @@ export const SideBar = () => {
                   </>
                 )}
                 {role === 'superadmin' && (
-                  <Link to="/gestion-eventos" className="block hover:text-pink-400">Gestión Eventos</Link>
+                  <Link to="/gestion-eventos" className="block hover:text-pink-400">Gestión eventos</Link>
                 )}
               </div>
             )}
@@ -247,7 +247,7 @@ export const SideBar = () => {
                     <Link to="/horario-estudiantes" className="block hover:text-green-400">Horario de estudiantes</Link>
                   )}
                   { (role === 'superadmin') && (
-                    <Link to="/gestion-horario" className="block hover:text-green-400">Gestión Horario</Link>
+                    <Link to="/gestion-horario" className="block hover:text-green-400">Gestión horario</Link>
                   )}
                 </div>
               )}
@@ -275,7 +275,7 @@ export const SideBar = () => {
                   <Link to="/formulario-matricula" className="block hover:text-purple-400">Formulario</Link>
                   {(role === 'admin' || role === 'superadmin') && (
                     <>
-                      <Link to="/matricula-ordinaria-extraordinaria" className="block hover:text-purple-400">Matricula Ordinaria - Extraordinaria</Link>
+                      <Link to="/matricula-ordinaria-extraordinaria" className="block hover:text-purple-400">Matricula ordinaria - extraordinaria</Link>
                       <Link to="/asignar-seccion" className="block hover:text-purple-400">Asignar sección</Link>
                       <Link to="/gestion-matricula" className="block hover:text-purple-400">Gestión matricula</Link>
                     </>
@@ -303,7 +303,7 @@ export const SideBar = () => {
               </button>
               {isOpen && openSection === 'usuarios' && (
                 <div className="ml-8 text-sm text-black dark:text-white space-y-1">
-                  <Link to="/gestion-usuarios" className="block hover:text-red-400">Gestión Usuarios</Link>
+                  <Link to="/gestion-usuarios" className="block hover:text-red-400">Gestión usuarios</Link>
                 </div>
               )}
             </div>

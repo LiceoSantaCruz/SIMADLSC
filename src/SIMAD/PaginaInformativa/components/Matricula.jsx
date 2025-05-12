@@ -37,12 +37,13 @@ export const Matricula = () => {
             Para completar el proceso de matrícula, deberás subir los siguientes documentos:
           </p>
           <ul class="list-disc list-inside mb-4 text-sm text-gray-700">
-            <li>Copia de las notas.</li>
+            <li>Copia de las últimas notas emitidas.</li>
             <li>Copia de la cédula del padre, madre o encargado legal.</li>
             <li>Copia de la cédula del estudiante.</li>
+            <li>Foto tipo pasaporte en formato JPG o PNG.</li>
           </ul>
           <p class="mb-4 text-sm text-gray-700">
-            Los documentos deben ser subidos en formato PDF y ser lo suficientemente claros y legibles. Recuerda que este formulario se llena en una única ocasión.
+            Los documentos deben ser subidos en formato PDF (y la foto tipo pasaporte en JPG/PNG) y ser lo suficientemente claros y legibles. Recuerda que este formulario se llena en una única ocasión.
           </p>
           <div class="flex items-center mt-4">
             <input type="checkbox" id="termsCheckbox" class="mr-2" />

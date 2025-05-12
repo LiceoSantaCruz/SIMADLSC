@@ -91,7 +91,7 @@ export const GestionHorario = () => {
   // Confirmación y eliminación de todos los horarios
   const handleDeleteAll = async () => {
     const result = await MySwal.fire({
-      title: '¿Eliminar todos los horarios?',
+      title: '¿Desea eliminar todos los horarios?',
       text: 'Esta acción no se puede deshacer.',
       icon: 'warning',
       showCancelButton: true,

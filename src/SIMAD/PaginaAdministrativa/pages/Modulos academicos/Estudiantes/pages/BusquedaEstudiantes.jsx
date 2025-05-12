@@ -11,10 +11,15 @@ const MySwal = withReactContent(Swal);
 
 const BusquedaEstudiantes = () => {
   const { estudiantes, setEstudiantes, loading, error } = UseFetchEstudiantes();
-  const [filters, setFilters] = useState({ nombre: '', apellido: '', cedula: '' });
+  const [filters, setFilters] = useState({
+    nombre: '',
+    apellido: '',
+    cedula: '',
+    estado: ''   // <-- filtro de estado
+  });
   const [errorMessage, setErrorMessage] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const studentsPerPage = 10;
+  const studentsPerPage = 20;
   const role = localStorage.getItem('role');
 
   useEffect(() => {
@@ -24,10 +29,13 @@ const BusquedaEstudiantes = () => {
 
   const cargarEstudiantes = async () => {
     try {
-      const data = await EstudiantesService.findByFilters(filters);
+      let data = await EstudiantesService.findByFilters(filters);
       data.sort((a, b) =>
         a.apellido1_Estudiante.localeCompare(b.apellido1_Estudiante, 'es', { sensitivity: 'base' })
       );
+      if (filters.estado) {
+        data = data.filter(est => est.estado_Estudiante === filters.estado);
+      }
       setEstudiantes(data);
       setErrorMessage('');
     } catch {
@@ -121,7 +129,7 @@ const BusquedaEstudiantes = () => {
         </div>
       )}
 
-      <form onSubmit={handleFilterSubmit} className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+      <form onSubmit={handleFilterSubmit} className="mb-6 grid grid-cols-1 md:grid-cols-5 gap-4">
         <input
           name="nombre"
           placeholder="Nombre"
@@ -143,6 +151,17 @@ const BusquedaEstudiantes = () => {
           onChange={handleFilterChange}
           className="p-2 border rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+        <select
+          name="estado"
+          value={filters.estado}
+          onChange={handleFilterChange}
+          className="p-2 border rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">Todos los Estados</option>
+          <option value="Activo">Activos</option>
+          <option value="Inactivo">Inactivos</option>
+          <option value="Graduado">Graduados</option>
+        </select>
         <button type="submit" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition">
           Buscar
         </button>
@@ -186,9 +205,11 @@ const BusquedaEstudiantes = () => {
                       </td>
                       <td className="px-6 py-4 text-sm">
                         <span className={
-                          inactive 
-                            ? 'text-red-600 dark:text-red-400' 
-                            : 'text-green-600 dark:text-green-400'
+                          est.estado_Estudiante === 'Graduado'
+                            ? 'text-blue-600 dark:text-blue-400'
+                            : inactive 
+                              ? 'text-red-600 dark:text-red-400' 
+                              : 'text-green-600 dark:text-green-400'
                         }>
                           {est.estado_Estudiante}
                         </span>
@@ -200,27 +221,17 @@ const BusquedaEstudiantes = () => {
                         >
                           Info
                         </Link>
-                        {(role === 'admin' || role === 'superadmin') && (
+                        {(role === 'admin' || role === 'superadmin') && est.estado_Estudiante === 'Activo' && (
                           <>
                             <button
                               onClick={() => handleDeactivate(est.id_Estudiante)}
-                              disabled={inactive}
-                              className={`px-2 py-1 rounded text-sm transition ${
-                                inactive
-                                  ? 'bg-red-600 text-white cursor-not-allowed'
-                                  : 'bg-green-500 hover:bg-green-600 text-white'
-                              }`}
+                              className="px-2 py-1 rounded text-sm bg-green-500 hover:bg-green-600 text-white transition"
                             >
                               Inactivar
                             </button>
                             <button
                               onClick={() => handleChangeSection(est)}
-                              disabled={inactive}
-                              className={`px-2 py-1 rounded text-sm transition ${
-                                inactive
-                                  ? 'bg-gray-400 text-white cursor-not-allowed'
-                                  : 'bg-yellow-500 hover:bg-yellow-600 text-white'
-                              }`}
+                              className="px-2 py-1 rounded text-sm bg-yellow-500 hover:bg-yellow-600 text-white transition"
                             >
                               Cambiar Sección
                             </button>

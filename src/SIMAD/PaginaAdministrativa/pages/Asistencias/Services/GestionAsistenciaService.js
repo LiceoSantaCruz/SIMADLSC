@@ -30,3 +30,7 @@ export const obtenerGestionAsistencias = async (filtros) => {
   export const eliminarAsistencia = async (id) => {
     await axios.delete(`${API_URL}/asistencias/${id}`);
   };
+
+  export const deleteAllAsistencias = async () => {
+  await axios.delete(`${API_URL}/asistencias`);
+};

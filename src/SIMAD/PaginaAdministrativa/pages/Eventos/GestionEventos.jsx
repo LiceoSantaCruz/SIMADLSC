@@ -4,7 +4,14 @@ import EventosService from './Service/EventosService';
 import UseFetchEventos from './Hook/UseFetchEventos';
 import Swal from 'sweetalert2';
 import '@sweetalert2/theme-bulma/bulma.css';
-import { FaInfoCircle, FaPlus, FaEdit, FaTrash, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import {
+  FaInfoCircle,
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaChevronLeft,
+  FaChevronRight,
+} from 'react-icons/fa';
 
 // Función para formatear la hora al formato HH:MM
 const formatTime = (timeStr) => {
@@ -77,6 +84,7 @@ const GestionEventos = () => {
       confirmButtonColor: '#10B981',
       cancelButtonColor: '#EF4444',
       confirmButtonText: 'Sí, aprobar',
+      cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
         approveEvento(id);
@@ -93,6 +101,7 @@ const GestionEventos = () => {
       confirmButtonColor: '#EF4444',
       cancelButtonColor: '#2563EB',
       confirmButtonText: 'Sí, rechazar',
+      cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
         rejectEvento(id);
@@ -109,6 +118,7 @@ const GestionEventos = () => {
       confirmButtonColor: '#EF4444',
       cancelButtonColor: '#2563EB',
       confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
         deleteEvento(id);
@@ -131,6 +141,7 @@ const GestionEventos = () => {
       `,
       icon: 'info',
       confirmButtonColor: '#2563EB',
+      cancelButtonText: 'Cancelar'  // opcional en info modal, no muestra cancelButton by default
     });
   };
 
@@ -143,12 +154,11 @@ const GestionEventos = () => {
         title: 'Aprobado',
         text: 'El evento ha sido aprobado.',
         confirmButtonColor: '#2563EB',
+        cancelButtonText: 'Cancelar'
       }).then(() => {
-        setData((prevEventos) =>
-          prevEventos.map((evento) =>
-            evento.id_Evento === id
-              ? { ...evento, estadoEvento: { nombre: 'Aprobado' } }
-              : evento
+        setData((prev) =>
+          prev.map((e) =>
+            e.id_Evento === id ? { ...e, estadoEvento: { nombre: 'Aprobado' } } : e
           )
         );
       });
@@ -158,6 +168,7 @@ const GestionEventos = () => {
         title: 'Error',
         text: err.response?.data?.message || 'Error al aprobar el evento',
         confirmButtonColor: '#2563EB',
+        cancelButtonText: 'Cancelar'
       });
     }
   };
@@ -170,12 +181,11 @@ const GestionEventos = () => {
         title: 'Rechazado',
         text: 'El evento ha sido rechazado.',
         confirmButtonColor: '#2563EB',
+        cancelButtonText: 'Cancelar'
       }).then(() => {
-        setData((prevEventos) =>
-          prevEventos.map((evento) =>
-            evento.id_Evento === id
-              ? { ...evento, estadoEvento: { nombre: 'Rechazado' } }
-              : evento
+        setData((prev) =>
+          prev.map((e) =>
+            e.id_Evento === id ? { ...e, estadoEvento: { nombre: 'Rechazado' } } : e
           )
         );
       });
@@ -185,6 +195,7 @@ const GestionEventos = () => {
         title: 'Error',
         text: err.response?.data?.message || 'Error al rechazar el evento',
         confirmButtonColor: '#2563EB',
+        cancelButtonText: 'Cancelar'
       });
     }
   };
@@ -197,8 +208,9 @@ const GestionEventos = () => {
         title: 'Eliminado',
         text: 'El evento ha sido eliminado.',
         confirmButtonColor: '#2563EB',
+        cancelButtonText: 'Cancelar'
       }).then(() => {
-        setData((prevEventos) => prevEventos.filter((evento) => evento.id_Evento !== id));
+        setData((prev) => prev.filter((e) => e.id_Evento !== id));
       });
     } catch (err) {
       Swal.fire({
@@ -206,6 +218,7 @@ const GestionEventos = () => {
         title: 'Error',
         text: err.response?.data?.message || 'Error al eliminar el evento',
         confirmButtonColor: '#2563EB',
+        cancelButtonText: 'Cancelar'
       });
     }
   };
@@ -213,30 +226,22 @@ const GestionEventos = () => {
   // useEffect principal para filtrar y ordenar
   useEffect(() => {
     if (eventos) {
-      // 1) Filtrar
       const filtered = eventos.filter((evento) => {
-        // Estado
         const matchesEstado =
           filterStatus === 'Todos'
             ? true
             : evento.estadoEvento?.nombre.trim().toLowerCase() ===
               filterStatus.trim().toLowerCase();
-
-        // Dirigido a
         const matchesDirigidoA = filters.dirigido_a
           ? evento.dirigidoA?.nombre.trim().toLowerCase() ===
             filters.dirigido_a.trim().toLowerCase()
           : true;
-
-        // Fecha
         const matchesFecha = filters.fecha
           ? formatDateToYMD(evento.fecha_Evento) === filters.fecha
           : true;
-
         return matchesEstado && matchesDirigidoA && matchesFecha;
       });
 
-      // 2) Ordenar de manera ascendente por fecha y hora de inicio
       const sorted = filtered.sort((a, b) => {
         const dateTimeA = new Date(`${a.fecha_Evento}T${a.hora_inicio_Evento}`);
         const dateTimeB = new Date(`${b.fecha_Evento}T${b.hora_inicio_Evento}`);
@@ -256,6 +261,7 @@ const GestionEventos = () => {
         title: 'Error',
         text: error || errorUbicaciones || errorTiposEventos || errorEstadosEventos,
         confirmButtonColor: '#2563EB',
+        cancelButtonText: 'Cancelar'
       });
     }
   }, [error, errorUbicaciones, errorTiposEventos, errorEstadosEventos]);
@@ -291,8 +297,12 @@ const GestionEventos = () => {
     return [...new Set(dirigidos)];
   };
 
-  // Mientras carga
-  if (loading || loadingUbicaciones || loadingTiposEventos || loadingEstadosEventos) {
+  if (
+    loading ||
+    loadingUbicaciones ||
+    loadingTiposEventos ||
+    loadingEstadosEventos
+  ) {
     return (
       <div className="p-6 bg-gray-100 min-h-screen">
         <p className="text-center">Cargando eventos...</p>
@@ -304,7 +314,9 @@ const GestionEventos = () => {
     <div className="p-6 bg-gray-100 dark:bg-gray-900 min-h-screen">
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Gestión de Eventos</h1>
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+          Gestión de Eventos
+        </h1>
         <Link
           to="/crear-eventos"
           className="flex items-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
@@ -317,15 +329,15 @@ const GestionEventos = () => {
 
       {/* Filtros por estado */}
       <div className="mb-6 flex space-x-4">
-        {["Todos", "Pendiente", "Aprobado", "Rechazado"].map((estado) => {
+        {['Todos', 'Pendiente', 'Aprobado', 'Rechazado'].map((estado) => {
           const color =
-            estado === "Pendiente"
-              ? "bg-yellow-500"
-              : estado === "Aprobado"
-              ? "bg-green-600"
-              : estado === "Rechazado"
-              ? "bg-red-600"
-              : "bg-blue-600";
+            estado === 'Pendiente'
+              ? 'bg-yellow-500'
+              : estado === 'Aprobado'
+              ? 'bg-green-600'
+              : estado === 'Rechazado'
+              ? 'bg-red-600'
+              : 'bg-blue-600';
           const isActive = filterStatus === estado;
           return (
             <button
@@ -334,7 +346,7 @@ const GestionEventos = () => {
               className={`px-4 py-2 rounded transition ${
                 isActive
                   ? `${color} text-white`
-                  : "bg-white dark:bg-gray-700 dark:text-white text-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600"
+                  : 'bg-white dark:bg-gray-700 dark:text-white text-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
               {estado}
@@ -367,7 +379,7 @@ const GestionEventos = () => {
         />
       </div>
 
-      {/* Tabla */}
+      {/* Tabla y paginación */}
       {filteredEventos.length === 0 ? (
         <div className="text-center text-gray-700 dark:text-gray-300">
           No hay eventos que coincidan con los filtros.
@@ -378,7 +390,7 @@ const GestionEventos = () => {
             <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
               <thead className="bg-blue-500 text-white">
                 <tr>
-                  {["Nombre", "Fecha", "Hora", "Dirigido a", "Estado", "Acciones"].map((th) => (
+                  {['Nombre', 'Fecha', 'Hora', 'Dirigido a', 'Estado', 'Acciones'].map((th) => (
                     <th
                       key={th}
                       className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider"
@@ -393,7 +405,7 @@ const GestionEventos = () => {
                   <tr
                     key={evento.id_Evento}
                     className={`transition hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                      index % 2 === 0 ? "bg-gray-50 dark:bg-gray-800" : "bg-white dark:bg-gray-900"
+                      index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'
                     }`}
                   >
                     <td className="px-6 py-4 text-gray-900 dark:text-white">{evento.nombre_Evento}</td>
@@ -404,16 +416,16 @@ const GestionEventos = () => {
                       {formatTime(evento.hora_inicio_Evento)} - {formatTime(evento.hora_fin_Evento)}
                     </td>
                     <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
-                      {evento.dirigidoA?.nombre || "Sin Público"}
+                      {evento.dirigidoA?.nombre || 'Sin Público'}
                     </td>
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
-                          evento.estadoEvento.nombre === "Aprobado"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                            : evento.estadoEvento.nombre === "Pendiente"
-                            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                          evento.estadoEvento.nombre === 'Aprobado'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                            : evento.estadoEvento.nombre === 'Pendiente'
+                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                            : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
                         }`}
                       >
                         {evento.estadoEvento.nombre}
@@ -428,7 +440,7 @@ const GestionEventos = () => {
                         <FaInfoCircle className="mr-1" />
                         Ver Info
                       </button>
-                      {evento.estadoEvento.nombre.trim().toLowerCase() === "pendiente" ? (
+                      {evento.estadoEvento.nombre.trim().toLowerCase() === 'pendiente' ? (
                         <>
                           <button
                             onClick={() => handleApprove(evento.id_Evento)}
@@ -467,11 +479,10 @@ const GestionEventos = () => {
           {/* Paginación */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center mt-4 space-x-2">
-              {/* Botón de página anterior */}
               <button
                 onClick={() => setCurrentPage((prev) => prev - 1)}
                 disabled={currentPage === 1}
-                className="mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 disabled:opacity-50"
+                className="mx-1 w-10 h-10 flex justify-center items-center rounded transition bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 disabled:opacity-50"
               >
                 <FaChevronLeft />
               </button>
@@ -481,21 +492,20 @@ const GestionEventos = () => {
                   <button
                     key={pageNumber}
                     onClick={() => setCurrentPage(pageNumber)}
-                    className={`mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition font-medium ${
+                    className={`mx-1 w-10 h-10 flex justify-center items-center rounded text-sm font-medium transition ${
                       currentPage === pageNumber
-                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                        : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-700"
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                        : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-700'
                     }`}
                   >
                     {pageNumber}
                   </button>
                 );
               })}
-              {/* Botón de página siguiente */}
               <button
                 onClick={() => setCurrentPage((prev) => prev + 1)}
                 disabled={currentPage === totalPages}
-                className="mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 disabled:opacity-50"
+                className="mx-1 w-10 h-10 flex justify-center items-center rounded transition bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 disabled:opacity-50"
               >
                 <FaChevronRight />
               </button>

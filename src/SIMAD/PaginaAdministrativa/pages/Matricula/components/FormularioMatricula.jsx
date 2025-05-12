@@ -662,7 +662,7 @@ export const FormularioMatricula = () => {
       />
 
       <h1 className="text-center text-2xl font-bold mb-2 dark:text-white">
-        Boleta de Matrícula Año 2025
+        Boleta de matrícula
       </h1>
       <p className="text-center text-gray-600 dark:text-gray-300 mb-6">
         Por favor, complete todos los campos solicitados con datos verídicos.
@@ -1291,13 +1291,22 @@ export const FormularioMatricula = () => {
 {/* ----------------------- */}
 {/* Aquí va el input de archivos */}
 
+<div className="mt-6">
+  {/* Descripción de lo que debe llevar */}
+  <p className="mb-2 text-sm text-gray-700 dark:text-gray-200">
+    Por favor, adjunta los siguientes documentos en formato PDF y imagen en formato JPG/PNG, todos claros y legibles:
+  </p>
+  <ul className="list-disc list-inside mb-4 text-sm text-gray-700 dark:text-gray-200">
+    <li>Copia de las notas del estudiante.</li>
+    <li>Copia de la cédula del padre, madre o encargado legal.</li>
+    <li>Copia de la cédula del estudiante.</li>
+    <li>Foto tipo pasaporte del estudiante (JPG o PNG).</li>
+  </ul>
 
-        {/* Input de archivos */}
-        <div className="mt-6">
+  {/* Input de archivos */}
   <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">
-    Adjuntar documentos (PDF/JPG/PNG)
+    Adjuntar documentos <span className="text-red-500">*</span>
   </label>
-  {/* Contenedor relativo para el botón y el input transparente */}
   <div className="relative inline-block">
     <button
       type="button"
@@ -1325,6 +1334,7 @@ export const FormularioMatricula = () => {
       multiple
       accept=".pdf,image/*"
       onChange={handleFileChange}
+      required
       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
     />
   </div>
@@ -1353,7 +1363,6 @@ export const FormularioMatricula = () => {
   )}
 </div>
 {/* ----------------------- */}
-
             
 
             <div className="flex justify-center space-x-4 mt-6">
