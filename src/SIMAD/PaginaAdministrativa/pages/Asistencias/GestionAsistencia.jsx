@@ -6,7 +6,6 @@ import {
   obtenerTodasLasAsistencias,
   actualizarAsistencia,
   eliminarAsistencia,
-  deleteAllAsistencias
 } from "./Services/GestionAsistenciaService";
 import { usePeriodos } from "./Hook/usePeriodos";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
@@ -222,33 +221,20 @@ export const GestionAsistencia = () => {
     }
   };
 
-  const handleDeleteAll = async () => {
-    const { isConfirmed } = await Swal.fire({
-      title: "¿Eliminar todas las asistencias?",
-      text: "Esta acción no se puede deshacer.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#e53e3e",
-      cancelButtonColor: "#a0aec0",
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-    });
-    if (!isConfirmed) return;
-    try {
-      await deleteAllAsistencias();
-      setAsistencias([]);
-      Swal.fire("¡Eliminado!", "Todas las asistencias han sido eliminadas.", "success");
-    } catch {
-      Swal.fire("Error", "No se pudieron eliminar las asistencias.", "error");
-    }
-  };
+  // ** NUEVO **: ordenar por fecha descendente antes de paginar
+  const sortedAsistencias = useMemo(() => {
+    return [...asistencias].sort(
+      (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+    );
+  }, [asistencias]);
 
-  // Cálculo de paginación
-  const totalItems = Math.min(asistencias.length, 100);
+  // Paginación
+  const totalItems = Math.min(sortedAsistencias.length, 100);
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
-  const paginatedAsistencias = asistencias.slice(indexOfFirst, indexOfLast);
+  // ** USAR sortedAsistencias para mostrar de más reciente a más antiguo **
+  const paginatedAsistencias = sortedAsistencias.slice(indexOfFirst, indexOfLast);
 
   const maxButtons = 6;
   let startPage, endPage;
@@ -270,7 +256,7 @@ export const GestionAsistencia = () => {
 
   return (
     <div className="p-6 bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300 min-h-screen">
-      <h1 className="text-2xl font-bold mb-4">Gestión de ssistencias</h1>
+      <h1 className="text-2xl font-bold mb-4">Gestión de Asistencias</h1>
 
       <p className="mb-2 text-sm text-gray-700 dark:text-gray-300">
         Por favor seleccione periodo, grado, materia y sección antes de realizar la búsqueda.
@@ -279,9 +265,9 @@ export const GestionAsistencia = () => {
       <div className="mb-4 grid grid-cols-1 md:grid-cols-5 gap-4">
         {[
           { name: "periodo", label: "Seleccionar Periodo", options: periodos, key: "id_Periodo", text: "nombre_Periodo" },
-          { name: "grado", label: "Seleccionar Grado", options: grados, key: "id_grado", text: "nivel" },
-          { name: "materia", label: "Seleccionar Materia", options: materias, key: "id_Materia", text: "nombre_Materia" },
-          { name: "seccion", label: "Seleccionar Sección", options: secciones, key: "id_Seccion", text: "nombre_Seccion" },
+          { name: "grado",   label: "Seleccionar Grado",   options: grados,  key: "id_grado",     text: "nivel" },
+          { name: "materia", label: "Seleccionar Materia", options: materias, key: "id_Materia",   text: "nombre_Materia" },
+          { name: "seccion", label: "Seleccionar Sección", options: secciones,key: "id_Seccion",   text: "nombre_Seccion" },
         ].map(({ name, label, options, key, text }) => (
           <select
             key={name}
@@ -291,7 +277,7 @@ export const GestionAsistencia = () => {
             className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded px-4 py-2"
           >
             <option value="">{label}</option>
-            {options.map((item) => (
+            {options.map(item => (
               <option key={item[key]} value={item[key]}>
                 {item[text]}
               </option>
@@ -312,12 +298,6 @@ export const GestionAsistencia = () => {
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition"
         >
           Buscar
-        </button>
-        <button
-          onClick={handleDeleteAll}
-          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition"
-        >
-          Eliminar registro de asistencia
         </button>
       </div>
 
@@ -359,8 +339,8 @@ export const GestionAsistencia = () => {
                   {typeof asistencia.lecciones === "string"
                     ? asistencia.lecciones.split(",").join(", ")
                     : Array.isArray(asistencia.lecciones)
-                    ? asistencia.lecciones.join(", ")
-                    : "N/A"}
+                      ? asistencia.lecciones.join(", ")
+                      : "N/A"}
                 </td>
                 <td className="border px-4 py-2 space-x-2">
                   <button
@@ -387,7 +367,7 @@ export const GestionAsistencia = () => {
       {/* Paginación */}
       <div className="flex justify-center items-center gap-2 mt-4">
         <button
-          onClick={() => currentPage > 1 && setCurrentPage((prev) => prev - 1)}
+          onClick={() => currentPage > 1 && setCurrentPage(prev => prev - 1)}
           disabled={currentPage === 1}
           className="mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-white disabled:opacity-50"
         >
@@ -399,18 +379,19 @@ export const GestionAsistencia = () => {
             <button
               key={pageNumber}
               onClick={() => paginate(pageNumber)}
-              className={`mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition font-medium ${
-                currentPage === pageNumber
+              className={`
+                mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition font-medium
+                ${currentPage === pageNumber
                   ? "bg-blue-600 text-white hover:bg-blue-700"
                   : "bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-500"
-              }`}
+                }`}
             >
               {pageNumber}
             </button>
           );
         })}
         <button
-          onClick={() => currentPage < totalPages && setCurrentPage((prev) => prev + 1)}
+          onClick={() => currentPage < totalPages && setCurrentPage(prev => prev + 1)}
           disabled={currentPage === totalPages}
           className="mx-1 w-10 h-10 flex justify-center items-center rounded text-sm transition bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-white disabled:opacity-50"
         >
@@ -420,3 +401,5 @@ export const GestionAsistencia = () => {
     </div>
   );
 };
+
+export default GestionAsistencia;
