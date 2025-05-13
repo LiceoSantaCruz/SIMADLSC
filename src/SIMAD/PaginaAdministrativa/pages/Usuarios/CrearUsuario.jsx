@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createUser, getAllMaterias } from '../Usuarios/services/useUserService';
 import Swal from 'sweetalert2';
 import "@sweetalert2/theme-bulma/bulma.css";
+
 const CrearUsuario = () => {
   const [newUser, setNewUser] = useState({
     nombre_Usuario: '',
@@ -141,6 +142,29 @@ const CrearUsuario = () => {
       setLoading(false);
       return;
     }
+
+    // ***** VALIDACIÓN ADICIONAL DE CONTRASEÑA *****
+    // Al menos 8 caracteres, 1 mayúscula, 1 número y 1 carácter especial
+    const pwd = newUser.contraseña_Usuario;
+    const pwdRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
+    if (!pwdRegex.test(pwd)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Contraseña inválida',
+        html: `
+          La contraseña debe tener al menos:<br/>
+          • 8 caracteres<br/>
+          • 1 letra mayúscula<br/>
+          • 1 número<br/>
+          • 1 carácter especial
+        `,
+        confirmButtonColor: '#2563EB',
+      });
+      setLoading(false);
+      return;
+    }
+    // **********************************************
+
     if (newUser.rol_Usuario === 3 && newUser.materias.length === 0) {
       Swal.fire({
         icon: 'warning',

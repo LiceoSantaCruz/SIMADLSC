@@ -256,7 +256,7 @@ export const GestionAsistencia = () => {
 
   return (
     <div className="p-6 bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300 min-h-screen">
-      <h1 className="text-2xl font-bold mb-4">Gestión de Asistencias</h1>
+      <h1 className="text-2xl font-bold mb-4">Gestión de asistencias</h1>
 
       <p className="mb-2 text-sm text-gray-700 dark:text-gray-300">
         Por favor seleccione periodo, grado, materia y sección antes de realizar la búsqueda.
