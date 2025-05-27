@@ -824,6 +824,7 @@ export const FormularioMatriculaUnificado = () => {
                 className="border p-2 rounded-md w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
               >
                 <option value="">Seleccione una ruta</option>
+                <option value="Centro de Santa Cruz">Centro de Santa Cruz</option>
                 <option value="San Juan - Guayabal - Santa Cruz">San Juan - Guayabal - Santa Cruz</option>
                 <option value="Río Cañas - Barrio Limón - Santa Cruz">Río Cañas - Barrio Limón - Santa Cruz</option>
                 <option value="Bolsón - Ortega - Oriente - Santa Cruz">Bolsón - Ortega - Oriente - Santa Cruz</option>
