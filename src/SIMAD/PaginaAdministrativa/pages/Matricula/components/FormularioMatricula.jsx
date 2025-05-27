@@ -441,6 +441,12 @@ export const FormularioMatricula = () => {
       formData.estudiante.cedula.trim() === ""
     ) {
       missingFields.push("Cédula del estudiante");
+    } else {
+      // Permitir ambos formatos: 1-2345-6789 y 1558-4834-4420
+      const cedulaRegex = /^(\d-\d{4}-\d{4}|\d{4}-\d{4}-\d{4})$/;
+      if (!cedulaRegex.test(formData.estudiante.cedula.trim())) {
+        missingFields.push("Cédula del estudiante (formato válido: 1-2345-6789 o 1558-4834-4420)");
+      }
     }
     if (
       !formData.estudiante.correo_estudiantil ||
@@ -561,6 +567,12 @@ export const FormularioMatricula = () => {
       formData.encargadoLegal.N_Cedula.trim() === ""
     ) {
       missingFields.push("Cédula del encargado legal");
+    } else {
+      // Permitir ambos formatos: 1-2345-6789 y 1558-4834-4420
+      const cedulaRegex = /^(\d-\d{4}-\d{4}|\d{4}-\d{4}-\d{4})$/;
+      if (!cedulaRegex.test(formData.encargadoLegal.N_Cedula.trim())) {
+        missingFields.push("Cédula del encargado legal (formato válido: 1-2345-6789 o 1558-4834-4420)");
+      }
     }
     if (
       !formData.encargadoLegal.ocupacion ||
