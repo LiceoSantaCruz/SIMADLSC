@@ -41,11 +41,11 @@ const EditarAsistenciaModal = ({ asistencia, onUpdate, onClose }) => {
             onChange={(e) => setEstado(e.target.value)}
             className="w-full border rounded px-3 py-2 bg-white dark:bg-gray-800 dark:border-gray-600 text-gray-900 dark:text-gray-100"
           >
-            {Object.entries(AsistenciaStatus).map(([key, value]) => (
-              <option key={key} value={value}>
-                {key}
-              </option>
-            ))}
+            <option value="P">Presente</option>
+            <option value="A">Ausente</option>
+            <option value="E">Escapado</option>
+            <option value="J">Justificado</option>
+            <option value="T">Tardía</option>
           </select>
         </div>
   

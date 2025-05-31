@@ -334,7 +334,13 @@ export const GestionAsistencia = () => {
                 <td className="border px-4 py-2">
                   {asistencia.id_Seccion?.nombre_Seccion || "Sin sección"}
                 </td>
-                <td className="border px-4 py-2">{asistencia.estado}</td>
+                <td className="border px-4 py-2">
+                  {asistencia.estado === "P" && "Presente"}
+                  {asistencia.estado === "A" && "Ausente"}
+                  {asistencia.estado === "E" && "Escapado"}
+                  {asistencia.estado === "J" && "Justificado"}
+                  {asistencia.estado === "T" && "Tardía"}
+                </td>
                 <td className="border px-4 py-2">
                   {typeof asistencia.lecciones === "string"
                     ? asistencia.lecciones.split(",").join(", ")

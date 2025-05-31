@@ -239,6 +239,7 @@ export const ReporteAsistenciaSeccion = () => {
             <p>Ausencias Totales: {reporte.estadisticas_generales.total_ausencias}</p>
             <p>Escapados Totales: {reporte.estadisticas_generales.total_escapados}</p>
             <p>Justificados Totales: {reporte.estadisticas_generales.total_justificados}</p>
+            <p>Tardías Totales: {reporte.estadisticas_generales.total_tardias}</p>
           </div>
   
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -259,6 +260,9 @@ export const ReporteAsistenciaSeccion = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                   Justificados
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                  Tardías
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -269,6 +273,7 @@ export const ReporteAsistenciaSeccion = () => {
                   <td className="px-6 py-4 whitespace-nowrap">{est.ausencias}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{est.escapados}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{est.justificados}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{est.tardias}</td>
                 </tr>
               ))}
             </tbody>

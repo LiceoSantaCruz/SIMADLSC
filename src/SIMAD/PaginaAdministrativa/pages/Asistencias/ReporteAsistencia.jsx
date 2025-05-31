@@ -106,6 +106,8 @@ export const ReporteAsistencia = () => {
         return "Escapado";
       case "J":
         return "Justificado";
+      case "T":
+        return "Tardía";
       default:
         return "Desconocido";
     }

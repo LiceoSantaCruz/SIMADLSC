@@ -133,6 +133,10 @@ const MiAsistencia = () => {
           <span className="font-semibold">Justificados totales:</span>{" "}
           {resumen.total_justificados}
         </p>
+        <p>
+          <span className="font-semibold">Tardías totales:</span>{" "}
+          {resumen.total_tardias}
+        </p>
       </div>
 
       <h2 className="text-2xl font-semibold mb-4 dark:text-white">
@@ -146,6 +150,7 @@ const MiAsistencia = () => {
               <th className="border px-4 py-2 text-center dark:text-white">Ausencias</th>
               <th className="border px-4 py-2 text-center dark:text-white">Escapados</th>
               <th className="border px-4 py-2 text-center dark:text-white">Justificados</th>
+              <th className="border px-4 py-2 text-center dark:text-white">Tardías</th>
             </tr>
           </thead>
           <tbody>
@@ -155,6 +160,7 @@ const MiAsistencia = () => {
                 <td className="border px-4 py-2 text-center">{m.ausencias}</td>
                 <td className="border px-4 py-2 text-center">{m.escapados}</td>
                 <td className="border px-4 py-2 text-center">{m.justificados}</td>
+                <td className="border px-4 py-2 text-center">{m.tardias}</td>
               </tr>
             ))}
           </tbody>
