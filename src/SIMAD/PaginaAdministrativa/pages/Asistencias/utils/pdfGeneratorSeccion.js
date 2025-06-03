@@ -7,6 +7,7 @@ export const generarPDFSeccion = ({
   fechaFin,
   estadisticas, // { total_asistencias, total_ausencias, total_escapados, total_justificados }
   estudiantes,  // [{ nombre_completo, asistencias, ausencias, escapados, justificados }, ...]
+  materiaFiltrada = "", // Nombre de la materia filtrada (si aplica)
 }) => {
   const pdf = new jsPDF("p", "mm", "a4");
   let currentY = 5;
@@ -37,14 +38,21 @@ export const generarPDFSeccion = ({
   currentY += 10;
 
   // Info de la sección
-  pdf.setFontSize(12);
-  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(12);  pdf.setFont("helvetica", "normal");
   pdf.text(`Sección: ${nombreSeccion}`, 10, currentY);
   currentY += 6;
   pdf.text(`Fecha de Inicio: ${fechaInicio}`, 10, currentY);
   currentY += 6;
   pdf.text(`Fecha Fin: ${fechaFin}`, 10, currentY);
-  currentY += 8;
+  currentY += 6;
+  
+  // Si hay una materia filtrada, la mostramos
+  if (materiaFiltrada) {
+    pdf.text(`Materia: ${materiaFiltrada}`, 10, currentY);
+    currentY += 6;
+  }
+  
+  currentY += 2;
 
   // Estadísticas
   pdf.setFont("helvetica", "bold");
