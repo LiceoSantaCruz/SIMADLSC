@@ -1,3 +1,4 @@
+// src/components/Secciones.jsx
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import UseFetchSecciones from '../Hooks/UseFetchSecciones';
@@ -6,6 +7,9 @@ import EstudiantesService from '../../../../pages/Modulos academicos/Estudiantes
 import Swal from 'sweetalert2';
 import '@sweetalert2/theme-bulma/bulma.css';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+
+// Importamos la función para generar PDF
+import { generateStudentsListPDF } from '../Utils/pdfsecciones';
 
 const normalizeText = (text) =>
   text
@@ -38,19 +42,23 @@ const levelOrder = {
 };
 
 const Secciones = () => {
+  // Hook personalizado que trae: secciones (array), loading (boolean), error (string), fetchSecciones (fn)
   const { secciones, loading, error, fetchSecciones } = UseFetchSecciones();
+
+  // Filtros y estados para paginación:
   const [nivelFilter, setNivelFilter] = useState('');
   const [levels, setLevels] = useState([]);
 
-  // Estados para el modal de creación
+  // Modal para crear sección:
   const [showModal, setShowModal] = useState(false);
   const [newSectionName, setNewSectionName] = useState('');
   const [newSectionGradeId, setNewSectionGradeId] = useState('');
 
-  // Estado para la paginación
+  // Paginación:
   const [currentPage, setCurrentPage] = useState(1);
-  const sectionsPerPage = 15; // 15 secciones por página
+  const sectionsPerPage = 15;
 
+  // Al montar, traemos la lista de niveles (para el select de creación):
   useEffect(() => {
     const fetchLevels = async () => {
       try {
@@ -63,6 +71,7 @@ const Secciones = () => {
     fetchLevels();
   }, []);
 
+  // Función que sugiere un nombre de ejemplo para la nueva sección
   const getExampleSectionName = () => {
     if (newSectionGradeId) {
       const selectedLevel = levels.find(
@@ -75,9 +84,9 @@ const Secciones = () => {
     }
     return '';
   };
-
   const exampleSectionName = getExampleSectionName();
 
+  // Filtrar secciones según el nivel (nivelFilter). Si nivelFilter está vacío, no filtra.
   const filteredSecciones = nivelFilter
     ? secciones.filter(
         (sec) =>
@@ -87,6 +96,7 @@ const Secciones = () => {
       )
     : secciones;
 
+  // Ordenar secciones: primero por nivel (7,8,9,10,11) y luego por número de sección
   const sortedSecciones = [...filteredSecciones].sort((a, b) => {
     const nivelA = levelOrder[normalizeText(a.grado.nivel)] || 100;
     const nivelB = levelOrder[normalizeText(b.grado.nivel)] || 100;
@@ -97,12 +107,16 @@ const Secciones = () => {
     return a.nombre_Seccion.localeCompare(b.nombre_Seccion);
   });
 
+  // Cálculo de índices para paginación
   const indexOfLastSection = currentPage * sectionsPerPage;
   const indexOfFirstSection = indexOfLastSection - sectionsPerPage;
-  const currentSecciones = sortedSecciones.slice(indexOfFirstSection, indexOfLastSection);
+  const currentSecciones = sortedSecciones.slice(
+    indexOfFirstSection,
+    indexOfLastSection
+  );
   const totalPages = Math.ceil(sortedSecciones.length / sectionsPerPage);
 
-  // Lógica de paginación: limitar a 6 botones
+  // Lógica para mostrar hasta 6 botones de página a la vez
   const maxButtons = 6;
   let startPage, endPage;
   if (totalPages <= maxButtons) {
@@ -121,18 +135,70 @@ const Secciones = () => {
     }
   }
 
+  // ------------------------------------------------
+  // FUNCION: Descargar PDF de la lista de estudiantes
+  // ------------------------------------------------
+  const handleDownloadPDF = async (seccion) => {
+    try {
+      // 1. Llamar al servicio que devuelve un array de estudiantes para esa sección
+      const estudiantesInSection = await SeccionesService.getEstudiantesPorSeccion(
+        seccion.id_Seccion
+      );
+
+      // 2. Validar que venga un arreglo con al menos un elemento
+      if (!Array.isArray(estudiantesInSection)) {
+        console.warn(
+          'getEstudiantesPorSeccion NO devolvió un arreglo. Revisa la respuesta en el backend.'
+        );
+        return Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo obtener la lista de estudiantes. Intenta nuevamente.',
+          confirmButtonColor: '#2563EB',
+        });
+      }
+
+      if (estudiantesInSection.length === 0) {
+        return Swal.fire({
+          icon: 'info',
+          title: 'Sin estudiantes',
+          text: `La sección "${seccion.nombre_Seccion}" no tiene estudiantes asignados.`,
+          confirmButtonColor: '#2563EB',
+        });
+      }
+
+      // 3. Si todo está bien, generamos el PDF
+      generateStudentsListPDF(seccion.nombre_Seccion, estudiantesInSection);
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al generar PDF',
+        text: 'Ocurrió un error al intentar descargar el PDF. Intenta nuevamente.',
+        confirmButtonColor: '#2563EB',
+      });
+    }
+  };
+
+  // -----------------------------------
+  // FUNCION: Eliminar sección (con alerta)
+  // -----------------------------------
   const handleDelete = async (idSeccion) => {
     try {
-      const estudiantesInSection = await SeccionesService.getEstudiantesPorSeccion(idSeccion);
-      if (estudiantesInSection && estudiantesInSection.length > 0) {
-        Swal.fire({
+      // Primero, verificar si la sección tiene estudiantes
+      const estudiantesInSection = await SeccionesService.getEstudiantesPorSeccion(
+        idSeccion
+      );
+      if (Array.isArray(estudiantesInSection) && estudiantesInSection.length > 0) {
+        return Swal.fire({
           icon: 'warning',
           title: 'No se puede eliminar',
           text: 'La sección tiene estudiantes asignados.',
           confirmButtonColor: '#2563EB',
         });
-        return;
       }
+
+      // Confirmar eliminación
       const result = await Swal.fire({
         title: '¿Estás seguro?',
         text: 'Se eliminará la sección.',
@@ -150,7 +216,7 @@ const Secciones = () => {
           text: 'La sección se eliminó correctamente.',
           confirmButtonColor: '#2563EB',
         });
-        fetchSecciones();
+        fetchSecciones(); // Refrescar la lista
       }
     } catch (error) {
       console.error('Error al eliminar sección:', error);
@@ -163,18 +229,22 @@ const Secciones = () => {
     }
   };
 
+  // ---------------------------------------
+  // FUNCIONES PARA CREAR NUEVA SECCIÓN
+  // ---------------------------------------
   const openModal = () => {
     setNewSectionName('');
     setNewSectionGradeId('');
     setShowModal(true);
   };
-
   const closeModal = () => {
     setShowModal(false);
   };
 
   const handleCreateSection = async (e) => {
     e.preventDefault();
+
+    // Validaciones básicas
     if (!newSectionName.trim()) {
       return Swal.fire({
         icon: 'error',
@@ -191,6 +261,8 @@ const Secciones = () => {
         confirmButtonColor: '#2563EB',
       });
     }
+
+    // Verificar que el nivel exista en el arreglo levels
     const selectedLevel = levels.find(
       (level) => level.id_grado === Number(newSectionGradeId)
     );
@@ -202,6 +274,8 @@ const Secciones = () => {
         confirmButtonColor: '#2563EB',
       });
     }
+
+    // Validar formato (7-1, 8-2, etc.)
     const normalizedNivel = normalizeText(selectedLevel.nivel);
     const pattern = allowedPatterns[normalizedNivel];
     if (!pattern) {
@@ -220,6 +294,8 @@ const Secciones = () => {
         confirmButtonColor: '#2563EB',
       });
     }
+
+    // Validar existencia de la sección anterior: p.ej. para "7-2" debe existir "7-1"
     const match = newSectionName.match(/^(\d+)-(\d+)$/);
     if (!match) {
       return Swal.fire({
@@ -234,7 +310,8 @@ const Secciones = () => {
     const previousSectionName = `${sectionLevel}-${sectionNumber - 1}`;
     if (sectionNumber > 1) {
       const previousExists = secciones.some(
-        (sec) => sec.nombre_Seccion.toLowerCase() === previousSectionName.toLowerCase()
+        (sec) =>
+          sec.nombre_Seccion.toLowerCase() === previousSectionName.toLowerCase()
       );
       if (!previousExists) {
         return Swal.fire({
@@ -245,8 +322,11 @@ const Secciones = () => {
         });
       }
     }
+
+    // Validar que la sección no exista ya
     const sectionExists = secciones.some(
-      (sec) => sec.nombre_Seccion.toLowerCase() === newSectionName.toLowerCase()
+      (sec) =>
+        sec.nombre_Seccion.toLowerCase() === newSectionName.toLowerCase()
     );
     if (sectionExists) {
       return Swal.fire({
@@ -256,6 +336,8 @@ const Secciones = () => {
         confirmButtonColor: '#2563EB',
       });
     }
+
+    // Preparar payload y llamar servicio de creación
     const payload = {
       nombre_Seccion: newSectionName,
       gradoId: Number(newSectionGradeId),
@@ -275,12 +357,15 @@ const Secciones = () => {
       Swal.fire({
         icon: 'error',
         title: 'Error del sistema',
-        text: 'Ocurrió un error al guardar la sección. Intente nuevamente.',
+        text: 'Ocurrió un error al guardar la sección. Intenta nuevamente.',
         confirmButtonColor: '#2563EB',
       });
     }
   };
 
+  // -----------------------
+  // RENDERIZADO DEL COMPONENTE
+  // -----------------------
   if (loading) {
     return (
       <div className="flex items-center justify-center p-4 bg-gray-100 min-h-screen">
@@ -296,8 +381,11 @@ const Secciones = () => {
   return (
     <div className="p-6 bg-gray-100 dark:bg-gray-900 min-h-screen relative">
       <div className="container mx-auto">
+        {/* Título + botón Crear Sección */}
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Lista de Secciones</h1>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+            Lista de Secciones
+          </h1>
           <button
             onClick={openModal}
             className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
@@ -305,9 +393,13 @@ const Secciones = () => {
             Crear Sección
           </button>
         </div>
-  
+
+        {/* Filtro por nivel */}
         <div className="mb-4">
-          <label htmlFor="nivelFilter" className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+          <label
+            htmlFor="nivelFilter"
+            className="block text-gray-700 dark:text-gray-300 font-medium mb-1"
+          >
             Filtrar por Nivel:
           </label>
           <select
@@ -318,33 +410,51 @@ const Secciones = () => {
           >
             <option value="">Todos los niveles</option>
             {levels.map((level, index) => (
-              <option key={level.id_grado || index} value={level.nivel}>
+              <option key={level.id_grado ?? index} value={level.nivel}>
                 {level.nivel}
               </option>
             ))}
           </select>
         </div>
-  
+
+        {/* Si no hay secciones después del filtro */}
         {sortedSecciones.length === 0 ? (
-          <p className="text-center text-gray-600 dark:text-gray-400">No hay secciones disponibles.</p>
+          <p className="text-center text-gray-600 dark:text-gray-400">
+            No hay secciones disponibles.
+          </p>
         ) : (
           <>
+            {/* Grid de tarjetas */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {currentSecciones.map((seccion) => (
-                <div key={seccion.id_Seccion} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                <div
+                  key={seccion.id_Seccion}
+                  className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow"
+                >
                   <h2 className="text-xl font-semibold text-blue-600 dark:text-blue-400">
                     {seccion.nombre_Seccion}
                   </h2>
                   {seccion.grado && (
-                    <p className="text-gray-700 dark:text-gray-300">Nivel: {seccion.grado.nivel}</p>
+                    <p className="text-gray-700 dark:text-gray-300">
+                      Nivel: {seccion.grado.nivel}
+                    </p>
                   )}
-                  <div className="mt-4 flex justify-between">
+                  <div className="mt-4 flex justify-between space-x-2">
+                    {/* Ver Lista en UI */}
                     <Link
                       to={`/lista-estudiantes/${seccion.id_Seccion}`}
                       className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
                     >
                       Ver Lista
                     </Link>
+                    {/* Descargar PDF */}
+                    <button
+                      onClick={() => handleDownloadPDF(seccion)}
+                      className="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+                    >
+                      Descargar PDF
+                    </button>
+                    {/* Eliminar Sección */}
                     <button
                       onClick={() => handleDelete(seccion.id_Seccion)}
                       className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
@@ -355,10 +465,10 @@ const Secciones = () => {
                 </div>
               ))}
             </div>
-  
+
+            {/* Paginación */}
             {totalPages > 1 && (
               <div className="flex justify-center items-center mt-4 space-x-2">
-                {/* Botón de página anterior */}
                 <button
                   onClick={() => setCurrentPage((prev) => prev - 1)}
                   disabled={currentPage === 1}
@@ -382,7 +492,6 @@ const Secciones = () => {
                     </button>
                   );
                 })}
-                {/* Botón de página siguiente */}
                 <button
                   onClick={() => setCurrentPage((prev) => prev + 1)}
                   disabled={currentPage === totalPages}
@@ -395,14 +504,20 @@ const Secciones = () => {
           </>
         )}
       </div>
-  
+
+      {/* Modal para crear nueva sección */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Crear Sección</h2>
+            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+              Crear Sección
+            </h2>
             <form onSubmit={handleCreateSection}>
               <div className="mb-4">
-                <label htmlFor="sectionName" className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                <label
+                  htmlFor="sectionName"
+                  className="block text-gray-700 dark:text-gray-300 font-medium mb-1"
+                >
                   Nombre de la Sección:
                 </label>
                 <input
@@ -415,7 +530,10 @@ const Secciones = () => {
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="sectionLevel" className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                <label
+                  htmlFor="sectionLevel"
+                  className="block text-gray-700 dark:text-gray-300 font-medium mb-1"
+                >
                   Nivel:
                 </label>
                 <select
