@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import { generarPDF } from "./utils/pdfGenerator";
 import { useReporteAsistencia } from "./Hook/useReporteAsistencia";
 import { usePeriodos } from "./Hook/usePeriodos";
+import useMaterias from "./Hook/useMaterias";
 import getCloudinaryUrl from "../../../PaginaInformativa/utils/cloudinary";
 import "@sweetalert2/theme-bulma/bulma.css";
 
@@ -16,15 +17,19 @@ export const ReporteAsistencia = () => {
     fechaInicio,
     fechaFin,
     idPeriodo,
+    idMateria,
     setFechaInicio,
     setFechaFin,
     setIdPeriodo,
+    setIdMateria,
     asistencias,
     setAsistencias,
     error,
     buscarAsistencias,
     loading,
   } = useReporteAsistencia();
+  
+  const { materias } = useMaterias();
 
   const { periodos } = usePeriodos();
   const [hasSearched, setHasSearched] = useState(false);
@@ -33,7 +38,6 @@ export const ReporteAsistencia = () => {
     asistencias.length > 0
       ? `${asistencias[0]?.id_Estudiante?.nombre_Estudiante} ${asistencias[0]?.id_Estudiante?.apellido1_Estudiante} ${asistencias[0]?.id_Estudiante?.apellido2_Estudiante || ""}`
       : "";
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!cedula.trim()) {
@@ -112,7 +116,6 @@ export const ReporteAsistencia = () => {
         return "Desconocido";
     }
   };
-
   // Manejar la exportación del PDF
   const handleExportPDF = async () => {
     // Obtiene la URL del logo desde Cloudinary
@@ -127,6 +130,12 @@ export const ReporteAsistencia = () => {
     reader.readAsDataURL(blob);
     reader.onloadend = () => {
       const logoBase64 = reader.result;
+      
+      // Determinar el nombre de la materia si hay un filtro activo
+      const nombreMateria = idMateria 
+        ? materias.find(m => m.id_Materia.toString() === idMateria)?.nombre_Materia || ""
+        : "";
+        
       generarPDF({
         logoBase64,
         estudianteNombre,
@@ -135,6 +144,7 @@ export const ReporteAsistencia = () => {
         seccion,
         asistencias,
         traducirEstado,
+        materiaFiltrada: idMateria ? nombreMateria : "",
       });
     };
   };
@@ -149,9 +159,8 @@ export const ReporteAsistencia = () => {
         </p>
       </div>
 
-      {/* Formulario de búsqueda */}
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-6">
-        <form className="grid grid-cols-1 md:grid-cols-3 gap-4" onSubmit={handleSubmit}>
+      {/* Formulario de búsqueda */}      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-6">
+        <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" onSubmit={handleSubmit}>
           <div>
             <label htmlFor="cedula" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
               Cédula del Estudiante
@@ -203,9 +212,7 @@ export const ReporteAsistencia = () => {
               }}
               className="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm"
             />
-          </div>
-
-          <div>
+          </div>          <div>
             <label htmlFor="idPeriodo" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
               Periodo
             </label>
@@ -222,6 +229,28 @@ export const ReporteAsistencia = () => {
               {periodos.map((periodo) => (
                 <option key={periodo.id_Periodo} value={periodo.id_Periodo}>
                   {periodo.nombre_Periodo}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="idMateria" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+              Materia
+            </label>
+            <select
+              name="idMateria"
+              value={idMateria}
+              onChange={(e) => {
+                setIdMateria(e.target.value);
+                setHasSearched(false);
+              }}
+              className="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm"
+            >
+              <option value="">Todas las materias</option>
+              {materias.map((materia) => (
+                <option key={materia.id_Materia} value={materia.id_Materia}>
+                  {materia.nombre_Materia}
                 </option>
               ))}
             </select>
@@ -244,11 +273,15 @@ export const ReporteAsistencia = () => {
 
       {asistencias.length > 0 && (
         <>
-          <div id="reporte-asistencias" className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow overflow-x-auto">
-            <div className="mb-4">
+          <div id="reporte-asistencias" className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow overflow-x-auto">          <div className="mb-4">
               <h3 className="text-lg font-semibold">Grado: {grado}</h3>
               <h3 className="text-lg font-semibold">Sección: {seccion}</h3>
               <h3 className="text-lg font-semibold">Estudiante: {estudianteNombre}</h3>
+              {idMateria && (
+                <h3 className="text-lg font-semibold">
+                  Materia: {materias.find(m => m.id_Materia.toString() === idMateria)?.nombre_Materia || ""}
+                </h3>
+              )}
             </div>
 
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">

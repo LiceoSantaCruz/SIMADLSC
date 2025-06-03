@@ -8,6 +8,7 @@ export const useReporteAsistencia = () => {
     const [fechaInicio, setFechaInicio] = useState("");
     const [fechaFin, setFechaFin] = useState("");
     const [idPeriodo, setIdPeriodo] = useState("");
+    const [idMateria, setIdMateria] = useState("");
     const [asistencias, setAsistencias] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -16,7 +17,7 @@ export const useReporteAsistencia = () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await obtenerReporteAsistencias(cedula, fechaInicio, fechaFin, idPeriodo);
+        const data = await obtenerReporteAsistencias(cedula, fechaInicio, fechaFin, idPeriodo, idMateria);
         
         // Si data es un objeto que contiene la propiedad "asistencias"
         const asistenciasArray = Array.isArray(data)
@@ -50,7 +51,7 @@ export const useReporteAsistencia = () => {
       }
     };
   
-    return {
+  return {
       cedula,
       setCedula,
       grado,
@@ -61,6 +62,8 @@ export const useReporteAsistencia = () => {
       setFechaFin,
       idPeriodo,
       setIdPeriodo,
+      idMateria,
+      setIdMateria,
       asistencias,
       setAsistencias,
       error,       // "not-found" | "server-error" | null

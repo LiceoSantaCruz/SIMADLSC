@@ -9,6 +9,7 @@ export const generarPDF = ({
   seccion,
   asistencias,
   traducirEstado,
+  materiaFiltrada = "", // Parámetro opcional para la materia filtrada
 }) => {
   const pdf = new jsPDF("p", "mm", "a4");
   let currentY = 5;
@@ -46,11 +47,18 @@ export const generarPDF = ({
   pdf.text(`Estudiante: ${estudianteNombre}`, 10, currentY);
   currentY += 6;
   pdf.text(`Cédula: ${cedula}`, 10, currentY);
-  currentY += 6;
-  pdf.text(`Grado: ${grado}`, 10, currentY);
+  currentY += 6;  pdf.text(`Grado: ${grado}`, 10, currentY);
   currentY += 6;
   pdf.text(`Sección: ${seccion}`, 10, currentY);
-  currentY += 8;
+  currentY += 6;
+  
+  // Agregar información de la materia filtrada si existe
+  if (materiaFiltrada) {
+    pdf.text(`Materia: ${materiaFiltrada}`, 10, currentY);
+    currentY += 6;
+  }
+  
+  currentY += 2;
 
   // Función auxiliar para contar lecciones
   const contarLecciones = (lecciones) => {

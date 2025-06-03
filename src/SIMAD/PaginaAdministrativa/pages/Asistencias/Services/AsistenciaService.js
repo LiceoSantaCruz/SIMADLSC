@@ -91,11 +91,12 @@ export const fetchAsistencias = async ({ cedula, fecha, id_Materia }) => {
   }
 };
 
-export const obtenerReporteAsistencias = async (cedula, fechaInicio, fechaFin, idPeriodo) => {
+export const obtenerReporteAsistencias = async (cedula, fechaInicio, fechaFin, idPeriodo, idMateria) => {
   const params = new URLSearchParams();
   if (fechaInicio) params.append("fechaInicio", fechaInicio);
   if (fechaFin) params.append("fechaFin", fechaFin);
   if (idPeriodo) params.append("id_Periodo", idPeriodo);
+  if (idMateria) params.append("id_Materia", idMateria);
 
   const response = await fetch(`${API_URL}/asistencias/reporte/${cedula}?${params.toString()}`);
 
