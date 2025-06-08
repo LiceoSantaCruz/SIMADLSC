@@ -103,7 +103,7 @@ export const SideBar = () => {
         className="flex items-center px-2 py-2 rounded-md hover:bg-blue-500/10 transition"
       >
         <FaUserGraduate className="text-blue-400" />
-        {isOpen && <span className="ml-3">Mis Asistencias</span>}
+        {isOpen && <span className="ml-3">Mis asistencias</span>}
       </Link>
     </div>
   ) : (
@@ -166,22 +166,37 @@ export const SideBar = () => {
               />
             )}
           </button>
-          {isOpen && openSection === 'asistencia' && (
-            <div className="ml-8 text-sm text-black dark:text-white space-y-1">
-              <Link to="/asistencia-estudiantes" className="block hover:text-blue-400">
-                Asistencia estudiantes
-              </Link>
-              <Link to="/reporte-asistencia" className="block hover:text-blue-400">
-                Reporte asistencia
-              </Link>
-              <Link
-                to="/reporte-asistencia-seccion"
-                className="block hover:text-blue-400"
-              >
-                Reporte asistencia sección
-              </Link>
-            </div>
-          )}
+       {isOpen && openSection === 'asistencia' && (
+  <div className="ml-8 text-sm text-black dark:text-white space-y-1">
+    <Link
+      to="/asistencia-estudiantes"
+      className="block hover:text-blue-400"
+    >
+      Asistencia estudiantes
+    </Link>
+
+    {/* Nuevo enlace debajo */}
+    <Link
+      to="/GestionAsistenciaFiltrada"
+      className="block hover:text-blue-400"
+    >
+      Gestión asistencias
+    </Link>
+
+    <Link
+      to="/reporte-asistencia"
+      className="block hover:text-blue-400"
+    >
+      Reporte asistencia
+    </Link>
+    <Link
+      to="/reporte-asistencia-seccion"
+      className="block hover:text-blue-400"
+    >
+      Reporte asistencia sección
+    </Link>
+  </div>
+)}
         </div>
       )}
       {/* Resto de secciones */}
