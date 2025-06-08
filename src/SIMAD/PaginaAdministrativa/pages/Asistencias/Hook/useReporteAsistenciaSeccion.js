@@ -6,14 +6,21 @@ export const useReporteAsistenciaSeccion = () => {
   const [reporte, setReporte] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [idMateriaSelected, setIdMateriaSelected] = useState("");
 
-  const buscarReporteSeccion = async ({ idSeccion, fechaInicio, fechaFin }) => {
+  const buscarReporteSeccion = async ({ idSeccion, fechaInicio, fechaFin, idMateria }) => {
     setLoading(true);
     setError(null);
     setReporte(null);
 
     try {
-      const url = `${API_URL}/asistencias/reporte-seccion/${idSeccion}?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
+      // Construir URL con parámetros de consulta
+      const params = new URLSearchParams();
+      params.append('fechaInicio', fechaInicio);
+      params.append('fechaFin', fechaFin);
+      if (idMateria) params.append('id_Materia', idMateria);
+      
+      const url = `${API_URL}/asistencias/reporte-seccion/${idSeccion}?${params.toString()}`;
       const response = await fetch(url);
 
       if (!response.ok) {
@@ -45,6 +52,12 @@ export const useReporteAsistenciaSeccion = () => {
       setLoading(false);
     }
   };
-
-  return { reporte, loading, error, buscarReporteSeccion };
+  return { 
+    reporte, 
+    loading, 
+    error, 
+    buscarReporteSeccion,
+    idMateriaSelected,
+    setIdMateriaSelected
+  };
 };

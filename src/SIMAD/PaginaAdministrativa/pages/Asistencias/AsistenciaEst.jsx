@@ -380,7 +380,6 @@ export const AsistenciaEst = () => {
                         <option value="P">Presente</option>
                         <option value="A">Ausente</option>
                         <option value="E">Escapado</option>
-                        <option value="J">Justificado</option>
                         <option value="T">Tardía</option>
                       </select>
                     </td>
