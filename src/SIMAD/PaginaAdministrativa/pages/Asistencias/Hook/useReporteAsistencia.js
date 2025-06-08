@@ -13,11 +13,15 @@ export const useReporteAsistencia = () => {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
   
-    const buscarAsistencias = async () => {
+    const buscarAsistencias = async (fechaInicioParam, fechaFinParam) => {
       setLoading(true);
       setError(null);
       try {
-        const data = await obtenerReporteAsistencias(cedula, fechaInicio, fechaFin, idPeriodo, idMateria);
+        // Usar los parámetros si se proporcionan, de lo contrario usar los valores del estado
+        const fechaInicioFinal = fechaInicioParam !== undefined ? fechaInicioParam : fechaInicio;
+        const fechaFinFinal = fechaFinParam !== undefined ? fechaFinParam : fechaFin;
+        
+        const data = await obtenerReporteAsistencias(cedula, fechaInicioFinal, fechaFinFinal, idPeriodo, idMateria);
         
         // Si data es un objeto que contiene la propiedad "asistencias"
         const asistenciasArray = Array.isArray(data)
@@ -25,9 +29,22 @@ export const useReporteAsistencia = () => {
           : data?.asistencias || [];
     
         if (asistenciasArray.length > 0) {
-          setAsistencias(asistenciasArray);
-          setGrado(asistenciasArray[0].id_grado.nivel);
-          setSeccion(asistenciasArray[0].id_Seccion.nombre_Seccion);
+          // Filtrar por materia si se indicó
+          let filtradas = asistenciasArray;
+          if (idMateria) {
+            filtradas = filtradas.filter(a =>
+              a.id_Materia?.id_Materia.toString() === idMateria.toString()
+            );
+          }
+          setAsistencias(filtradas);
+          if (filtradas.length > 0) {
+            setGrado(filtradas[0].id_grado.nivel);
+            setSeccion(filtradas[0].id_Seccion.nombre_Seccion);
+          } else {
+            setGrado("");
+            setSeccion("");
+            setError("not-found");
+          }
         } else {
           setAsistencias([]);
           setGrado("");

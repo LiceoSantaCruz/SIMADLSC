@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useResumenAsistencias } from "./Hook/useResumenAsistencias";
 import Swal from "sweetalert2";
 import "@sweetalert2/theme-bulma/bulma.css";
+import { esDiaLaborable, validarRangoFechas } from "./utils/dateUtils";
 
 const MiAsistencia = () => {
   const { resumen, loading, error, fetchResumen, fetchResumenByDates } =
@@ -40,34 +41,17 @@ const MiAsistencia = () => {
   const handleFiltrarFechas = (e) => {
     e.preventDefault();
 
-    // Validar fechas
-    if (!fechaInicio || !fechaFin) {
+    const validacion = validarRangoFechas(fechaInicio, fechaFin);
+    if (!validacion.isValid) {
       return Swal.fire({
         icon: "warning",
-        title: "Fechas incompletas",
-        text: "Seleccione ambas fechas.",
-        confirmButtonColor: "#2563EB",
-      });
-    }
-    const inicio = new Date(fechaInicio);
-    const fin    = new Date(fechaFin);
-    if (inicio > fin) {
-      return Swal.fire({
-        icon: "warning",
-        title: "Rango inválido",
-        text: "La fecha de inicio no puede ser posterior a la fecha de fin.",
-        confirmButtonColor: "#2563EB",
-      });
-    }
-    if (fin < inicio) {
-      return Swal.fire({
-        icon: "warning",
-        title: "Rango inválido",
-        text: "La fecha de fin no puede ser anterior a la fecha de inicio.",
+        title: "Fechas inválidas",
+        text: validacion.message,
         confirmButtonColor: "#2563EB",
       });
     }
 
+    // Enviar fechas tal cual
     fetchResumenByDates(studentId, fechaInicio, fechaFin);
   };
 
@@ -94,7 +78,19 @@ const MiAsistencia = () => {
             type="date"
             id="fechaInicio"
             value={fechaInicio}
-            onChange={(e) => setFechaInicio(e.target.value)}
+            onChange={(e) => {
+              const fecha = e.target.value;
+              if (!fecha || esDiaLaborable(fecha)) {
+                setFechaInicio(fecha);
+              } else {
+                Swal.fire({
+                  icon: "warning",
+                  title: "Día no válido",
+                  text: "Solo se permiten días laborables (lunes a viernes).",
+                  confirmButtonColor: "#2563EB",
+                });
+              }
+            }}
             className="border p-2 rounded-md dark:text-black"
           />
         </div>
@@ -107,7 +103,19 @@ const MiAsistencia = () => {
             type="date"
             id="fechaFin"
             value={fechaFin}
-            onChange={(e) => setFechaFin(e.target.value)}
+            onChange={(e) => {
+              const fecha = e.target.value;
+              if (!fecha || esDiaLaborable(fecha)) {
+                setFechaFin(fecha);
+              } else {
+                Swal.fire({
+                  icon: "warning",
+                  title: "Día no válido",
+                  text: "Solo se permiten días laborables (lunes a viernes).",
+                  confirmButtonColor: "#2563EB",
+                });
+              }
+            }}
             className="border p-2 rounded-md dark:text-black"
           />
         </div>

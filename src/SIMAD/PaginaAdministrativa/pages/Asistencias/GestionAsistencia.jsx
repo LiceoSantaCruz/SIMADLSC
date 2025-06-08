@@ -9,6 +9,7 @@ import {
 } from "./Services/GestionAsistenciaService";
 import { usePeriodos } from "./Hook/usePeriodos";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { formatearFechaUI, esDiaLaborable } from "./utils/dateUtils";
 
 import Swal from "sweetalert2";
 import "@sweetalert2/theme-bulma/bulma.css";
@@ -26,6 +27,7 @@ export const GestionAsistencia = () => {
     seccion: "",
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Paginación: 15 items por página, máximo 100 registros.
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,11 +43,19 @@ export const GestionAsistencia = () => {
           "Por favor, seleccione todos los campos requeridos (Periodo, Grado, Materia y Sección).",
       };
     }
-    if (filtros.fecha && new Date(filtros.fecha) > new Date()) {
-      return {
-        isValid: false,
-        message: "La fecha seleccionada no puede ser mayor a la fecha actual.",
-      };
+    if (filtros.fecha) {
+      if (!esDiaLaborable(filtros.fecha)) {
+        return {
+          isValid: false,
+          message: "Solo se permiten días laborables (lunes a viernes).",
+        };
+      }
+      if (new Date(filtros.fecha) > new Date()) {
+        return {
+          isValid: false,
+          message: "La fecha seleccionada no puede ser mayor a la fecha actual.",
+        };
+      }
     }
     return { isValid: true };
   };
@@ -70,47 +80,58 @@ export const GestionAsistencia = () => {
   }, []);
 
   const handleBuscar = async () => {
-    const { isValid, message } = validateFiltros();
-    if (!isValid) {
+    const validacion = validateFiltros();
+    if (!validacion.isValid) {
       return Swal.fire({
         icon: "warning",
         title: "Validación",
-        text: message,
+        text: validacion.message,
         confirmButtonColor: "#2563EB",
       });
     }
+
     try {
-      const data = await obtenerGestionAsistencias(filtros);
-      if (data.length === 0) {
-        Swal.fire({
-          icon: "info",
-          title: "Sin resultados",
-          text: "No se encontraron asistencias con los criterios de búsqueda.",
-          confirmButtonColor: "#2563EB",
-        });
-        setAsistencias([]);
-      } else {
-        setAsistencias(data);
-      }
-    } catch (err) {
-      const errorMessage = parseError(
-        err,
-        "Ocurrió un problema durante la búsqueda. Por favor, verifique los datos ingresados y vuelva a intentarlo."
-      );
-      setError(errorMessage);
-      setAsistencias([]);
+      setLoading(true);
+
+      // Enviar la fecha tal cual
+      const data = await obtenerGestionAsistencias({
+        ...filtros,
+        fecha: filtros.fecha
+      });
+      
+      setAsistencias(data);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error("Error al buscar asistencias:", error);
       Swal.fire({
-        icon: "warning",
-        title: "Advertencia",
-        text: errorMessage,
+        icon: "error",
+        title: "Error",
+        text: "No se pudieron cargar las asistencias.",
         confirmButtonColor: "#2563EB",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFiltros({ ...filtros, [name]: value });
+    
+    // Si es un cambio de fecha, validar que sea día laborable
+    if (name === 'fecha' && value && !esDiaLaborable(value)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Fecha inválida",
+        text: "Solo se permiten días laborables (lunes a viernes).",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
+    setFiltros(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleEditar = async (id) => {
@@ -323,7 +344,7 @@ export const GestionAsistencia = () => {
                   {asistencia.id_Estudiante?.apellido1_Estudiante || ""}{" "}
                   {asistencia.id_Estudiante?.apellido2_Estudiante || ""}
                 </td>
-                <td className="border px-4 py-2">{asistencia.fecha}</td>
+                <td className="border px-4 py-2">{formatearFechaUI(asistencia.fecha)}</td>
                 <td className="border px-4 py-2">
                   {asistencia.id_Profesor?.nombre_Profesor || "Sin profesor"}{" "}
                   {asistencia.id_Profesor?.apellido1_Profesor || ""}

@@ -4,13 +4,14 @@ import "@sweetalert2/theme-bulma/bulma.css";
 import { crearJustificacion } from "./Services/JustificacionService";
 import useMaterias from "./Hook/useMaterias";
 import { useAsistenciaByCedula } from "./Hook/useAsistenciaByCedula";
+import { formatearFechaUI, esDiaLaborable } from "./utils/dateUtils";
 
 // Función auxiliar para crear un mensaje detallado cuando no se encuentran resultados
 function buildNoResultsMessage(cedula, materia, fecha) {
   let msg = "No se encontraron asistencias";
-  if (cedula.trim()) msg += ` para “${cedula}”`;
-  if (materia)    msg += ` en la materia “${materia}”`;
-  if (fecha)      msg += ` con fecha “${fecha}”`;
+  if (cedula.trim()) msg += ` para "${cedula}"`;
+  if (materia)    msg += ` en la materia "${materia}"`;
+  if (fecha)      msg += ` con fecha "${fecha}"`;
   return msg + ". Por favor, verifica la información e inténtalo nuevamente.";
 }
 
@@ -27,15 +28,34 @@ export const JustificacionAusencias = () => {
   const [hasSearched, setHasSearched] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    // Si es un cambio de fecha, validar que sea día laborable
+    if (name === 'fecha' && value && !esDiaLaborable(value)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Fecha inválida",
+        text: "Solo se permiten días laborables (lunes a viernes).",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
+    // Si es fecha, ajustar a zona horaria de Costa Rica
+    const adjustedValue = name === 'fecha' && value ? value : value;
+    setFormData({ ...formData, [name]: adjustedValue });
     setHasSearched(false);
   };
 
   const handleSearch = async (e) => {
     e.preventDefault();
     setHasSearched(true);
+
     try {
-      await searchAsistencias(formData);
+      await searchAsistencias({
+        ...formData,
+        fecha: formData.fecha
+      });
     } catch (err) {
       console.error("Error al buscar asistencias:", err);
     }
@@ -190,7 +210,7 @@ export const JustificacionAusencias = () => {
                 key={asistencia.asistencia_id}
                 className="text-center border-t dark:border-gray-600"
               >
-                <td className="border px-4 py-2">{asistencia.fecha}</td>
+                <td className="border px-4 py-2">{formatearFechaUI(asistencia.fecha)}</td>
                 <td className="border px-4 py-2">
                   {asistencia.id_Materia?.nombre_Materia || "N/A"}
                 </td>
