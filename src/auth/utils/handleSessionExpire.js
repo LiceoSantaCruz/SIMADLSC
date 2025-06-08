@@ -62,7 +62,7 @@ export function setAutoLogout() {
     console.error("Error al establecer auto-logout:", error
 
     );
-    console.error("Token inválido. Cerrando sesión por seguridad.");
+    console.error("Token inválido. Cerrando sesión por seguridad. ");
     logoutUser();
   }
 }
