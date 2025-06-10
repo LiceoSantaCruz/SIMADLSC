@@ -19,12 +19,7 @@ export const AsistenciaEst = () => {
   // 2. Hooks de datos
   const { grados } = useGrados()
   const { materias } = useMaterias()
-  const {
-    profesores,
-    loading: loadingProfesores,
-    selectedProfesor,
-    setSelectedProfesor,
-  } = useProfesores()
+  const { profesores, selectedProfesor, setSelectedProfesor } = useProfesores()
   const { periodos } = usePeriodos()
 
   // 3. Filtrar materias si es profesor
@@ -60,23 +55,23 @@ export const AsistenciaEst = () => {
   } = useEstudiantesPorSeccion(formData.id_Seccion)
   const { handleCrearAsistencias, loading: loadingCrear } = useCrearAsistencia()
 
-  // 5. Validar fin de semana
-  const isWeekend = (dateStr) => {
+  // 5. Validar día laborable (lunes a viernes)
+  const esDiaLaborable = (dateStr) => {
     if (!dateStr) return false
     const [y, m, d] = dateStr.split("-").map(Number)
     const day = new Date(y, m - 1, d).getDay()
-    return day === 0 || day === 6
+    return day >= 1 && day <= 5 // 1 es lunes, 5 es viernes
   }
 
-  // 6. Handlers de formulario
+  // 7. Handlers de formulario
   const handleChange = (e) => {
     const { name, value } = e.target
 
-    if (name === "fecha" && isWeekend(value)) {
+    if (name === "fecha" && value && !esDiaLaborable(value)) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "No se pueden seleccionar sábados ni domingos.",
+        text: "Solo se pueden seleccionar días laborables (lunes a viernes).",
         confirmButtonColor: "#2563EB",
       })
       return setFormData((prev) => ({ ...prev, fecha: "" }))
@@ -170,7 +165,7 @@ export const AsistenciaEst = () => {
       })
     }
 
-    // Prepara datos
+    // Prepara datos (enviar fecha tal cual)
     const payload = estudiantes.map((est) => ({
       fecha: formData.fecha,
       estado: est.estado,
@@ -211,7 +206,7 @@ export const AsistenciaEst = () => {
     }
   }
 
-  // 7. Render
+  // 8. Render
   return (
     <div className="container mx-auto p-4 text-gray-900 dark:text-gray-100">
       <h2 className="text-2xl font-semibold mb-4">Registrar Asistencia</h2>

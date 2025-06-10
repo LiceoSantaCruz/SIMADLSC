@@ -7,6 +7,7 @@ import { usePeriodos } from "./Hook/usePeriodos";
 import useMaterias from "./Hook/useMaterias";
 import getCloudinaryUrl from "../../../PaginaInformativa/utils/cloudinary";
 import "@sweetalert2/theme-bulma/bulma.css";
+import { formatearFechaUI, esDiaLaborable } from "./utils/dateUtils";
 
 export const ReporteAsistencia = () => {
   const {
@@ -49,6 +50,28 @@ export const ReporteAsistencia = () => {
       });
       return;
     }
+
+    // Validar que sean días laborables si hay fechas
+    if (fechaInicio && !esDiaLaborable(fechaInicio)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Fecha inválida",
+        text: "La fecha de inicio debe ser un día laborable (lunes a viernes).",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
+    if (fechaFin && !esDiaLaborable(fechaFin)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Fecha inválida",
+        text: "La fecha final debe ser un día laborable (lunes a viernes).",
+        confirmButtonColor: "#2563EB",
+      });
+      return;
+    }
+
     if (fechaInicio && fechaFin && fechaInicio > fechaFin) {
       Swal.fire({
         icon: "warning",
@@ -58,10 +81,11 @@ export const ReporteAsistencia = () => {
       });
       return;
     }
+
     setHasSearched(true);
     setAsistencias([]);
     try {
-      await buscarAsistencias();
+      await buscarAsistencias(fechaInicio, fechaFin);
     } catch (err) {
       console.error("Error en la búsqueda:", err);
     }
@@ -190,7 +214,17 @@ export const ReporteAsistencia = () => {
               name="fechaInicio"
               value={fechaInicio}
               onChange={(e) => {
-                setFechaInicio(e.target.value);
+                const fecha = e.target.value;
+                if (!fecha || esDiaLaborable(fecha)) {
+                  setFechaInicio(fecha);
+                } else {
+                  Swal.fire({
+                    icon: "warning",
+                    title: "Día no válido",
+                    text: "Solo se permiten días laborables (lunes a viernes).",
+                    confirmButtonColor: "#2563EB",
+                  });
+                }
                 setHasSearched(false);
               }}
               className="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm"
@@ -207,7 +241,17 @@ export const ReporteAsistencia = () => {
               name="fechaFin"
               value={fechaFin}
               onChange={(e) => {
-                setFechaFin(e.target.value);
+                const fecha = e.target.value;
+                if (!fecha || esDiaLaborable(fecha)) {
+                  setFechaFin(fecha);
+                } else {
+                  Swal.fire({
+                    icon: "warning",
+                    title: "Día no válido",
+                    text: "Solo se permiten días laborables (lunes a viernes).",
+                    confirmButtonColor: "#2563EB",
+                  });
+                }
                 setHasSearched(false);
               }}
               className="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm"
@@ -298,7 +342,7 @@ export const ReporteAsistencia = () => {
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {asistencias.map((asistencia) => (
                   <tr key={asistencia.asistencia_id}>
-                    <td className="px-6 py-4">{new Date(asistencia.fecha).toLocaleDateString()}</td>
+                    <td className="px-6 py-4">{formatearFechaUI(asistencia.fecha)}</td>
                     <td className="px-6 py-4">
                       {Array.isArray(asistencia.lecciones)
                         ? asistencia.lecciones.join(", ")
